@@ -1,5 +1,31 @@
 # Salesforce Form Builder - Complete Implementation Guide
 
+## 🔄 Version Control Instructions
+
+**IMPORTANT**: This project uses Git version control. Before making any changes:
+
+1. **Pull Latest Changes**: Always pull the latest code before starting work
+   ```bash
+   git pull origin main
+   ```
+
+2. **Make Your Changes**: Edit files as needed
+
+3. **Commit Changes**: After making changes, commit them with a descriptive message
+   ```bash
+   git add .
+   git commit -m "Description of changes made"
+   ```
+
+4. **Push Changes**: Push your commits to GitHub
+   ```bash
+   git push origin main
+   ```
+
+5. **Handle Conflicts**: If there are conflicts, resolve them before pushing
+
+**Repository**: https://github.com/PGSDaveMoudy/SFB
+
 ## Overview
 A production-ready, full-stack web application that creates custom forms with advanced drag-and-drop functionality, seamless Salesforce integration, and a modern interface. Features include conditional field visibility, real-time Salesforce picklist sync, lookup fields with advanced filtering, comprehensive form management, enterprise-grade electronic signature capabilities, and robust page reordering functionality.
 
