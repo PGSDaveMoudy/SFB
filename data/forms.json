@@ -6930,7 +6930,7 @@
       },
       "userId": "005gK000002NvXVQA0",
       "organizationId": "00DgK000002zFFXUA2",
-      "updatedAt": "2025-07-22T03:03:33.793Z",
+      "updatedAt": "2025-07-22T03:28:33.802Z",
       "createdAt": "2025-07-21T07:31:18.900Z",
       "creatorConnection": {
         "accessToken": "00DgK000002zFFX!AQEAQKPJAS2apLfvq0ZfvcX4uPnxWbtbZNVKQ0adBJ80bKtFX0tSmDiZHaog8aJ4IYC1THBSMIITainXrv5a0DjsiFgx1ksJ",
@@ -10077,7 +10077,7 @@
       "organizationId": "00DgK000002zFFXUA2",
       "isDraft": true,
       "title": "Untitled Draft",
-      "updatedAt": "2025-07-22T03:04:07.786Z",
+      "updatedAt": "2025-07-22T03:29:07.800Z",
       "createdAt": "2025-07-21T15:00:10.265Z",
       "published": true,
       "publishedAt": "2025-07-21T15:02:20.017Z",
@@ -21172,7 +21172,7 @@
       "organizationId": "00DgK000002zFFXUA2",
       "isDraft": true,
       "title": "Untitled Draft",
-      "updatedAt": "2025-07-22T03:06:16.782Z",
+      "updatedAt": "2025-07-22T03:26:16.792Z",
       "createdAt": "2025-07-21T23:11:22.507Z",
       "published": true,
       "publishedAt": "2025-07-21T23:11:23.854Z",
@@ -23021,7 +23021,7 @@
       "organizationId": "00DgK000002zFFXUA2",
       "isDraft": true,
       "title": "Untitled Draft",
-      "updatedAt": "2025-07-22T03:03:40.657Z",
+      "updatedAt": "2025-07-22T03:28:40.644Z",
       "createdAt": "2025-07-22T02:33:55.715Z",
       "published": true,
       "publishedAt": "2025-07-22T02:34:41.763Z",
@@ -23360,6 +23360,165 @@
       "title": "Untitled Draft",
       "updatedAt": "2025-07-22T02:54:17.397Z",
       "createdAt": "2025-07-22T02:46:27.922Z",
+      "published": false,
+      "publishedAt": null,
+      "publicUrl": null,
+      "creatorConnection": null
+    },
+    "draft_005gK000002NvXVQA0_1753154003373": {
+      "id": "draft_005gK000002NvXVQA0_1753154003373",
+      "name": "Untitled Form",
+      "description": "",
+      "pages": [
+        {
+          "id": "page_1",
+          "name": "Page 1",
+          "fields": [
+            {
+              "id": "field_6",
+              "type": "text",
+              "label": "Text Field",
+              "placeholder": "",
+              "required": false,
+              "helpText": "",
+              "salesforceField": null,
+              "conditionalVisibility": {
+                "enabled": false,
+                "dependsOn": null,
+                "condition": "equals",
+                "value": ""
+              }
+            },
+            {
+              "id": "field_7",
+              "type": "text",
+              "label": "Text Field",
+              "placeholder": "",
+              "required": false,
+              "helpText": "",
+              "salesforceField": null,
+              "conditionalVisibility": {
+                "enabled": false,
+                "dependsOn": null,
+                "condition": "equals",
+                "value": ""
+              }
+            }
+          ],
+          "salesforceObject": null,
+          "actionType": "create",
+          "hiddenFields": [],
+          "conditionalVisibility": {
+            "enabled": false,
+            "conditions": [],
+            "logic": "AND"
+          },
+          "repeatConfig": null,
+          "variables": {},
+          "navigationConfig": {
+            "next": {
+              "conditionalVisibility": {
+                "enabled": false,
+                "conditions": [],
+                "logic": "AND"
+              }
+            },
+            "submit": {
+              "conditionalVisibility": {
+                "enabled": false,
+                "conditions": [],
+                "logic": "AND"
+              }
+            }
+          }
+        }
+      ],
+      "settings": {
+        "submitButtonText": "Submit",
+        "successMessage": "Thank you for your submission!",
+        "redirectUrl": "",
+        "requireAuth": false,
+        "customCSS": "",
+        "theme": "light"
+      },
+      "userId": "005gK000002NvXVQA0",
+      "organizationId": "00DgK000002zFFXUA2",
+      "isDraft": true,
+      "title": "Untitled Draft",
+      "updatedAt": "2025-07-22T03:20:14.104Z",
+      "createdAt": "2025-07-22T03:13:23.378Z",
+      "published": false,
+      "publishedAt": null,
+      "publicUrl": null,
+      "creatorConnection": null
+    },
+    "draft_005gK000002NvXVQA0_1753154685160": {
+      "id": "draft_005gK000002NvXVQA0_1753154685160",
+      "name": "Untitled Form",
+      "description": "",
+      "pages": [
+        {
+          "id": "page_1",
+          "name": "Page 1",
+          "fields": [
+            {
+              "id": "field_1",
+              "type": "text",
+              "label": "Text Field",
+              "placeholder": "",
+              "required": false,
+              "helpText": "",
+              "salesforceField": null,
+              "conditionalVisibility": {
+                "enabled": false,
+                "dependsOn": null,
+                "condition": "equals",
+                "value": ""
+              }
+            }
+          ],
+          "salesforceObject": null,
+          "actionType": "create",
+          "hiddenFields": [],
+          "conditionalVisibility": {
+            "enabled": false,
+            "conditions": [],
+            "logic": "AND"
+          },
+          "repeatConfig": null,
+          "variables": {},
+          "navigationConfig": {
+            "next": {
+              "conditionalVisibility": {
+                "enabled": false,
+                "conditions": [],
+                "logic": "AND"
+              }
+            },
+            "submit": {
+              "conditionalVisibility": {
+                "enabled": false,
+                "conditions": [],
+                "logic": "AND"
+              }
+            }
+          }
+        }
+      ],
+      "settings": {
+        "submitButtonText": "Submit",
+        "successMessage": "Thank you for your submission!",
+        "redirectUrl": "",
+        "requireAuth": false,
+        "customCSS": "",
+        "theme": "light"
+      },
+      "userId": "005gK000002NvXVQA0",
+      "organizationId": "00DgK000002zFFXUA2",
+      "isDraft": true,
+      "title": "Untitled Draft",
+      "updatedAt": "2025-07-22T03:25:22.841Z",
+      "createdAt": "2025-07-22T03:24:45.164Z",
       "published": false,
       "publishedAt": null,
       "publicUrl": null,

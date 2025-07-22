@@ -1041,840 +1041,74 @@ export class FormBuilder {
         field.conditionalVisibility = field.conditionalVisibility || {};
 
         let html = `
-            <!-- Field Header with Delete Button -->
-            <div class="field-property-header">
-                <div class="field-info">
-                    <h3>${field.label || 'Field Properties'}</h3>
-                    <span class="field-type-badge">${field.type}</span>
+            <div class="properties-content">
+                <!-- Field Header with Delete Button -->
+                <div class="field-property-header">
+                    <div class="field-info">
+                        <h3>${field.label || 'Field Properties'}</h3>
+                        <span class="field-type-badge">${field.type}</span>
+                    </div>
+                    <button class="delete-field-btn property-button-compact" onclick="window.AppModules.formBuilder.deleteField('${field.id}')" title="Delete Field">
+                        🗑️ Delete
+                    </button>
                 </div>
-                <button class="delete-field-btn" onclick="window.AppModules.formBuilder.deleteField('${field.id}')" title="Delete Field">
-                    🗑️ Delete
-                </button>
-            </div>
 
-            <!-- Basic Properties Section -->
-            <div class="field-property-section">
-                <div class="section-header">
-                    <h4 class="section-title">⚙️ Basic Properties</h4>
-                    <p class="section-description">Essential field configuration and settings</p>
+                <!-- Field Sub-Tabs -->
+                <div class="property-sub-tabs">
+                    <button class="property-sub-tab active" onclick="window.AppModules.formBuilder.switchFieldSubTab('basic')">⚙️ Basic</button>
+                    <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchFieldSubTab('config')">🔧 Config</button>
+                    <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchFieldSubTab('salesforce')">🔗 SF</button>
+                    <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchFieldSubTab('conditions')">🔍 Logic</button>
+                    <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchFieldSubTab('style')">🎨 Style</button>
                 </div>
-                
-                <div class="property-group">
-                    <label>Field Label</label>
-                    <input type="text" id="prop-label" value="${field.label || ''}" 
-                           onchange="window.AppModules.formBuilder.updateFieldProperty('label', this.value)">
-                    <div class="help-text">Label shown to users above the field</div>
-                </div>
-                
-                <div class="property-group">
-                    <label>Field ID</label>
-                    <input type="text" id="prop-fieldId" value="${field.id}" 
-                           onchange="window.AppModules.formBuilder.updateFieldId(this.value)"
-                           pattern="[a-zA-Z][a-zA-Z0-9_-]*"
-                           title="Must start with a letter and contain only letters, numbers, hyphens, and underscores">
-                    <div class="help-text">Unique identifier for this field. Click to edit or use default generated ID.</div>
-                </div>
-                
-                <div class="property-group">
-                    <div class="form-checkbox">
-                        <input type="checkbox" id="prop-required" ${field.required ? 'checked' : ''}
-                               onchange="window.AppModules.formBuilder.updateFieldProperty('required', this.checked)">
-                        <label for="prop-required">Required Field</label>
-                    </div>
-                    <div class="help-text">Users must fill this field before submitting</div>
-                </div>
-            </div>
-        `;
-        
-        // Add type-specific properties
-        switch (field.type) {
-            case 'text':
-            case 'email':
-            case 'phone':
-            case 'textarea':
-                html += `
-                    <div class="property-group">
-                        <label>Placeholder</label>
-                        <input type="text" id="prop-placeholder" value="${field.placeholder || ''}"
-                               onchange="window.AppModules.formBuilder.updateFieldProperty('placeholder', this.value)">
-                    </div>
-                `;
-                break;
-            
-            case 'checkbox':
-                html += `
-                    <div class="property-group">
-                        <label>Checkbox Text</label>
-                        <input type="text" id="prop-checkboxLabel" value="${field.checkboxLabel || 'Check this box'}"
-                               onchange="window.AppModules.formBuilder.updateFieldProperty('checkboxLabel', this.value)">
-                    </div>
-                `;
-                break;
-            
-            case 'select':
-            case 'radio':
-                html += `
-                    <div class="property-group">
-                        <label>
-                            <input type="checkbox" id="prop-usePicklist" ${field.usePicklist ? 'checked' : ''}
-                                   onchange="window.AppModules.formBuilder.togglePicklist(this.checked)">
-                            Use Salesforce Picklist
-                        </label>
-                    </div>
-                    
-                    <div id="picklistConfig" style="display: ${field.usePicklist ? 'block' : 'none'}">
-                        <div class="property-group">
-                            <label>Salesforce Object</label>
-                            <select id="prop-picklistObject" onchange="window.AppModules.formBuilder.updatePicklistObject(this.value)">
-                                <option value="">Select Object...</option>
-                            </select>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Picklist Field</label>
-                            <select id="prop-picklistField" onchange="window.AppModules.formBuilder.updatePicklistField(this.value)">
-                                <option value="">Select Field...</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div id="manualOptions" style="display: ${field.usePicklist ? 'none' : 'block'}">
-                        <div class="property-group">
-                            <label>Options</label>
-                            <div id="optionsList">
-                                ${this.renderOptionsList(field.options || [])}
-                            </div>
-                            <button class="button button-secondary" onclick="window.AppModules.formBuilder.addOption()">
-                                Add Option
-                            </button>
-                        </div>
-                    </div>
-                `;
-                break;
-            
-            case 'lookup':
-                html += `
-                    <!-- Lookup Configuration Section -->
-                    <div class="field-property-section">
-                        <div class="section-header">
-                            <h4 class="section-title">🔍 Lookup Configuration</h4>
-                            <p class="section-description">Configure which Salesforce records to search</p>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Salesforce Object</label>
-                            <select id="prop-lookupObject" onchange="window.AppModules.formBuilder.updateLookupObject(this.value)">
-                                <option value="">Select Object...</option>
-                            </select>
-                            <div class="help-text">The Salesforce object type to search (e.g., Account, Contact, Lead)</div>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Display Field</label>
-                            <select id="prop-displayField" onchange="window.AppModules.formBuilder.updateFieldProperty('displayField', this.value)">
-                                <option value="Name">Name</option>
-                            </select>
-                            <div class="help-text">Field shown in the dropdown results</div>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Search Field</label>
-                            <select id="prop-searchField" onchange="window.AppModules.formBuilder.updateFieldProperty('searchField', this.value)">
-                                <option value="Name">Name</option>
-                            </select>
-                            <div class="help-text">Field used to match user's search input</div>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Maximum Results</label>
-                            <input type="number" id="prop-maxResults" value="${field.maxResults || 10}" min="1" max="50"
-                                   onchange="window.AppModules.formBuilder.updateFieldProperty('maxResults', parseInt(this.value))">
-                            <div class="help-text">Limit the number of results shown in dropdown</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Variable Storage Section -->
-                    <div class="field-property-section">
-                        <div class="section-header">
-                            <h4 class="section-title">📊 Variable Storage</h4>
-                            <p class="section-description">Store selected record data for use elsewhere</p>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Store Record ID as Variable</label>
-                            <select id="prop-storeIdVariable" 
-                                    onchange="window.AppModules.formBuilder.updateFieldProperty('storeIdVariable', this.value)">
-                                ${this.renderStoreIdVariableOptions(field)}
-                            </select>
-                            <div class="help-text">Variable name to store the selected record's ID. Use this in conditions or for update operations.</div>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>
-                                <input type="checkbox" id="prop-storeAllFields" ${field.storeAllFields ? 'checked' : ''}
-                                       onchange="window.AppModules.formBuilder.updateFieldProperty('storeAllFields', this.checked)">
-                                Store All Record Fields
-                            </label>
-                            <div class="help-text">When enabled, stores all selected record fields as variables (e.g., Account.Name, Account.Phone)</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Advanced Filtering Section -->
-                    <div class="field-property-section">
-                        <div class="section-header">
-                            <h4 class="section-title">🎯 Advanced Filtering</h4>
-                            <p class="section-description">Add filters to limit which records are shown</p>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Lookup Filters</label>
-                            <div id="lookup-filters-container">
-                                <div class="lookup-filters-list" id="lookup-filters-list">
-                                    ${this.renderLookupFilters(field.lookupFilters || [], this.lookupObjectFieldsCache[field.lookupObject] || [])}
-                                </div>
-                                <button type="button" class="add-condition-btn" onclick="window.AppModules.formBuilder.addLookupFilter()">
-                                    ➕ Add Filter
-                                </button>
-                            </div>
-                            <div class="help-text">Filter records based on field values (e.g., only active accounts)</div>
-                        </div>
-                    </div>
-                `;
-                break;
-            
-            case 'signature':
-                html += `
-                    <div class="property-group">
-                        <label>Signature Width</label>
-                        <input type="number" id="prop-sigWidth" value="${field.signatureConfig?.width || 500}"
-                               min="300" max="800" step="50"
-                               onchange="window.AppModules.formBuilder.updateSignatureConfig('width', this.value)">
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Signature Height</label>
-                        <input type="number" id="prop-sigHeight" value="${field.signatureConfig?.height || 200}"
-                               min="100" max="400" step="50"
-                               onchange="window.AppModules.formBuilder.updateSignatureConfig('height', this.value)">
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Pen Color</label>
-                        <input type="color" id="prop-penColor" value="${field.signatureConfig?.penColor || '#000000'}"
-                               onchange="window.AppModules.formBuilder.updateSignatureConfig('penColor', this.value)">
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>
-                            <input type="checkbox" ${field.signatureConfig?.requireLegalText ? 'checked' : ''}
-                                   onchange="window.AppModules.formBuilder.updateSignatureConfig('requireLegalText', this.checked)">
-                            Require Legal Agreement
-                        </label>
-                    </div>
-                    
-                    ${field.signatureConfig?.requireLegalText ? `
-                        <div class="property-group">
-                            <label>Legal Text</label>
-                            <textarea onchange="window.AppModules.formBuilder.updateSignatureConfig('legalText', this.value)">${field.signatureConfig?.legalText || ''}</textarea>
-                        </div>
-                    ` : ''}
-                `;
-                break;
-                
-            case 'login':
-                html += `
-                    <div class="property-group">
-                        <label>Login Title</label>
-                        <input type="text" id="prop-loginTitle" value="${field.loginConfig?.title || 'Login Required'}"
-                               onchange="window.AppModules.formBuilder.updateLoginConfig('title', this.value)">
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Instructions</label>
-                        <textarea id="prop-loginInstructions" onchange="window.AppModules.formBuilder.updateLoginConfig('instructions', this.value)">${field.loginConfig?.instructions || 'Please enter your email address to continue.'}</textarea>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Success Message</label>
-                        <textarea id="prop-successMessage" onchange="window.AppModules.formBuilder.updateLoginConfig('successMessage', this.value)">${field.loginConfig?.successMessage || 'Login successful! You can now continue.'}</textarea>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>New User Message</label>
-                        <textarea id="prop-newUserMessage" onchange="window.AppModules.formBuilder.updateLoginConfig('newUserMessage', this.value)">${field.loginConfig?.newUserMessage || 'Welcome! You can proceed to create your account.'}</textarea>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>
-                            <input type="checkbox" ${field.loginConfig?.enableOTP ? 'checked' : ''}
-                                   onchange="window.AppModules.formBuilder.updateLoginConfig('enableOTP', this.checked)">
-                            Enable OTP Verification
-                        </label>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>
-                            <input type="checkbox" ${field.loginConfig?.enableContactLookup ? 'checked' : ''}
-                                   onchange="window.AppModules.formBuilder.updateLoginConfig('enableContactLookup', this.checked)">
-                            Enable Contact Lookup
-                        </label>
-                    </div>
-                    
-                    <div class="property-group">
-                        <h4>Variables to Set</h4>
-                        <div id="login-variables-list">
-                            ${this.renderLoginVariables(field.loginConfig?.setVariables || {})}
-                        </div>
-                        <button type="button" class="button button-secondary" onclick="window.AppModules.formBuilder.addLoginVariable()">
-                            Add Variable
-                        </button>
-                    </div>
-                `;
-                break;
-                
-            case 'email-verify':
-                html += `
-                    <!-- Basic Configuration Section -->
-                    <div class="field-property-section">
-                        <div class="section-header">
-                            <h4 class="section-title">📧 Basic Configuration</h4>
-                            <p class="section-description">Configure the email verification appearance</p>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Verification Title</label>
-                            <input type="text" id="prop-verifyTitle" value="${field.verifyConfig?.title || 'Email Verification'}"
-                                   onchange="window.AppModules.formBuilder.updateVerifyConfig('title', this.value)">
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Instructions</label>
-                            <textarea id="prop-verifyInstructions" onchange="window.AppModules.formBuilder.updateVerifyConfig('instructions', this.value)">${field.verifyConfig?.instructions || 'Enter your email address and click verify to continue.'}</textarea>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Verify Button Text</label>
-                            <input type="text" id="prop-buttonText" value="${field.verifyConfig?.buttonText || 'Verify Email'}"
-                                   onchange="window.AppModules.formBuilder.updateVerifyConfig('buttonText', this.value)">
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Success Message</label>
-                            <textarea id="prop-verifySuccessMessage" onchange="window.AppModules.formBuilder.updateVerifyConfig('successMessage', this.value)">${field.verifyConfig?.successMessage || 'Email verified successfully!'}</textarea>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Resend Button Text</label>
-                            <input type="text" id="prop-resendText" value="${field.verifyConfig?.resendText || 'Resend Code'}"
-                                   onchange="window.AppModules.formBuilder.updateVerifyConfig('resendText', this.value)">
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>
-                                <input type="checkbox" ${field.verifyConfig?.requiredToSubmit ? 'checked' : ''}
-                                       onchange="window.AppModules.formBuilder.updateVerifyConfig('requiredToSubmit', this.checked)">
-                                Required to Submit Form
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <!-- Contact Lookup Configuration Section -->
-                    <div class="field-property-section">
-                        <div class="section-header">
-                            <h4 class="section-title">🔍 Contact Lookup Settings</h4>
-                            <p class="section-description">Configure Salesforce contact verification</p>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>
-                                <input type="checkbox" ${field.verifyConfig?.enableContactLookup ? 'checked' : ''}
-                                       onchange="window.AppModules.formBuilder.updateVerifyConfig('enableContactLookup', this.checked); window.AppModules.formBuilder.showFieldProperties();">
-                                Enable Contact Lookup
-                            </label>
-                            <div class="help-text">Check if contact exists in Salesforce before sending OTP</div>
-                        </div>
-                        
-                        <div id="contactLookupOptions" style="display: ${field.verifyConfig?.enableContactLookup ? 'block' : 'none'}">
-                            <div class="property-group">
-                                <label>
-                                    <input type="checkbox" ${field.verifyConfig?.requireExistingContact ? 'checked' : ''}
-                                           onchange="window.AppModules.formBuilder.updateVerifyConfig('requireExistingContact', this.checked)">
-                                    Require Existing Contact
-                                </label>
-                                <div class="help-text">Only allow verification for existing Salesforce contacts</div>
-                            </div>
-                            
-                            <div class="property-group">
-                                <label>Contact Not Found Message</label>
-                                <textarea id="prop-contactNotFoundMessage" onchange="window.AppModules.formBuilder.updateVerifyConfig('contactNotFoundMessage', this.value)">${field.verifyConfig?.contactNotFoundMessage || 'No account found with this email address.'}</textarea>
-                                <div class="help-text">Message shown when email is not found in Salesforce</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Variables Configuration Section -->
-                    <div class="field-property-section">
-                        <div class="section-header">
-                            <h4 class="section-title">🔧 Variables to Set</h4>
-                            <p class="section-description">Configure variables set after successful verification</p>
-                        </div>
-                        
-                        <div class="property-group">
-                            <div id="verify-variables-list">
-                                ${this.renderVerifyVariables(field.verifyConfig?.setVariables || {})}
-                            </div>
-                            <button type="button" class="button button-secondary" onclick="window.AppModules.formBuilder.addVerifyVariable()">
-                                Add Variable
-                            </button>
-                            <div class="help-text">Available templates: {{email}}, {{Contact.Name}}, {{Contact.Phone}}, {{Contact.Id}}</div>
-                        </div>
-                    </div>
-                `;
-                break;
-                
-            case 'display':
-                const escapedContent = (field.displayContent || '').replace(/"/g, '&quot;');
-                html += `
-                    <div class="property-group">
-                        <label>Display Content</label>
-                        <div id="display-content-editor" style="min-height: 200px; border: 1px solid #ddd; border-radius: 4px;"></div>
-                        <input type="hidden" id="prop-displayContent" value="${escapedContent}">
-                    </div>
-                `;
-                break;
-                
-            case 'datatable':
-                html += `
-                    <!-- Basic Configuration Section -->
-                    <div class="field-property-section">
-                        <div class="section-header">
-                            <h4 class="section-title">📊 Basic Configuration</h4>
-                            <p class="section-description">Configure the data table appearance and behavior</p>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Table Title</label>
-                            <input type="text" id="prop-datatableTitle" value="${field.dataTableConfig?.title || 'Data Table'}"
-                                   onchange="window.AppModules.formBuilder.updateDataTableConfig('title', this.value)">
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Description</label>
-                            <textarea id="prop-datatableDescription" 
-                                      onchange="window.AppModules.formBuilder.updateDataTableConfig('description', this.value)">${field.dataTableConfig?.description || ''}</textarea>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>
-                                    <input type="checkbox" ${field.dataTableConfig?.allowAdd ? 'checked' : ''}
-                                           onchange="window.AppModules.formBuilder.updateDataTableConfig('allowAdd', this.checked)">
-                                    Allow Add Rows
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <label>
-                                    <input type="checkbox" ${field.dataTableConfig?.allowEdit ? 'checked' : ''}
-                                           onchange="window.AppModules.formBuilder.updateDataTableConfig('allowEdit', this.checked)">
-                                    Allow Edit Cells
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <label>
-                                    <input type="checkbox" ${field.dataTableConfig?.allowDelete ? 'checked' : ''}
-                                           onchange="window.AppModules.formBuilder.updateDataTableConfig('allowDelete', this.checked)">
-                                    Allow Delete Rows
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Data Source Section -->
-                    <div class="field-property-section">
-                        <div class="section-header">
-                            <h4 class="section-title">📥 Data Source</h4>
-                            <p class="section-description">Configure where the table data comes from</p>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Data Source</label>
-                            <select id="prop-dataSource" onchange="window.AppModules.formBuilder.updateDataTableConfig('dataSource', this.value)">
-                                <option value="static" ${field.dataTableConfig?.dataSource === 'static' ? 'selected' : ''}>Static Data</option>
-                                <option value="variable" ${field.dataTableConfig?.dataSource === 'variable' ? 'selected' : ''}>Form Variable</option>
-                                <option value="query" ${field.dataTableConfig?.dataSource === 'query' ? 'selected' : ''}>Get Records Page</option>
-                            </select>
-                        </div>
-                        
-                        <div id="variable-source-config" style="display: ${field.dataTableConfig?.dataSource === 'variable' ? 'block' : 'none'};">
-                            <div class="property-group">
-                                <label>Variable Name</label>
-                                <input type="text" id="prop-sourceVariable" value="${field.dataTableConfig?.sourceVariable || ''}"
-                                       placeholder="QueryResults"
-                                       onchange="window.AppModules.formBuilder.updateDataTableConfig('sourceVariable', this.value)">
-                                <div class="help-text">Variable containing JSON array of data objects</div>
-                            </div>
-                        </div>
-                        
-                        <div id="query-source-config" style="display: ${field.dataTableConfig?.dataSource === 'query' ? 'block' : 'none'};">
-                            <div class="property-group">
-                                <label>Get Records Page</label>
-                                <select id="prop-sourcePageId" onchange="window.AppModules.formBuilder.updateDataTableConfig('sourcePageId', this.value)">
-                                    <option value="">Select Page...</option>
-                                    ${this.renderQueryPagesDropdown(field.dataTableConfig?.sourcePageId)}
-                                </select>
-                                <div class="help-text">Page with actionType "Get/Query Records"</div>
-                            </div>
-                            
-                            ${field.dataTableConfig?.sourcePageId ? `
-                            <div class="field-selection-container">
-                                <div class="field-selection-header">
-                                    <h4>🎯 Available Fields</h4>
-                                    <p>Select fields from the Get Records query to display in the table</p>
-                                </div>
-                                
-                                <div class="field-selection-list" id="available-fields-list">
-                                    ${this.renderAvailableFields(field.dataTableConfig.sourcePageId)}
-                                </div>
-                                
-                                <div class="field-selection-actions">
-                                    <div class="field-selection-info">
-                                        Select fields to automatically create table columns
-                                    </div>
-                                    <div>
-                                        <button type="button" class="button button-secondary button-small" onclick="window.AppModules.formBuilder.selectAllFields()">
-                                            Select All
-                                        </button>
-                                        <button type="button" class="button button-primary button-small" onclick="window.AppModules.formBuilder.createColumnsFromSelectedFields()">
-                                            Create Columns
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    
-                    <!-- Columns Configuration Section -->
-                    <div class="field-property-section">
-                        <div class="section-header">
-                            <h4 class="section-title">📋 Columns</h4>
-                            <p class="section-description">Configure table columns and their properties</p>
-                        </div>
-                        
-                        <div class="property-group">
-                            <div id="datatable-columns-list">
-                                ${this.renderDataTableColumns(field.dataTableConfig?.columns || [])}
-                            </div>
-                            <button type="button" class="button button-secondary" onclick="window.AppModules.formBuilder.addDataTableColumn()">
-                                ➕ Add Column
-                            </button>
-                        </div>
-                    </div>
-                `;
-                break;
-                
-            case 'section':
-                html += `
-                    <!-- Section Configuration -->
-                    <div class="field-property-section">
-                        <div class="section-header">
-                            <h4 class="section-title">📦 Section Configuration</h4>
-                            <p class="section-description">Configure the section container properties</p>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Section Title</label>
-                            <input type="text" value="${field.sectionConfig?.title || 'Section'}"
-                                   onchange="window.AppModules.formBuilder.updateSectionConfig('title', this.value)">
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Description</label>
-                            <textarea onchange="window.AppModules.formBuilder.updateSectionConfig('description', this.value)">${field.sectionConfig?.description || ''}</textarea>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>
-                                <input type="checkbox" ${field.sectionConfig?.collapsible ? 'checked' : ''}
-                                       onchange="window.AppModules.formBuilder.updateSectionConfig('collapsible', this.checked)">
-                                Allow Collapse/Expand
-                            </label>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>
-                                <input type="checkbox" ${field.sectionConfig?.collapsed ? 'checked' : ''}
-                                       onchange="window.AppModules.formBuilder.updateSectionConfig('collapsed', this.checked)">
-                                Start Collapsed
-                            </label>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>
-                                <input type="checkbox" ${field.sectionConfig?.showBorder ? 'checked' : ''}
-                                       onchange="window.AppModules.formBuilder.updateSectionConfig('showBorder', this.checked)">
-                                Show Border
-                            </label>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Background Color</label>
-                            <input type="color" value="${field.sectionConfig?.backgroundColor || '#ffffff'}"
-                                   onchange="window.AppModules.formBuilder.updateSectionConfig('backgroundColor', this.value)">
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Padding</label>
-                            <select onchange="window.AppModules.formBuilder.updateSectionConfig('padding', this.value)">
-                                <option value="small" ${field.sectionConfig?.padding === 'small' ? 'selected' : ''}>Small</option>
-                                <option value="medium" ${field.sectionConfig?.padding === 'medium' ? 'selected' : ''}>Medium</option>
-                                <option value="large" ${field.sectionConfig?.padding === 'large' ? 'selected' : ''}>Large</option>
-                            </select>
-                        </div>
-                    </div>
-                `;
-                break;
-                
-            case 'columns':
-                html += `
-                    <!-- Columns Configuration -->
-                    <div class="field-property-section">
-                        <div class="section-header">
-                            <h4 class="section-title">📐 Columns Configuration</h4>
-                            <p class="section-description">Configure the column layout</p>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Number of Columns</label>
-                            <select onchange="window.AppModules.formBuilder.updateColumnsCount(parseInt(this.value))">
-                                <option value="2" ${field.columnsConfig?.columnCount === 2 ? 'selected' : ''}>2 Columns</option>
-                                <option value="3" ${field.columnsConfig?.columnCount === 3 ? 'selected' : ''}>3 Columns</option>
-                                <option value="4" ${field.columnsConfig?.columnCount === 4 ? 'selected' : ''}>4 Columns</option>
-                            </select>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>Column Gap</label>
-                            <select onchange="window.AppModules.formBuilder.updateColumnsConfig('columnGap', this.value)">
-                                <option value="small" ${field.columnsConfig?.columnGap === 'small' ? 'selected' : ''}>Small</option>
-                                <option value="medium" ${field.columnsConfig?.columnGap === 'medium' ? 'selected' : ''}>Medium</option>
-                                <option value="large" ${field.columnsConfig?.columnGap === 'large' ? 'selected' : ''}>Large</option>
-                            </select>
-                        </div>
-                        
-                        <div class="property-group">
-                            <label>
-                                <input type="checkbox" ${field.columnsConfig?.mobileStack ? 'checked' : ''}
-                                       onchange="window.AppModules.formBuilder.updateColumnsConfig('mobileStack', this.checked)">
-                                Stack on Mobile
-                            </label>
-                            <div class="help-text">Columns will stack vertically on mobile devices</div>
-                        </div>
-                        
-                        <div class="property-group">
-                            <h4>Column Widths</h4>
-                            ${field.columnsConfig?.columns.map((col, index) => `
-                                <div class="form-row">
-                                    <label>Column ${index + 1} Width</label>
-                                    <input type="text" value="${col.width || '50%'}"
-                                           onchange="window.AppModules.formBuilder.updateColumnWidth(${index}, this.value)"
-                                           placeholder="e.g., 50%, 300px, 1fr">
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-                break;
-        }
-        
-        // Add help text field
-        html += `
-            <div class="property-group">
-                <label>Help Text</label>
-                <textarea id="prop-helpText" onchange="window.AppModules.formBuilder.updateFieldProperty('helpText', this.value)">${field.helpText || ''}</textarea>
-            </div>
-        `;
-        
-        // Add Salesforce field mapping (exclude file, signature, display, and login fields as they are handled differently)
-        if (!['display', 'file', 'signature', 'login'].includes(field.type)) {
-            html += `
-                <div class="property-group">
-                    <label>Salesforce Field</label>
-                    <select id="prop-salesforceField" onchange="window.AppModules.formBuilder.updateFieldProperty('salesforceField', this.value)">
-                        <option value="">Not Mapped</option>
-                    </select>
-                </div>
-            `;
-        }
-        
-        // Add variable setting for all field types (except display fields)
-        if (field.type !== 'display') {
-            html += `
-                <div class="property-group">
-                    <h4>🔧 Variable Setting</h4>
-                    <p class="help-text">Set variables based on field values for use in conditional logic</p>
-                    
-                    <label>
-                        <input type="checkbox" ${field.setVariablesConfig?.enabled ? 'checked' : ''}
-                               onchange="window.AppModules.formBuilder.toggleVariableSetting(this.checked)">
-                        Enable Variable Setting
-                    </label>
-                </div>
-            `;
-            
-            if (field.setVariablesConfig?.enabled) {
-                html += `
-                    <div id="variable-setting-config" class="variable-config">
-                        <div class="property-group">
-                            <h4>Variables to Set</h4>
-                            <div id="field-variables-list">
-                                ${this.renderFieldVariables(field.setVariablesConfig?.setVariables || {})}
-                            </div>
-                            <button type="button" class="button button-secondary" onclick="window.AppModules.formBuilder.addFieldVariable()">
-                                Add Variable
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-        
-        // Add conditional visibility
-        html += `
-            <div class="property-group">
-                <h4>Conditional Visibility</h4>
-                <label>
-                    <input type="checkbox" ${field.conditionalVisibility?.enabled ? 'checked' : ''}
-                           onchange="window.AppModules.formBuilder.toggleConditionalVisibility(this.checked)">
-                    Enable Conditional Logic
-                </label>
-            </div>
-        `;
-        
-        const conditionalVisibility = field.conditionalVisibility || {};
-        if (conditionalVisibility.enabled) {
-            html += window.AppModules.conditionalLogic?.renderConditionalConfig(field) || '';
-        }
-        
-        // Add styling section
-        const styling = field.styling || {};
-        html += `
-            <div class="field-property-section styling-section">
-                <div class="section-header">
-                    <h4 class="section-title">🎨 Field Styling</h4>
-                    <p class="section-description">Customize field appearance and layout</p>
-                </div>
-                
-                <div class="styling-grid">
-                    <div class="property-group">
-                        <label>Width</label>
-                        <input type="text" value="${styling.width || ''}" placeholder="auto"
-                               onchange="window.AppModules.formBuilder.updateFieldStyling('width', this.value)">
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Height</label>
-                        <input type="text" value="${styling.height || ''}" placeholder="auto"
-                               onchange="window.AppModules.formBuilder.updateFieldStyling('height', this.value)">
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Padding</label>
-                        <input type="text" value="${styling.padding || ''}" placeholder="8px"
-                               onchange="window.AppModules.formBuilder.updateFieldStyling('padding', this.value)">
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Margin</label>
-                        <input type="text" value="${styling.margin || ''}" placeholder="0px"
-                               onchange="window.AppModules.formBuilder.updateFieldStyling('margin', this.value)">
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Background Color</label>
-                        <div class="color-input-group">
-                            <input type="color" value="${styling.backgroundColor || '#ffffff'}"
-                                   onchange="window.AppModules.formBuilder.updateFieldStyling('backgroundColor', this.value)">
-                            <input type="text" value="${styling.backgroundColor || ''}" placeholder="#ffffff"
-                                   onchange="window.AppModules.formBuilder.updateFieldStyling('backgroundColor', this.value)">
-                        </div>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Text Color</label>
-                        <div class="color-input-group">
-                            <input type="color" value="${styling.color || '#000000'}"
-                                   onchange="window.AppModules.formBuilder.updateFieldStyling('color', this.value)">
-                            <input type="text" value="${styling.color || ''}" placeholder="#000000"
-                                   onchange="window.AppModules.formBuilder.updateFieldStyling('color', this.value)">
-                        </div>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Font Size</label>
-                        <input type="text" value="${styling.fontSize || ''}" placeholder="14px"
-                               onchange="window.AppModules.formBuilder.updateFieldStyling('fontSize', this.value)">
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Font Weight</label>
-                        <select onchange="window.AppModules.formBuilder.updateFieldStyling('fontWeight', this.value)">
-                            <option value="">Default</option>
-                            <option value="normal" ${styling.fontWeight === 'normal' ? 'selected' : ''}>Normal</option>
-                            <option value="bold" ${styling.fontWeight === 'bold' ? 'selected' : ''}>Bold</option>
-                            <option value="lighter" ${styling.fontWeight === 'lighter' ? 'selected' : ''}>Lighter</option>
-                        </select>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Text Align</label>
-                        <select onchange="window.AppModules.formBuilder.updateFieldStyling('textAlign', this.value)">
-                            <option value="">Default</option>
-                            <option value="left" ${styling.textAlign === 'left' ? 'selected' : ''}>Left</option>
-                            <option value="center" ${styling.textAlign === 'center' ? 'selected' : ''}>Center</option>
-                            <option value="right" ${styling.textAlign === 'right' ? 'selected' : ''}>Right</option>
-                        </select>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Border Radius</label>
-                        <input type="text" value="${styling.borderRadius || ''}" placeholder="4px"
-                               onchange="window.AppModules.formBuilder.updateFieldStyling('borderRadius', this.value)">
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Border Width</label>
-                        <input type="text" value="${styling.borderWidth || ''}" placeholder="1px"
-                               onchange="window.AppModules.formBuilder.updateFieldStyling('borderWidth', this.value)">
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Border Color</label>
-                        <div class="color-input-group">
-                            <input type="color" value="${styling.borderColor || '#cccccc'}"
-                                   onchange="window.AppModules.formBuilder.updateFieldStyling('borderColor', this.value)">
-                            <input type="text" value="${styling.borderColor || ''}" placeholder="#cccccc"
-                                   onchange="window.AppModules.formBuilder.updateFieldStyling('borderColor', this.value)">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="property-group">
-                    <label>Custom CSS</label>
-                    <textarea rows="4" placeholder="Add custom CSS properties..."
-                              onchange="window.AppModules.formBuilder.updateFieldStyling('customCSS', this.value)">${styling.customCSS || ''}</textarea>
-                    <div class="help-text">Enter CSS properties like "box-shadow: 0 2px 4px rgba(0,0,0,0.1);"</div>
-                </div>
-            </div>
-        `;
 
-        // Add delete button
-        html += `
-            <div class="property-group mt-lg">
-                <button class="button button-secondary" style="background-color: var(--accent-red); color: white;"
-                        onclick="window.AppModules.formBuilder.deleteSelectedField()">
-                    Delete Field
-                </button>
+                <!-- Basic Tab -->
+                <div class="property-sub-content" id="field-basic-tab">
+                    <div class="property-group-compact">
+                        <label>Field Label</label>
+                        <input type="text" id="prop-label" value="${field.label || ''}" 
+                               onchange="window.AppModules.formBuilder.updateFieldProperty('label', this.value)">
+                        <div class="help-text">Label shown to users</div>
+                    </div>
+                    
+                    <div class="property-row">
+                        <div class="property-group-compact">
+                            <label>Field ID</label>
+                            <input type="text" id="prop-fieldId" value="${field.id}" 
+                                   onchange="window.AppModules.formBuilder.updateFieldId(this.value)">
+                            <div class="help-text">Unique identifier</div>
+                        </div>
+                    </div>
+                    
+                    <div class="property-group-compact">
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="prop-required" ${field.required ? 'checked' : ''}
+                                   onchange="window.AppModules.formBuilder.updateFieldProperty('required', this.checked)">
+                            <label for="prop-required">Required Field</label>
+                        </div>
+                        <div class="help-text">Users must fill before submitting</div>
+                    </div>
+                </div>
+
+                <!-- Config Tab -->
+                <div class="property-sub-content" id="field-config-tab" style="display: none;">
+                    ${this.renderFieldConfigTab(field)}
+                </div>
+
+                <!-- Salesforce Tab -->
+                <div class="property-sub-content" id="field-salesforce-tab" style="display: none;">
+                    ${this.renderFieldSalesforceTab(field)}
+                </div>
+
+                <!-- Conditions Tab -->
+                <div class="property-sub-content" id="field-conditions-tab" style="display: none;">
+                    ${this.renderFieldConditionsTab(field)}
+                </div>
+
+                <!-- Style Tab -->
+                <div class="property-sub-content" id="field-style-tab" style="display: none;">
+                    ${this.renderFieldStyleTab(field)}
+                </div>
             </div>
         `;
         
@@ -3553,108 +2787,81 @@ export class FormBuilder {
         const settings = form.settings || {};
 
         return `
-            <div class="form-properties-container">
-                <!-- General Settings Section -->
-                <div class="property-section">
-                    <div class="section-header">
-                        <h3 class="section-title">📋 General Settings</h3>
-                        <p class="section-description">Configure basic form information and metadata</p>
-                    </div>
-                    
-                    <div class="property-group">
+            <div class="properties-content">
+                <!-- Form Sub-Tabs -->
+                <div class="property-sub-tabs">
+                    <button class="property-sub-tab active" onclick="window.AppModules.formBuilder.switchFormSubTab('basic')">📋 Basic</button>
+                    <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchFormSubTab('appearance')">🎨 Style</button>
+                    <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchFormSubTab('advanced')">⚙️ Advanced</button>
+                </div>
+
+                <!-- Basic Settings Tab -->
+                <div class="property-sub-content" id="form-basic-tab">
+                    <div class="property-group-compact">
                         <label>Form Name</label>
-                        <input type="text" id="form-name" value="${form.name || ''}" placeholder="Enter a descriptive form name (e.g., Contact Registration)">
-                        <div class="help-text">This name is used for internal reference and form management</div>
+                        <input type="text" id="form-name" value="${form.name || ''}" placeholder="Contact Registration">
+                        <div class="help-text">Internal reference name for form management</div>
                     </div>
                     
-                    <div class="property-group">
+                    <div class="property-group-compact">
                         <label>Form Description</label>
-                        <textarea id="form-description" rows="3" placeholder="Brief description of what this form collects...">${form.description || ''}</textarea>
-                        <div class="help-text">Optional description for documentation and form overview</div>
+                        <textarea id="form-description" rows="2" placeholder="Brief description...">${form.description || ''}</textarea>
+                        <div class="help-text">Optional description for documentation</div>
                     </div>
-                </div>
 
-                <!-- User Experience Section -->
-                <div class="property-section">
-                    <div class="section-header">
-                        <h3 class="section-title">✨ User Experience</h3>
-                        <p class="section-description">Customize how users interact with your form</p>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Submit Button Text</label>
-                        <input type="text" id="form-submit-text" value="${settings.submitButtonText || 'Submit'}" placeholder="Submit">
-                        <div class="help-text">Text displayed on the final submission button</div>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Success Message</label>
-                        <textarea id="form-success-message" rows="3" placeholder="Thank you for your submission! We'll get back to you soon.">${settings.successMessage || ''}</textarea>
-                        <div class="help-text">Message shown after successful form submission</div>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Redirect URL <span class="optional-tag">Optional</span></label>
-                        <input type="url" id="form-redirect-url" value="${settings.redirectUrl || ''}" placeholder="https://example.com/thank-you">
-                        <div class="help-text">Redirect users to this URL after successful submission</div>
-                    </div>
-                </div>
-
-                <!-- Appearance Section -->
-                <div class="property-section">
-                    <div class="section-header">
-                        <h3 class="section-title">🎨 Appearance</h3>
-                        <p class="section-description">Customize the visual appearance of your published form</p>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Theme</label>
-                        <div class="theme-selector">
-                            <div class="theme-option ${settings.theme === 'light' || !settings.theme ? 'selected' : ''}" data-theme="light">
-                                <div class="theme-preview light-preview"></div>
-                                <span>Light</span>
-                            </div>
-                            <div class="theme-option ${settings.theme === 'dark' ? 'selected' : ''}" data-theme="dark">
-                                <div class="theme-preview dark-preview"></div>
-                                <span>Dark</span>
-                            </div>
+                    <div class="property-row">
+                        <div class="property-group-compact">
+                            <label>Submit Button Text</label>
+                            <input type="text" id="form-submit-text" value="${settings.submitButtonText || 'Submit'}" placeholder="Submit">
+                            <div class="help-text">Final submission button text</div>
                         </div>
-                        <select id="form-theme" style="display: none;">
-                            <option value="light" ${settings.theme === 'light' ? 'selected' : ''}>Light</option>
+                    </div>
+                    
+                    <div class="property-group-compact">
+                        <label>Success Message</label>
+                        <textarea id="form-success-message" rows="2" placeholder="Thank you for your submission!">${settings.successMessage || ''}</textarea>
+                        <div class="help-text">Message shown after successful submission</div>
+                    </div>
+                    
+                    <div class="property-group-compact">
+                        <label>Redirect URL (Optional)</label>
+                        <input type="url" id="form-redirect-url" value="${settings.redirectUrl || ''}" placeholder="https://example.com/thank-you">
+                        <div class="help-text">Redirect users after submission</div>
+                    </div>
+                </div>
+
+                <!-- Appearance Tab -->
+                <div class="property-sub-content" id="form-appearance-tab" style="display: none;">
+                    <div class="property-group-compact">
+                        <label>Theme</label>
+                        <select id="form-theme">
+                            <option value="light" ${settings.theme === 'light' || !settings.theme ? 'selected' : ''}>Light</option>
                             <option value="dark" ${settings.theme === 'dark' ? 'selected' : ''}>Dark</option>
                         </select>
+                        <div class="help-text">Overall theme for published form</div>
                     </div>
-                    
-                    <div class="property-group">
-                        <label>Primary Color</label>
-                        <div class="color-picker-wrapper">
-                            <input type="text" id="form-primary-color" value="${settings.primaryColor || '#8b5cf6'}" placeholder="#8b5cf6">
-                            <input type="color" class="color-picker" id="form-primary-color-picker" value="${settings.primaryColor || '#8b5cf6'}">
+
+                    <div class="property-row">
+                        <div class="property-group-compact">
+                            <label>Primary Color</label>
+                            <input type="color" id="form-primary-color-picker" value="${settings.primaryColor || '#8b5cf6'}">
+                            <div class="help-text">Buttons & accents</div>
                         </div>
-                        <div class="help-text">Main accent color used for buttons and interactive elements</div>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Background Color</label>
-                        <div class="color-picker-wrapper">
-                            <input type="text" id="form-bg-color" value="${settings.backgroundColor || '#ffffff'}" placeholder="#ffffff">
-                            <input type="color" class="color-picker" id="form-bg-color-picker" value="${settings.backgroundColor || '#ffffff'}">
+                        
+                        <div class="property-group-compact">
+                            <label>Background Color</label>
+                            <input type="color" id="form-bg-color-picker" value="${settings.backgroundColor || '#ffffff'}">
+                            <div class="help-text">Form background</div>
                         </div>
-                        <div class="help-text">Background color for the form container</div>
                     </div>
                 </div>
 
-                <!-- Advanced Section -->
-                <div class="property-section">
-                    <div class="section-header">
-                        <h3 class="section-title">⚙️ Advanced Settings</h3>
-                        <p class="section-description">Custom styling and advanced configuration options</p>
-                    </div>
-                    
-                    <div class="property-group">
-                        <label>Custom CSS <span class="optional-tag">Advanced</span></label>
-                        <textarea id="form-custom-css" rows="6" placeholder="/* Enter custom CSS to override default styles */">${settings.customCSS || ''}</textarea>
-                        <div class="help-text">Add custom CSS to further customize your form's appearance</div>
+                <!-- Advanced Tab -->
+                <div class="property-sub-content" id="form-advanced-tab" style="display: none;">
+                    <div class="property-group-compact">
+                        <label>Custom CSS</label>
+                        <textarea id="form-custom-css" rows="6" placeholder="/* Custom CSS styles */">${settings.customCSS || ''}</textarea>
+                        <div class="help-text">Advanced styling overrides</div>
                     </div>
                 </div>
             </div>
@@ -3669,10 +2876,8 @@ export class FormBuilder {
             { id: 'form-success-message', event: 'input', handler: (e) => { this.updateFormSetting('successMessage', e.target.value); } },
             { id: 'form-redirect-url', event: 'input', handler: (e) => { this.updateFormSetting('redirectUrl', e.target.value); } },
             { id: 'form-theme', event: 'change', handler: (e) => { this.updateFormSetting('theme', e.target.value); } },
-            { id: 'form-primary-color', event: 'input', handler: (e) => { this.updateFormSetting('primaryColor', e.target.value); const picker = document.getElementById('form-primary-color-picker'); if (picker) picker.value = e.target.value; } },
-            { id: 'form-primary-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('primaryColor', e.target.value); const input = document.getElementById('form-primary-color'); if (input) input.value = e.target.value; } },
-            { id: 'form-bg-color', event: 'input', handler: (e) => { this.updateFormSetting('backgroundColor', e.target.value); const picker = document.getElementById('form-bg-color-picker'); if (picker) picker.value = e.target.value; } },
-            { id: 'form-bg-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('backgroundColor', e.target.value); const input = document.getElementById('form-bg-color'); if (input) input.value = e.target.value; } },
+            { id: 'form-primary-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('primaryColor', e.target.value); } },
+            { id: 'form-bg-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('backgroundColor', e.target.value); } },
             { id: 'form-custom-css', event: 'input', handler: (e) => { this.updateFormSetting('customCSS', e.target.value); } }
         ];
 
@@ -3682,6 +2887,242 @@ export class FormBuilder {
                 element.addEventListener(elConfig.event, elConfig.handler);
             }
         });
+    }
+
+    switchFormSubTab(tabName) {
+        // Hide all form sub-tab contents
+        const tabs = ['basic', 'appearance', 'advanced'];
+        tabs.forEach(tab => {
+            const content = document.getElementById(`form-${tab}-tab`);
+            const button = document.querySelector(`[onclick="window.AppModules.formBuilder.switchFormSubTab('${tab}')"]`);
+            if (content) content.style.display = 'none';
+            if (button) button.classList.remove('active');
+        });
+
+        // Show selected tab
+        const selectedContent = document.getElementById(`form-${tabName}-tab`);
+        const selectedButton = document.querySelector(`[onclick="window.AppModules.formBuilder.switchFormSubTab('${tabName}')"]`);
+        if (selectedContent) selectedContent.style.display = 'block';
+        if (selectedButton) selectedButton.classList.add('active');
+    }
+
+    switchPageSubTab(tabName) {
+        // Hide all page sub-tab contents
+        const tabs = ['basic', 'salesforce', 'conditions', 'navigation', 'advanced'];
+        tabs.forEach(tab => {
+            const content = document.getElementById(`page-${tab}-tab`);
+            const button = document.querySelector(`[onclick="window.AppModules.formBuilder.switchPageSubTab('${tab}')"]`);
+            if (content) content.style.display = 'none';
+            if (button) button.classList.remove('active');
+        });
+
+        // Show selected tab
+        const selectedContent = document.getElementById(`page-${tabName}-tab`);
+        const selectedButton = document.querySelector(`[onclick="window.AppModules.formBuilder.switchPageSubTab('${tabName}')"]`);
+        if (selectedContent) selectedContent.style.display = 'block';
+        if (selectedButton) selectedButton.classList.add('active');
+    }
+
+    switchFieldSubTab(tabName) {
+        // Hide all field sub-tab contents
+        const tabs = ['basic', 'config', 'salesforce', 'conditions', 'style'];
+        tabs.forEach(tab => {
+            const content = document.getElementById(`field-${tab}-tab`);
+            const button = document.querySelector(`[onclick="window.AppModules.formBuilder.switchFieldSubTab('${tab}')"]`);
+            if (content) content.style.display = 'none';
+            if (button) button.classList.remove('active');
+        });
+
+        // Show selected tab
+        const selectedContent = document.getElementById(`field-${tabName}-tab`);
+        const selectedButton = document.querySelector(`[onclick="window.AppModules.formBuilder.switchFieldSubTab('${tabName}')"]`);
+        if (selectedContent) selectedContent.style.display = 'block';
+        if (selectedButton) selectedButton.classList.add('active');
+    }
+
+    renderFieldConfigTab(field) {
+        let content = '';
+        
+        // Type-specific configuration
+        switch (field.type) {
+            case 'text':
+            case 'email':
+            case 'phone':
+            case 'textarea':
+                content = `
+                    <div class="property-group-compact">
+                        <label>Placeholder</label>
+                        <input type="text" id="prop-placeholder" value="${field.placeholder || ''}"
+                               onchange="window.AppModules.formBuilder.updateFieldProperty('placeholder', this.value)">
+                        <div class="help-text">Hint text for user input</div>
+                    </div>
+                `;
+                break;
+            
+            case 'checkbox':
+                content = `
+                    <div class="property-group-compact">
+                        <label>Checkbox Text</label>
+                        <input type="text" id="prop-checkboxLabel" value="${field.checkboxLabel || 'Check this box'}"
+                               onchange="window.AppModules.formBuilder.updateFieldProperty('checkboxLabel', this.value)">
+                        <div class="help-text">Text next to checkbox</div>
+                    </div>
+                `;
+                break;
+            
+            case 'select':
+            case 'radio':
+                content = `
+                    <div class="property-group-compact">
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="prop-usePicklist" ${field.usePicklist ? 'checked' : ''}
+                                   onchange="window.AppModules.formBuilder.togglePicklist(this.checked)">
+                            <label for="prop-usePicklist">Use Salesforce Picklist</label>
+                        </div>
+                        <div class="help-text">Load options from Salesforce</div>
+                    </div>
+                    
+                    <div id="picklistConfig" style="display: ${field.usePicklist ? 'block' : 'none'}">
+                        <div class="property-group-compact">
+                            <label>Salesforce Object</label>
+                            <select id="prop-picklistObject" onchange="window.AppModules.formBuilder.updatePicklistObject(this.value)">
+                                <option value="">Select Object...</option>
+                            </select>
+                            <div class="help-text">Source object</div>
+                        </div>
+                        
+                        <div class="property-group-compact">
+                            <label>Picklist Field</label>
+                            <select id="prop-picklistField" onchange="window.AppModules.formBuilder.updatePicklistField(this.value)">
+                                <option value="">Select Field...</option>
+                            </select>
+                            <div class="help-text">Picklist field name</div>
+                        </div>
+                    </div>
+                    
+                    <div id="manualOptions" style="display: ${field.usePicklist ? 'none' : 'block'}">
+                        <div class="property-group-compact">
+                            <label>Options</label>
+                            <div id="optionsList">
+                                ${this.renderOptionsList(field.options || [])}
+                            </div>
+                            <button class="property-button-compact" onclick="window.AppModules.formBuilder.addOption()">
+                                ➕ Add Option
+                            </button>
+                            <div class="help-text">Manual option list</div>
+                        </div>
+                    </div>
+                `;
+                break;
+        }
+        
+        return content || '<div class="property-group-compact"><p>No additional configuration needed for this field type.</p></div>';
+    }
+
+    renderFieldSalesforceTab(field) {
+        if (field.type === 'lookup') {
+            return `
+                <div class="property-group-compact">
+                    <label>Salesforce Object</label>
+                    <select id="prop-lookupObject" onchange="window.AppModules.formBuilder.updateLookupObject(this.value)">
+                        <option value="">Select Object...</option>
+                    </select>
+                    <div class="help-text">Object to search</div>
+                </div>
+                
+                <div class="property-row">
+                    <div class="property-group-compact">
+                        <label>Display Field</label>
+                        <select id="prop-displayField" onchange="window.AppModules.formBuilder.updateFieldProperty('displayField', this.value)">
+                            <option value="Name">Name</option>
+                        </select>
+                        <div class="help-text">Field to show</div>
+                    </div>
+                    
+                    <div class="property-group-compact">
+                        <label>Search Field</label>
+                        <select id="prop-searchField" onchange="window.AppModules.formBuilder.updateFieldProperty('searchField', this.value)">
+                            <option value="Name">Name</option>
+                        </select>
+                        <div class="help-text">Field to search</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        return `
+            <div class="property-group-compact">
+                <label>Salesforce Field</label>
+                <input type="text" id="prop-salesforceField" value="${field.salesforceField || ''}"
+                       onchange="window.AppModules.formBuilder.updateFieldProperty('salesforceField', this.value)">
+                <div class="help-text">API name of Salesforce field</div>
+            </div>
+        `;
+    }
+
+    renderFieldConditionsTab(field) {
+        return `
+            <div class="property-group-compact">
+                <div class="form-checkbox">
+                    <input type="checkbox" id="prop-conditionalVisibility" ${field.conditionalVisibility?.enabled ? 'checked' : ''}
+                           onchange="window.AppModules.formBuilder.toggleConditionalVisibility(this.checked)">
+                    <label for="prop-conditionalVisibility">Conditional Visibility</label>
+                </div>
+                <div class="help-text">Show/hide based on other field values</div>
+            </div>
+            
+            <div id="conditionalConfig" style="display: ${field.conditionalVisibility?.enabled ? 'block' : 'none'}">
+                <div class="property-group-compact">
+                    <label>Show When</label>
+                    <select id="prop-conditionField" onchange="window.AppModules.formBuilder.updateConditionField(this.value)">
+                        <option value="">Select Field...</option>
+                    </select>
+                    <div class="help-text">Field to check</div>
+                </div>
+                
+                <div class="property-row">
+                    <div class="property-group-compact">
+                        <label>Condition</label>
+                        <select id="prop-conditionOperator" onchange="window.AppModules.formBuilder.updateConditionOperator(this.value)">
+                            <option value="equals">Equals</option>
+                            <option value="not_equals">Not Equals</option>
+                            <option value="contains">Contains</option>
+                        </select>
+                        <div class="help-text">Comparison type</div>
+                    </div>
+                    
+                    <div class="property-group-compact">
+                        <label>Value</label>
+                        <input type="text" id="prop-conditionValue" value="${field.conditionalVisibility?.value || ''}"
+                               onchange="window.AppModules.formBuilder.updateConditionValue(this.value)">
+                        <div class="help-text">Value to compare</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderFieldStyleTab(field) {
+        return `
+            <div class="property-group-compact">
+                <label>CSS Classes</label>
+                <input type="text" id="prop-cssClasses" value="${field.cssClasses || ''}"
+                       onchange="window.AppModules.formBuilder.updateFieldProperty('cssClasses', this.value)">
+                <div class="help-text">Custom CSS classes</div>
+            </div>
+            
+            <div class="property-row">
+                <div class="property-group-compact">
+                    <label>Width</label>
+                    <select id="prop-width" onchange="window.AppModules.formBuilder.updateFieldProperty('width', this.value)">
+                        <option value="full" ${field.width === 'full' ? 'selected' : ''}>Full Width</option>
+                        <option value="half" ${field.width === 'half' ? 'selected' : ''}>Half Width</option>
+                        <option value="third" ${field.width === 'third' ? 'selected' : ''}>One Third</option>
+                    </select>
+                    <div class="help-text">Field width</div>
+                </div>
+            </div>
+        `;
     }
 
     updateFormSetting(key, value) {
@@ -3763,191 +3204,87 @@ export class FormBuilder {
         const availableObjects = this.getAvailableSalesforceObjects();
 
         return `
-            <div class="page-properties-container">
-                <!-- Basic Page Settings -->
-                <div class="property-section">
-                    <div class="section-header">
-                        <h3 class="section-title">📄 Basic Settings</h3>
-                        <p class="section-description">Configure basic page information and display options</p>
-                    </div>
-                    
-                    <div class="property-group">
+            <div class="properties-content">
+                <!-- Page Sub-Tabs -->
+                <div class="property-sub-tabs">
+                    <button class="property-sub-tab active" onclick="window.AppModules.formBuilder.switchPageSubTab('basic')">📄 Basic</button>
+                    <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchPageSubTab('salesforce')">🔗 SF</button>
+                    <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchPageSubTab('conditions')">🔍 Logic</button>
+                    <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchPageSubTab('navigation')">⬅️➡️ Nav</button>
+                    <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchPageSubTab('advanced')">⚙️ More</button>
+                </div>
+
+                <!-- Basic Settings Tab -->
+                <div class="property-sub-content" id="page-basic-tab">
+                    <div class="property-group-compact">
                         <label>Page Name</label>
                         <input type="text" id="page-name" value="${page.name || ''}" 
-                               placeholder="Enter page name (e.g., Contact Information)"
+                               placeholder="Contact Information"
                                onchange="window.AppModules.formBuilder.updatePageProperty('name', this.value)">
+                        <div class="help-text">Name for this page</div>
                     </div>
 
-                    <div class="property-group">
+                    <div class="property-group-compact">
                         <label>Page Description</label>
                         <textarea id="page-description" rows="2" 
-                                  placeholder="Optional description shown to users"
+                                  placeholder="Optional description..."
                                   onchange="window.AppModules.formBuilder.updatePageProperty('description', this.value)">${page.description || ''}</textarea>
-                        <div class="help-text">Brief description displayed at the top of the page for users</div>
+                        <div class="help-text">Description shown to users</div>
                     </div>
                 </div>
 
-                <!-- Salesforce Integration -->
-                <div class="property-section">
-                    <div class="section-header">
-                        <h3 class="section-title">🔗 Salesforce Integration</h3>
-                        <p class="section-description">Configure how this page interacts with Salesforce</p>
-                    </div>
-
-                    <div class="property-group">
+                <!-- Salesforce Integration Tab -->
+                <div class="property-sub-content" id="page-salesforce-tab" style="display: none;">
+                    <div class="property-group-compact">
                         <label>Salesforce Object</label>
                         <select id="page-salesforce-object" onchange="window.AppModules.formBuilder.updatePageProperty('salesforceObject', this.value)">
                             <option value="">Not Mapped</option>
                             ${availableObjects.map(obj => `
                                 <option value="${obj.name}" ${page.salesforceObject === obj.name ? 'selected' : ''}>
-                                    ${obj.label} (${obj.name})
+                                    ${obj.label}
                                 </option>
                             `).join('')}
                         </select>
-                        <div class="help-text">Select the Salesforce object this page will create/update</div>
+                        <div class="help-text">Object to create/update</div>
                     </div>
 
-                    <div class="property-group">
-                        <label>Action Type</label>
-                        <select id="page-action-type" onchange="window.AppModules.formBuilder.updatePageProperty('actionType', this.value)">
-                            <option value="create" ${page.actionType === 'create' ? 'selected' : ''}>Create New Record</option>
-                            <option value="update" ${page.actionType === 'update' ? 'selected' : ''}>Update Existing Record</option>
-                            <option value="get" ${page.actionType === 'get' ? 'selected' : ''}>Get/Query Records</option>
-                        </select>
-                        <div class="help-text">Choose whether to create a new record or update an existing one</div>
+                    <div class="property-row">
+                        <div class="property-group-compact">
+                            <label>Action Type</label>
+                            <select id="page-action-type" onchange="window.AppModules.formBuilder.updatePageProperty('actionType', this.value)">
+                                <option value="create" ${page.actionType === 'create' ? 'selected' : ''}>Create New</option>
+                                <option value="update" ${page.actionType === 'update' ? 'selected' : ''}>Update Existing</option>
+                                <option value="get" ${page.actionType === 'get' ? 'selected' : ''}>Query Records</option>
+                            </select>
+                            <div class="help-text">Create or update records</div>
+                        </div>
                     </div>
                     
-                    <div class="property-group" id="record-id-group" style="display: ${page.actionType === 'update' ? 'block' : 'none'};">
+                    <div class="property-group-compact" id="record-id-group" style="display: ${page.actionType === 'update' ? 'block' : 'none'};">
                         <label>Record ID Variable</label>
                         <select id="page-record-id-variable" 
                                 onchange="window.AppModules.formBuilder.updatePageProperty('recordIdVariable', this.value)">
                             ${this.renderRecordIdVariableOptions(page.recordIdVariable)}
                         </select>
-                        <div class="help-text">
-                            Variable containing the Salesforce record ID to update (set by Login field, lookup field, or manually created)
-                        </div>
-                    </div>
-                    
-                    <div class="property-group" id="query-config-group" style="display: ${page.actionType === 'get' ? 'block' : 'none'};">
-                        <label>Query Configuration</label>
-                        <div class="query-builder">
-                            <div class="query-fields-selection">
-                                <label class="sub-label">Fields to Retrieve</label>
-                                <div class="field-picker-container">
-                                    <button type="button" id="query-fields-picker-btn" 
-                                            class="button button-secondary field-picker-btn"
-                                            onclick="window.AppModules.formBuilder.openQueryFieldsPicker()">
-                                        📋 Select Fields (${(page.queryFields || '').split(',').filter(f => f.trim()).length} selected)
-                                    </button>
-                                    <div class="selected-fields-display" id="query-selected-fields">
-                                        ${this.renderSelectedQueryFields(page.queryFields || '')}
-                                    </div>
-                                </div>
-                                <textarea id="page-query-fields" 
-                                          placeholder="Name, Email, Phone, Account.Name (comma-separated)"
-                                          onchange="window.AppModules.formBuilder.updatePageProperty('queryFields', this.value)"
-                                          rows="2" 
-                                          style="display: none;">${page.queryFields || ''}</textarea>
-                                <div class="help-text">Click "Select Fields" to choose from available Salesforce fields, or manually enter comma-separated field names</div>
-                            </div>
-                            
-                            <div class="query-filters">
-                                <label class="sub-label">Query Filters</label>
-                                <div id="query-filters-list" class="query-filters-list">
-                                    ${this.renderQueryFilters(page.queryFilters || [])}
-                                </div>
-                                <button type="button" class="add-condition-btn" onclick="window.AppModules.formBuilder.addQueryFilter()">
-                                    ➕ Add Filter
-                                </button>
-                                <div class="help-text">Filter records based on form field values (e.g., Email equals field value)</div>
-                            </div>
-                            
-                            <div class="query-options">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label class="sub-label">WHERE Conditions</label>
-                                        <div class="where-builder-container">
-                                            <button type="button" id="where-builder-btn" 
-                                                    class="button button-secondary where-builder-btn"
-                                                    onclick="window.AppModules.formBuilder.openWhereBuilder()">
-                                                🔍 Build WHERE Clause (${this.getWhereConditionCount(page.queryWhereConditions || [])} conditions)
-                                            </button>
-                                            <div class="where-conditions-display" id="where-conditions-display">
-                                                ${this.renderWhereConditionsDisplay(page.queryWhereConditions || [])}
-                                            </div>
-                                        </div>
-                                        <textarea id="page-query-where" 
-                                                  placeholder="Name LIKE 'John%' OR Email = 'test@example.com'"
-                                                  onchange="window.AppModules.formBuilder.updatePageProperty('queryWhere', this.value)"
-                                                  rows="2" 
-                                                  style="display: none;">${page.queryWhere || ''}</textarea>
-                                        <div class="help-text">Click "Build WHERE Clause" to create conditions visually, or manually enter SOQL WHERE clause</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label class="sub-label">ORDER BY</label>
-                                        <div class="order-by-container">
-                                            <button type="button" id="order-by-picker-btn" 
-                                                    class="button button-secondary order-by-btn"
-                                                    onclick="window.AppModules.formBuilder.openOrderByPicker()">
-                                                📊 Select Order (${this.getOrderByCount(page.queryOrderBy || '')} fields)
-                                            </button>
-                                            <div class="selected-order-display" id="order-selected-fields">
-                                                ${this.renderSelectedOrderBy(page.queryOrderBy || '')}
-                                            </div>
-                                        </div>
-                                        <input type="text" id="page-query-order" 
-                                               placeholder="Name ASC, CreatedDate DESC"
-                                               onchange="window.AppModules.formBuilder.updatePageProperty('queryOrderBy', this.value)"
-                                               value="${page.queryOrderBy || ''}"
-                                               style="display: none;">
-                                        <div class="help-text">Click "Select Order" to choose fields and sort direction, or manually enter ORDER BY clause</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label class="sub-label">Record Limit</label>
-                                        <input type="number" id="page-query-limit" 
-                                               placeholder="100"
-                                               min="1" max="2000"
-                                               onchange="window.AppModules.formBuilder.updatePageProperty('queryLimit', parseInt(this.value))"
-                                               value="${page.queryLimit || 100}">
-                                        <div class="help-text">Maximum records to retrieve (1-2000, default 100)</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label class="sub-label">Result Variable Name</label>
-                                        <input type="text" id="page-result-variable" 
-                                               placeholder="QueryResults (optional)"
-                                               onchange="window.AppModules.formBuilder.updatePageProperty('resultVariable', this.value)"
-                                               value="${page.resultVariable || ''}">
-                                        <div class="help-text">Custom variable name for query results (optional)</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="help-text">Variable with record ID to update</div>
                     </div>
                 </div>
 
-                <!-- Page Conditional Visibility -->
-                ${this.renderPageConditionalVisibilitySection(page, availableFields)}
+                <!-- Conditions Tab -->
+                <div class="property-sub-content" id="page-conditions-tab" style="display: none;">
+                    ${this.renderPageConditionalVisibilitySection(page, availableFields)}
+                </div>
 
-                <!-- Navigation Button Controls -->
-                ${this.renderNavigationButtonSection(page, availableFields)}
+                <!-- Navigation Tab -->
+                <div class="property-sub-content" id="page-navigation-tab" style="display: none;">
+                    ${this.renderNavigationButtonSection(page, availableFields)}
+                </div>
 
-                <!-- Repeat Configuration -->
-                ${this.renderRepeatConfigurationSection(page)}
-
-                <!-- Hidden Fields -->
-                ${this.renderHiddenFieldsSection(page)}
-
-                <!-- Advanced Settings -->
-                ${this.renderAdvancedSettingsSection(page)}
+                <!-- Advanced Tab -->
+                <div class="property-sub-content" id="page-advanced-tab" style="display: none;">
+                    ${this.renderRepeatConfigurationSection(page)}
+                    ${this.renderHiddenFieldsSection(page)}
+                </div>
             </div>
         `;
     }
