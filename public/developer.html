@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Form Builder - Developer Documentation</title>
+    <link rel="stylesheet" href="styles-notion.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            background: linear-gradient(135deg, var(--gray-900) 0%, var(--purple-900) 100%);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            color: var(--gray-100);
+            min-height: 100vh;
+            height: auto !important;
+            overflow: visible !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+        }
+        
+        .dev-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-8);
+            height: auto !important;
+            overflow: visible !important;
+        }
+        
+        .dev-header {
+            text-align: center;
+            margin-bottom: var(--space-12);
+            padding: var(--space-8);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-2xl);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dev-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dev-section h2 {
+            color: var(--purple-300);
+            margin-bottom: var(--space-6);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            margin: var(--space-4) 0;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        
+        .function-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: var(--space-6);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-4);
+            border-left: 4px solid var(--purple-400);
+        }
+        
+        .function-name {
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-weight: 600;
+            color: var(--purple-300);
+            font-size: 1.1rem;
+            margin-bottom: var(--space-2);
+        }
+        
+        .function-desc {
+            color: var(--gray-300);
+            margin-bottom: var(--space-3);
+        }
+        
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: var(--space-6);
+            margin-top: var(--space-6);
+        }
+        
+        .variable-tag {
+            background: var(--purple-600);
+            color: white;
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-md);
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            color: var(--purple-300);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: var(--space-6);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all var(--duration-normal);
+        }
+        
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--purple-200);
+        }
+        
+        .highlight {
+            background: var(--warning);
+            color: var(--gray-900);
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+        }
+        
+        .method-type {
+            background: var(--success);
+            color: white;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .new-badge {
+            background: var(--error);
+            color: white;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: var(--space-2);
+        }
+    </style>
+</head>
+<body>
+    <div class="dev-container">
+        <a href="index.html" class="back-link">
+            ← Back to Form Builder
+        </a>
+        
+        <div class="dev-header">
+            <h1>🛠️ Developer Documentation</h1>
+            <p>Technical reference for advanced form building and debugging</p>
+        </div>
+
+        <!-- Global Variables System -->
+        <div class="dev-section">
+            <h2>🌐 Global Variables System <span class="new-badge">NEW</span></h2>
+            
+            <div class="function-card">
+                <div class="function-name">window.FormVariables</div>
+                <div class="function-desc">Global variable management system accessible throughout the application.</div>
+                
+                <h4>Methods:</h4>
+                <div class="code-block">window.FormVariables.set(name, value)    // Set a global variable
+window.FormVariables.get(name)           // Get variable value
+window.FormVariables.has(name)           // Check if variable exists
+window.FormVariables.getAll()           // Get all variables as object
+window.FormVariables.clear()            // Clear all variables
+window.FormVariables.debug()            // Console table display</div>
+                
+                <h4>Debug Shortcuts:</h4>
+                <div class="code-block">window.vars.debug()                    // Quick debug access
+window.vars.getAll()                   // Quick get all variables</div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">Login Variables <span class="new-badge">FIXED</span></div>
+                <div class="function-desc">Automatically set after successful Login field authentication.</div>
+                
+                <h4>Available Variables:</h4>
+                <div class="code-block">isLoggedIn  = "true"     // Primary login status
+loggedIn    = "true"     // Alternative login status  
+userEmail   = "user@example.com"  // Authenticated email
+userName    = "John Doe" // Contact name or email</div>
+
+                <h4>Usage in Conditional Logic:</h4>
+                <div class="code-block">// Show submit button only after login
+Condition: isLoggedIn equals "true"
+
+// Show different content for logged users  
+Condition: userEmail is not empty</div>
+            </div>
+        </div>
+
+        <!-- Variables Manager API -->
+        <div class="dev-section">
+            <h2>🔧 Variables Manager API <span class="new-badge">NEW</span></h2>
+            
+            <div class="api-grid">
+                <div class="function-card">
+                    <div class="function-name">showVariablesManager()</div>
+                    <div class="function-desc">Opens the Variables Manager modal for real-time variable monitoring.</div>
+                    <div class="code-block">window.showVariablesManager();</div>
+                </div>
+                
+                <div class="function-card">
+                    <div class="function-name">refreshVariables()</div>
+                    <div class="function-desc">Refreshes the variables list in the modal.</div>
+                    <div class="code-block">window.refreshVariables();</div>
+                </div>
+                
+                <div class="function-card">
+                    <div class="function-name">addVariable()</div>
+                    <div class="function-desc">Programmatically adds a variable via the manager interface.</div>
+                    <div class="code-block">// Set inputs then call
+document.getElementById('newVariableName').value = 'testVar';
+document.getElementById('newVariableValue').value = 'testValue';
+window.addVariable();</div>
+                </div>
+                
+                <div class="function-card">
+                    <div class="function-name">exportVariables()</div>
+                    <div class="function-desc">Exports all variables as downloadable JSON file.</div>
+                    <div class="code-block">window.exportVariables();</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Form Builder API -->
+        <div class="dev-section">
+            <h2>📝 Enhanced Form Builder API</h2>
+            
+            <div class="function-card">
+                <div class="function-name">setupRequireLoginForButton() <span class="new-badge">NEW</span></div>
+                <div class="function-desc">Quick setup for login-required navigation buttons.</div>
+                
+                <h4>Functions:</h4>
+                <div class="code-block">window.setupRequireLoginForNext()     // Require login for Next button
+window.setupRequireLoginForSubmit()   // Require login for Submit button</div>
+                
+                <h4>What it does:</h4>
+                <div class="code-block">// Automatically creates condition:
+// Field: isLoggedIn
+// Condition: equals  
+// Value: "true"</div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">Smart Dropdown Enhancements <span class="new-badge">NEW</span></div>
+                <div class="function-desc">Dynamic field loading and variable discovery.</div>
+                
+                <h4>RecordId Variable Options:</h4>
+                <div class="code-block">// Automatically includes:
+// - Global variables from FormVariables
+// - Common patterns (ContactId, AccountId, etc.)
+// - Login field variables  
+// - Lookup field ID variables
+// - Option to create custom variables</div>
+                
+                <h4>Relationship Field Options:</h4>
+                <div class="code-block">// Dynamically loads from Salesforce:
+// - All reference fields for current object
+// - Field labels and relationship targets
+// - Option to create custom field names</div>
+            </div>
+        </div>
+
+        <!-- Module System -->
+        <div class="dev-section">
+            <h2>🏗️ Module System</h2>
+            
+            <div class="function-card">
+                <div class="function-name">window.AppModules</div>
+                <div class="function-desc">Central access point for all application modules.</div>
+                
+                <h4>Available Modules:</h4>
+                <div class="code-block">window.AppModules.formBuilder      // Form building interface
+window.AppModules.salesforce       // Salesforce integration
+window.AppModules.conditionalLogic // Conditional visibility
+window.AppModules.multiPage        // Multi-page navigation
+window.AppModules.autoSave         // Auto-save functionality
+window.AppModules.fieldTypes       // Field type handlers
+window.AppModules.signature        // E-signature capture
+window.AppModules.flowLogic        // Email/OTP workflows</div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">Performance Optimizations <span class="highlight">UPDATED</span></div>
+                <div class="function-desc">Auto-save optimizations to reduce server load.</div>
+                
+                <h4>Auto-save Changes:</h4>
+                <div class="code-block">// OLD: 500ms debounce (causing server overload)
+// NEW: 3000ms debounce (6x reduction in requests)
+
+// Access auto-save instance:
+window.AppModules.autoSave.autoSaveInterval  // Now: 3000ms</div>
+            </div>
+        </div>
+
+        <!-- Conditional Logic API -->
+        <div class="dev-section">
+            <h2>👁️ Conditional Logic API <span class="highlight">ENHANCED</span></h2>
+            
+            <div class="function-card">
+                <div class="function-name">Field Value Priority System</div>
+                <div class="function-desc">Enhanced priority system for variable/field value resolution.</div>
+                
+                <h4>Priority Order:</h4>
+                <div class="code-block">// 1. Global Variables (FormVariables) - HIGHEST PRIORITY
+if (window.FormVariables?.has(fieldId)) {
+    value = window.FormVariables.get(fieldId);
+}
+
+// 2. Field Values - MEDIUM PRIORITY  
+else if (this.fieldValues.get(fieldId)) {
+    value = this.fieldValues.get(fieldId);
+}
+
+// 3. MultiPage Variables - LOWEST PRIORITY
+else if (window.AppModules.multiPage?.getVariable(fieldId)) {
+    value = window.AppModules.multiPage.getVariable(fieldId);
+}</div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">Navigation Button Conditional Visibility <span class="new-badge">FIXED</span></div>
+                <div class="function-desc">Per-page conditional visibility for Next and Submit buttons.</div>
+                
+                <h4>Configuration Structure:</h4>
+                <div class="code-block">page.navigationConfig = {
+    next: {
+        conditionalVisibility: {
+            enabled: false,
+            conditions: [
+                {
+                    dependsOn: 'isLoggedIn',
+                    condition: 'equals', 
+                    value: 'true'
+                }
+            ],
+            logic: 'AND'  // or 'OR'
+        }
+    },
+    submit: { /* same structure */ }
+}</div>
+            </div>
+        </div>
+
+        <!-- Salesforce Integration -->
+        <div class="dev-section">
+            <h2>🔗 Salesforce Integration API</h2>
+            
+            <div class="function-card">
+                <div class="function-name">Enhanced Record Update Logic <span class="highlight">IMPROVED</span></div>
+                <div class="function-desc">Priority-based record ID resolution for update operations.</div>
+                
+                <h4>Server-side Priority (server.js):</h4>
+                <div class="code-block">// 1. Page-specific recordIdVariable (NEW - HIGHEST PRIORITY)
+if (page.recordIdVariable && variables[page.recordIdVariable]) {
+    recordId = variables[page.recordIdVariable];
+}
+
+// 2. Record data ID fields (MEDIUM PRIORITY)
+else if (record.Id || record.id) {
+    recordId = record.Id || record.id;
+}
+
+// 3. Common ID patterns (LOWEST PRIORITY - FALLBACK)  
+else if (variables.ContactId || variables.RecordId) {
+    recordId = variables.ContactId || variables.RecordId;
+}</div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">Multi-Org Security <span class="highlight">SECURED</span></div>
+                <div class="function-desc">Enhanced encryption and org protection.</div>
+                
+                <h4>Security Features:</h4>
+                <div class="code-block">// Persistent encryption key prevents data loss
+ENCRYPTION_KEY=your-64-character-hex-key
+
+// Dangerous cleanup function disabled
+cleanupCorruptedOrgs() {
+    // DISABLED - returns safety message
+    return { deletedCount: 0, message: 'Function disabled for safety' };
+}</div>
+            </div>
+        </div>
+
+        <!-- Debugging Tools -->
+        <div class="dev-section">
+            <h2>🐛 Debugging Tools</h2>
+            
+            <div class="api-grid">
+                <div class="function-card">
+                    <div class="function-name">Variable Debugging</div>
+                    <div class="function-desc">Real-time variable inspection and monitoring.</div>
+                    <div class="code-block">// Console commands
+window.vars.debug()              // Table view
+window.vars.getAll()            // Object view
+window.FormVariables.variables  // Raw Map
+
+// Variables Manager UI
+window.showVariablesManager()   // Visual interface</div>
+                </div>
+                
+                <div class="function-card">
+                    <div class="function-name">Conditional Logic Debugging</div>
+                    <div class="function-desc">Debug conditional visibility issues.</div>
+                    <div class="code-block">// Check condition evaluation
+window.AppModules.conditionalLogic.evaluateAllConditions()
+
+// Check field values
+window.AppModules.conditionalLogic.fieldValues
+
+// Check page conditions  
+window.AppModules.conditionalLogic.pageConditions</div>
+                </div>
+                
+                <div class="function-card">
+                    <div class="function-name">Enhanced Logging <span class="new-badge">NEW</span></div>
+                    <div class="function-desc">Comprehensive logging system for troubleshooting.</div>
+                    <div class="code-block">// Variable discovery logging
+📊 Found X global variables for conditional visibility
+
+// Login authentication logging  
+🔐 LOGIN: Setting global variable "isLoggedIn" = "true"
+
+// Auto-refresh logging
+🔄 Refreshing form builder properties panel for new variables</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Environment Configuration -->
+        <div class="dev-section">
+            <h2>⚙️ Environment Configuration</h2>
+            
+            <div class="function-card">
+                <div class="function-name">Critical Environment Variables</div>
+                <div class="function-desc">Essential configuration for production deployment.</div>
+                
+                <h4>Required Variables:</h4>
+                <div class="code-block"># CRITICAL - Prevents org data loss on restart
+ENCRYPTION_KEY=your-64-character-hex-key-here
+
+# Salesforce OAuth
+SALESFORCE_CLIENT_ID=your-consumer-key
+SALESFORCE_CLIENT_SECRET=your-consumer-secret
+
+# Server Configuration  
+PORT=8080
+DOMAIN=your-domain.com
+SESSION_SECRET=your-session-secret
+
+# Auto-save Performance (Optional - defaults to 3000ms)
+AUTOSAVE_INTERVAL=3000</div>
+                
+                <h4>Generate Encryption Key:</h4>
+                <div class="code-block">node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</div>
+            </div>
+        </div>
+
+        <!-- Recent Updates -->
+        <div class="dev-section">
+            <h2>🆕 January 2025 Updates</h2>
+            
+            <div class="api-grid">
+                <div class="function-card">
+                    <div class="function-name">Variables Management System</div>
+                    <div class="function-desc">Complete variable lifecycle management.</div>
+                    <div class="code-block">✅ Variables Manager modal
+✅ Real-time variable monitoring  
+✅ Manual variable creation
+✅ JSON export/import
+✅ Debug console integration</div>
+                </div>
+                
+                <div class="function-card">
+                    <div class="function-name">Login Variable Integration</div>
+                    <div class="function-desc">Fixed conditional visibility issues.</div>
+                    <div class="code-block">✅ Auto-refresh properties panel
+✅ Login variables in dropdowns
+✅ Quick "Require Login" buttons
+✅ Real-time UI updates</div>
+                </div>
+                
+                <div class="function-card">
+                    <div class="function-name">Smart Dropdowns</div>
+                    <div class="function-desc">Dynamic field discovery and configuration.</div>
+                    <div class="code-block">✅ RecordId variable picker
+✅ Relationship field picker  
+✅ Salesforce field loading
+✅ Custom field creation</div>
+                </div>
+                
+                <div class="function-card">
+                    <div class="function-name">Performance & Security</div>
+                    <div class="function-desc">Production-ready optimizations.</div>
+                    <div class="code-block">✅ 6x auto-save optimization
+✅ Persistent encryption keys
+✅ Enhanced error handling
+✅ Comprehensive logging</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Reference -->
+        <div class="dev-section">
+            <h2>📚 Quick Reference</h2>
+            
+            <div class="function-card">
+                <div class="function-name">Most Used Developer Functions</div>
+                <div class="function-desc">Common debugging and development commands.</div>
+                
+                <div class="code-block">// Variable Management
+window.vars.debug()                      // Show all variables
+window.FormVariables.set('test', 'value') // Set test variable  
+window.showVariablesManager()            // Open Variables Manager
+
+// Form Builder Access
+window.AppModules.formBuilder.getCurrentPage()  // Get current page
+window.AppModules.formBuilder.getFormData()     // Get entire form
+
+// Conditional Logic Debug
+window.AppModules.conditionalLogic.evaluateAllConditions()
+
+// Quick Login Setup
+window.setupRequireLoginForNext()       // Require login for Next
+window.setupRequireLoginForSubmit()     // Require login for Submit
+
+// Auto-save Control  
+window.AppModules.autoSave.saveBuilderData()   // Manual save
+window.AppModules.autoSave.enabled = false     // Disable auto-save</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

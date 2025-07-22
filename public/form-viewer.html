@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form</title>
+    <link rel="stylesheet" href="/styles-notion.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    
+    <style>
+        /* Form Viewer Specific Styles - Make.com Inspired */
+        body {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--purple-50) 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .form-viewer-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-16);
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* Subtle background pattern */
+        .form-viewer-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(59, 130, 246, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: var(--space-16);
+            padding-bottom: var(--space-8);
+            border-bottom: 1px solid var(--gray-200);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .form-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-4);
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+        
+        .form-description {
+            font-size: 1.1rem;
+            color: var(--gray-600);
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .public-form {
+            background: white;
+            padding: var(--space-12);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--gray-200);
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-page {
+            animation: fadeIn var(--duration-normal) var(--ease-out);
+        }
+        
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: var(--space-8);
+            padding-bottom: var(--space-4);
+            border-bottom: 2px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+        
+        .page-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-sm);
+        }
+        
+        .page-fields {
+            display: grid;
+            gap: var(--space-8);
+        }
+        
+        .form-field-container {
+            display: grid;
+            gap: var(--space-3);
+        }
+        
+        .field-label {
+            font-weight: 600;
+            color: var(--gray-800);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .field-required {
+            color: var(--error);
+            font-weight: 700;
+        }
+        
+        .field-help {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            line-height: 1.5;
+            margin-top: var(--space-2);
+        }
+        
+        .field-error {
+            color: var(--error);
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: var(--space-2);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .field-error::before {
+            content: '⚠️';
+            font-size: 0.875rem;
+        }
+        
+        .form-field-container.has-error .form-input,
+        .form-field-container.has-error .form-select,
+        .form-field-container.has-error .form-textarea {
+            border-color: var(--error);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+        
+        /* Form Controls */
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: var(--space-4);
+            background: var(--gray-50);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            transition: all var(--duration-normal) var(--ease-out);
+            font-family: var(--font-sans);
+            color: var(--gray-900);
+        }
+        
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--purple-500);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .form-input:hover,
+        .form-select:hover,
+        .form-textarea:hover {
+            border-color: var(--gray-400);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+        
+        /* Checkbox and Radio Styles */
+        .checkbox-label,
+        .radio-label {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+            cursor: pointer;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--gray-700);
+            padding: var(--space-3);
+            border-radius: var(--radius-md);
+            transition: all var(--duration-normal) var(--ease-out);
+        }
+        
+        .checkbox-label:hover,
+        .radio-label:hover {
+            background: var(--gray-50);
+        }
+        
+        .form-checkbox,
+        .form-radio {
+            margin-top: 2px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--purple-500);
+            cursor: pointer;
+        }
+        
+        .radio-group {
+            display: grid;
+            gap: var(--space-2);
+            padding: var(--space-4);
+            background: var(--gray-50);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-200);
+        }
+        
+        /* Signature Field Styles */
+        .signature-field {
+            display: grid;
+            gap: var(--space-md);
+        }
+        
+        .signature-legal-text {
+            background-color: var(--bg-tertiary);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+        
+        .signature-legal-text p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        
+        .signature-pad {
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background-color: #ffffff;
+            cursor: crosshair;
+            display: block;
+        }
+        
+        .signature-controls {
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .signature-name,
+        .signature-email {
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        /* File Upload Styles */
+        .file-field {
+            display: grid;
+            gap: var(--space-md);
+        }
+        
+        .file-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--space-2xl);
+            text-align: center;
+            background-color: var(--bg-tertiary);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--accent-blue);
+            background-color: var(--bg-secondary);
+        }
+        
+        .file-upload-area.dragging {
+            border-color: var(--accent-blue);
+            background-color: rgba(35, 131, 226, 0.1);
+        }
+        
+        .file-upload-icon {
+            font-size: 2rem;
+            margin-bottom: var(--space-md);
+        }
+        
+        .file-upload-text p {
+            margin: 0 0 var(--space-xs) 0;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .file-upload-text small {
+            display: block;
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
+        }
+        
+        .file-list {
+            display: grid;
+            gap: var(--space-sm);
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+        
+        .file-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .file-size {
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
+        }
+        
+        /* Display Field Styles */
+        .display-field {
+            background-color: var(--bg-tertiary);
+            padding: var(--space-lg);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+        
+        .display-content {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .display-content h1,
+        .display-content h2,
+        .display-content h3 {
+            color: var(--text-primary);
+            margin-top: 0;
+        }
+        
+        /* Lookup Field Styles */
+        .lookup-field {
+            position: relative;
+        }
+        
+        .lookup-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            box-shadow: var(--shadow-md);
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .lookup-result-item {
+            padding: var(--space-md);
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color var(--transition-base);
+        }
+        
+        .lookup-result-item:hover {
+            background-color: var(--bg-secondary);
+        }
+        
+        .lookup-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .lookup-no-results {
+            padding: var(--space-md);
+            text-align: center;
+            color: var(--text-tertiary);
+            font-style: italic;
+        }
+        
+        .lookup-selected {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-md);
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+        
+        .selected-text {
+            flex: 1;
+        }
+        
+        .clear-selection {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .clear-selection:hover {
+            color: var(--text-primary);
+        }
+        
+        /* Rich Text Field Styles */
+        .richtext-field .ql-container {
+            background-color: var(--bg-primary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .richtext-field .ql-toolbar {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+        
+        /* Repeat Controls */
+        .repeat-controls {
+            margin-top: var(--space-xl);
+            padding-top: var(--space-xl);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .repeat-instance {
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            position: relative;
+        }
+        
+        .repeat-instance h4 {
+            margin: 0 0 var(--space-lg) 0;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .add-repeat-btn,
+        .remove-instance-btn {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+        
+        .add-repeat-btn:hover,
+        .remove-instance-btn:hover {
+            background-color: var(--border-color);
+        }
+        
+        .remove-instance-btn {
+            background-color: var(--accent-red);
+            color: white;
+            border-color: var(--accent-red);
+        }
+        
+        .remove-instance-btn:hover {
+            background-color: #cc4444;
+        }
+        
+        /* Navigation */
+        .form-navigation {
+            margin-top: var(--space-12);
+            padding-top: var(--space-8);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: var(--space-4);
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .form-navigation.single-page {
+            justify-content: center;
+        }
+        
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-4) var(--space-6);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-out);
+            text-decoration: none;
+            min-width: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left var(--duration-slow) var(--ease-out);
+        }
+        
+        .button:hover::before {
+            left: 100%;
+        }
+        
+        .button-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .button-primary:disabled {
+            background: var(--gray-400);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .button-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .button-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .add-repeat-btn,
+        .remove-instance-btn {
+            background: white;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-out);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .add-repeat-btn:hover {
+            background: var(--gray-50);
+            border-color: var(--purple-300);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .remove-instance-btn {
+            background: var(--error);
+            color: white;
+            border-color: var(--error);
+        }
+        
+        .remove-instance-btn:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* Collected Items Display */
+        .collected-items {
+            margin-top: var(--space-6);
+            padding: var(--space-4);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .collected-items h4 {
+            margin-bottom: var(--space-3);
+            color: var(--gray-700);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .collected-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-3);
+            margin-bottom: var(--space-2);
+            background: white;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .collected-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .item-summary {
+            flex: 1;
+            color: var(--gray-700);
+            font-size: 0.9rem;
+        }
+        
+        .button-small {
+            padding: var(--space-1) var(--space-3);
+            font-size: 0.8rem;
+            min-height: auto;
+        }
+        
+        /* Submission Message */
+        .submission-message {
+            text-align: center;
+            padding: var(--space-12);
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--gray-200);
+            animation: fadeIn var(--duration-normal) var(--ease-out);
+        }
+        
+        .submission-message h2 {
+            color: var(--success);
+            margin-bottom: var(--space-4);
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-3);
+        }
+        
+        .submission-message h2::before {
+            content: '✅';
+            font-size: 2.5rem;
+        }
+        
+        .submission-message p {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        /* Error Container */
+        .error-container {
+            text-align: center;
+            padding: var(--space-12);
+            max-width: 600px;
+            margin: var(--space-12) auto;
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .error-container h1 {
+            color: var(--error);
+            margin-bottom: var(--space-4);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-3);
+        }
+        
+        .error-container h1::before {
+            content: '❌';
+            font-size: 2rem;
+        }
+        
+        .error-container p {
+            color: var(--gray-600);
+            margin-bottom: var(--space-8);
+            line-height: 1.6;
+        }
+        
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: var(--space-12);
+            color: var(--gray-600);
+        }
+        
+        .loading-state .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--gray-300);
+            border-top-color: var(--purple-500);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto var(--space-4);
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes spin {
+            to { 
+                transform: rotate(360deg); 
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .form-viewer-container {
+                padding: var(--space-8);
+            }
+            
+            .public-form {
+                padding: var(--space-8);
+            }
+            
+            .form-title {
+                font-size: 2rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .form-navigation {
+                flex-direction: column;
+                gap: var(--space-4);
+            }
+            
+            .button {
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .signature-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .signature-name,
+            .signature-email {
+                width: 100%;
+            }
+            
+            .page-fields {
+                gap: var(--space-6);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .form-viewer-container {
+                padding: var(--space-4);
+            }
+            
+            .public-form {
+                padding: var(--space-6);
+            }
+            
+            .form-title {
+                font-size: 1.75rem;
+            }
+        }
+        
+        /* ==========================================================================
+           DATATABLE FIELD STYLES - MATCHING BUILDER DESIGN
+           ========================================================================== */
+           
+        .datatable-field {
+            margin-bottom: var(--space-4);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .datatable-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .datatable-header {
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--gray-200);
+            background: var(--gray-50);
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+        }
+
+        .datatable-title {
+            margin: 0 0 var(--space-2) 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .datatable-title::before {
+            content: '📊';
+            font-size: 1rem;
+        }
+
+        .datatable-description {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.4;
+        }
+
+        .datatable-actions {
+            margin-top: var(--space-3);
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        .datatable-content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .datatable-wrapper {
+            flex: 1;
+            overflow: auto;
+            max-height: 400px;
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+        }
+
+        .datatable {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            background: white;
+        }
+
+        .datatable thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--gray-50);
+        }
+
+        .datatable thead tr {
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .datatable th {
+            padding: var(--space-3) var(--space-4);
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-700);
+            background: var(--gray-50);
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .datatable th:not(:last-child) {
+            border-right: 1px solid var(--gray-200);
+        }
+
+        .datatable tbody tr {
+            border-bottom: 1px solid var(--gray-100);
+            transition: background-color 0.15s ease;
+        }
+
+        .datatable tbody tr:hover {
+            background: var(--gray-25);
+        }
+
+        .datatable tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .datatable td {
+            padding: var(--space-3) var(--space-4);
+            vertical-align: middle;
+            border-right: 1px solid var(--gray-100);
+            position: relative;
+        }
+
+        .datatable td:last-child {
+            border-right: none;
+        }
+
+        /* Cell content styling */
+        .datatable .cell-content {
+            min-height: 20px;
+            width: 100%;
+            background: transparent;
+            border: none;
+            font-size: inherit;
+            font-family: inherit;
+            color: var(--gray-900);
+            outline: none;
+            padding: 2px 0;
+        }
+
+        .datatable .cell-content:focus {
+            background: var(--purple-50);
+            border-radius: 2px;
+            padding: 2px 4px;
+        }
+
+        .datatable .cell-content[data-type="number"] {
+            text-align: right;
+        }
+
+        .datatable .cell-content[data-type="date"] {
+            font-family: monospace;
+        }
+
+        /* Checkbox styling */
+        .datatable .cell-content[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--purple-500);
+            cursor: pointer;
+        }
+
+        /* Select styling */
+        .datatable select.cell-content {
+            background: white;
+            border: 1px solid var(--gray-300);
+            border-radius: 3px;
+            padding: 2px 4px;
+            font-size: inherit;
+        }
+
+        .datatable select.cell-content:focus {
+            border-color: var(--purple-500);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+        }
+
+        /* Action buttons */
+        .datatable .row-actions {
+            display: flex;
+            gap: var(--space-1);
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .datatable tbody tr:hover .row-actions {
+            opacity: 1;
+        }
+
+        .datatable .action-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+
+        .datatable .delete-row-btn {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        .datatable .delete-row-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* Empty state */
+        .datatable-empty {
+            padding: var(--space-8);
+            text-align: center;
+            color: var(--gray-500);
+            font-style: italic;
+        }
+
+        .datatable-empty-icon {
+            font-size: 2rem;
+            margin-bottom: var(--space-2);
+            opacity: 0.5;
+        }
+
+        /* Loading state */
+        .datatable-loading {
+            padding: var(--space-8);
+            text-align: center;
+            color: var(--gray-500);
+        }
+
+        .datatable-loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--gray-300);
+            border-top-color: var(--purple-500);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto var(--space-3);
+        }
+
+        /* Error state */
+        .datatable-error {
+            padding: var(--space-6);
+            text-align: center;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: var(--radius-md);
+            margin: var(--space-4);
+        }
+
+        .datatable-error-icon {
+            color: #ef4444;
+            font-size: 1.5rem;
+            margin-bottom: var(--space-2);
+        }
+
+        .datatable-error-message {
+            color: #b91c1c;
+            font-weight: 500;
+            margin-bottom: var(--space-2);
+        }
+
+        .datatable-error-details {
+            color: #7f1d1d;
+            font-size: 0.875rem;
+        }
+
+        /* Button styling */
+        .button-small {
+            padding: var(--space-2) var(--space-3);
+            font-size: 0.75rem;
+            min-height: auto;
+            line-height: 1.2;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .datatable-wrapper {
+                max-height: 300px;
+            }
+            
+            .datatable th,
+            .datatable td {
+                padding: var(--space-2) var(--space-3);
+                font-size: 0.8rem;
+            }
+            
+            .datatable-title {
+                font-size: 1rem;
+            }
+            
+            .datatable-header {
+                padding: var(--space-3);
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .form-navigation,
+            .repeat-controls,
+            .add-repeat-btn,
+            .remove-instance-btn {
+                display: none !important;
+            }
+            
+            .form-viewer-container {
+                padding: 0;
+                box-shadow: none;
+            }
+            
+            .public-form {
+                box-shadow: none;
+                border: 1px solid #000;
+            }
+            
+            .datatable-actions,
+            .row-actions {
+                display: none !important;
+            }
+            
+            .datatable-wrapper {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+        }
+        
+        /* ==========================================================================
+           DATATABLE FULL SCREEN STYLING
+           ========================================================================== */
+
+        /* Header layout for full screen button */
+        .datatable-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            gap: var(--space-4);
+        }
+
+        .datatable-header-text {
+            flex: 1;
+        }
+
+        .datatable-header-buttons {
+            display: flex;
+            gap: var(--space-2);
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .datatable-fullscreen-btn {
+            white-space: nowrap;
+            font-size: 0.85rem;
+            padding: var(--space-2) var(--space-3);
+            background: #e6f2ff;
+            border: 1px solid #b3d9ff;
+            color: #0066cc;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .datatable-fullscreen-btn:hover {
+            background: #0066cc;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Full screen mode styles */
+        .datatable-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+            background: var(--bg-primary, white) !important;
+            margin: 0 !important;
+            padding: var(--space-6, 2rem) !important;
+            box-shadow: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            overflow: auto !important;
+        }
+
+        .datatable-fullscreen .datatable-container {
+            height: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .datatable-fullscreen .datatable-header {
+            flex-shrink: 0 !important;
+            margin-bottom: var(--space-4, 1.5rem) !important;
+            border-bottom: 2px solid var(--gray-200, #e5e7eb) !important;
+            padding-bottom: var(--space-4, 1.5rem) !important;
+        }
+
+        .datatable-fullscreen .datatable-wrapper {
+            flex: 1 !important;
+            overflow: auto !important;
+            max-height: none !important;
+            border: 2px solid var(--gray-200, #e5e7eb) !important;
+            border-radius: var(--radius-md, 0.5rem) !important;
+        }
+
+        .datatable-fullscreen .datatable {
+            min-width: 100% !important;
+            font-size: 0.95rem !important;
+        }
+
+        .datatable-fullscreen .datatable th,
+        .datatable-fullscreen .datatable td {
+            padding: var(--space-3, 1rem) var(--space-4, 1.5rem) !important;
+            white-space: nowrap !important;
+        }
+
+        .datatable-fullscreen .datatable-title {
+            font-size: 1.5rem !important;
+            margin-bottom: var(--space-2, 0.75rem) !important;
+        }
+
+        .datatable-fullscreen .datatable-description {
+            font-size: 1rem !important;
+            margin-bottom: 0 !important;
+        }
+
+        /* Body scroll lock when full screen is active */
+        body.datatable-fullscreen-active {
+            overflow: hidden !important;
+        }
+
+        /* Dark mode full screen styles */
+        [data-theme="dark"] .datatable-fullscreen {
+            background: var(--bg-dark, #1a1a1a) !important;
+            color: var(--text-light, #f0f0f0) !important;
+        }
+
+        [data-theme="dark"] .datatable-fullscreen .datatable-header {
+            border-bottom-color: var(--gray-600, #4b5563) !important;
+        }
+
+        [data-theme="dark"] .datatable-fullscreen .datatable-wrapper {
+            border-color: var(--gray-600, #4b5563) !important;
+        }
+
+        [data-theme="dark"] .datatable-fullscreen-btn {
+            background: #1a3d5c;
+            border-color: #2e5a87;
+            color: #66b3ff;
+        }
+
+        [data-theme="dark"] .datatable-fullscreen-btn:hover {
+            background: #66b3ff;
+            color: white;
+        }
+
+        /* Responsive full screen adjustments */
+        @media (max-width: 768px) {
+            .datatable-fullscreen {
+                padding: var(--space-4, 1.5rem) !important;
+            }
+            
+            .datatable-header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-3, 1rem);
+            }
+            
+            .datatable-header-buttons {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .datatable-fullscreen .datatable th,
+            .datatable-fullscreen .datatable td {
+                padding: var(--space-2, 0.75rem) var(--space-3, 1rem) !important;
+                font-size: 0.9rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="form-viewer-page">
+    <div id="formContainer">
+        <!-- Form will be rendered here by JavaScript -->
+        <div class="form-viewer-container">
+            <div class="loading-state" style="text-align: center; padding: 2rem;">
+                <div class="spinner" style="margin: 0 auto 1rem;"></div>
+                <p>Loading form...</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Auto-save Indicator -->
+    <div id="autoSaveIndicator" class="auto-save-indicator">
+        <span class="save-icon">💾</span>
+        <span class="save-text">Progress saved</span>
+    </div>
+
+    <!-- Global Variable Manager -->
+    <script>
+        // Global Variable System for Form Variables
+        window.FormVariables = {
+            variables: new Map(),
+            changeListeners: new Set(),
+            evaluationPending: false,
+            evaluationTimeout: null,
+            batchedChanges: new Set(),
+            
+            set(name, value) {
+                const oldValue = this.variables.get(name);
+                const hasChanged = oldValue !== value;
+                
+                console.log(`🌐 GLOBAL: Set variable "${name}" = "${value}" (type: ${typeof value})${hasChanged ? ' [CHANGED]' : ' [NO CHANGE]'}`);
+                this.variables.set(name, value);
+                
+                // Only trigger re-evaluation if the value actually changed
+                if (hasChanged) {
+                    this.batchedChanges.add(name);
+                    this.scheduleEvaluation();
+                    
+                    // Dispatch custom event for variable changes
+                    this.dispatchVariableChangeEvent(name, value, oldValue);
+                }
+            },
+            
+            // Method to set multiple variables at once with single evaluation
+            setMultiple(variableObject) {
+                console.log('🌐 GLOBAL: Setting multiple variables:', Object.keys(variableObject));
+                let hasAnyChanges = false;
+                
+                Object.entries(variableObject).forEach(([name, value]) => {
+                    const oldValue = this.variables.get(name);
+                    if (oldValue !== value) {
+                        this.variables.set(name, value);
+                        this.batchedChanges.add(name);
+                        hasAnyChanges = true;
+                        console.log(`🌐 GLOBAL: Batch set "${name}" = "${value}" (type: ${typeof value}) [CHANGED]`);
+                    } else {
+                        console.log(`🌐 GLOBAL: Batch set "${name}" = "${value}" (type: ${typeof value}) [NO CHANGE]`);
+                    }
+                });
+                
+                if (hasAnyChanges) {
+                    this.scheduleEvaluation();
+                }
+            },
+            
+            // Intelligent scheduling of conditional logic evaluation
+            scheduleEvaluation() {
+                if (this.evaluationPending) {
+                    // Already scheduled, just extend the timeout
+                    clearTimeout(this.evaluationTimeout);
+                } else {
+                    this.evaluationPending = true;
+                }
+                
+                this.evaluationTimeout = setTimeout(() => {
+                    this.performEvaluation();
+                }, 50); // Reduced from 100ms for better responsiveness
+            },
+            
+            // Perform the actual evaluation with batched changes
+            performEvaluation() {
+                const changedVariables = Array.from(this.batchedChanges);
+                console.log(`🔄 REACTIVE: Performing batched conditional logic evaluation for variables:`, changedVariables);
+                
+                // Reset batching state
+                this.evaluationPending = false;
+                this.batchedChanges.clear();
+                
+                // Trigger conditional logic re-evaluation
+                if (window.AppModules?.conditionalLogic) {
+                    const startTime = performance.now();
+                    window.AppModules.conditionalLogic.evaluateAllConditions();
+                    const endTime = performance.now();
+                    console.log(`🔄 REACTIVE: Conditional evaluation completed in ${(endTime - startTime).toFixed(2)}ms`);
+                }
+            },
+            
+            // Dispatch custom events for variable changes
+            dispatchVariableChangeEvent(name, newValue, oldValue) {
+                const event = new CustomEvent('variableChanged', {
+                    detail: {
+                        name,
+                        newValue,
+                        oldValue,
+                        timestamp: Date.now()
+                    }
+                });
+                document.dispatchEvent(event);
+            },
+            
+            // Add a change listener for external modules
+            addChangeListener(callback) {
+                this.changeListeners.add(callback);
+                return () => this.changeListeners.delete(callback); // Return cleanup function
+            },
+            
+            // Remove a change listener
+            removeChangeListener(callback) {
+                this.changeListeners.delete(callback);
+            },
+            
+            // Force immediate evaluation (bypass batching)
+            forceEvaluation() {
+                console.log('🔄 REACTIVE: Force evaluation requested');
+                if (this.evaluationTimeout) {
+                    clearTimeout(this.evaluationTimeout);
+                }
+                this.performEvaluation();
+            },
+            
+            get(name) {
+                const value = this.variables.get(name);
+                // Reduce logging verbosity for get operations in production
+                if (console.log.toString().indexOf('native') === -1) { // Only log in dev mode
+                    console.log(`🌐 GLOBAL: Get variable "${name}" = "${value}"`);
+                }
+                return value;
+            },
+            
+            has(name) {
+                return this.variables.has(name);
+            },
+            
+            getAll() {
+                return Object.fromEntries(this.variables);
+            },
+            
+            clear() {
+                console.log('🌐 GLOBAL: Clearing all variables');
+                this.variables.clear();
+                this.batchedChanges.clear();
+                if (this.evaluationTimeout) {
+                    clearTimeout(this.evaluationTimeout);
+                    this.evaluationPending = false;
+                }
+                
+                // Trigger evaluation after clearing
+                this.scheduleEvaluation();
+            },
+            
+            // Debug method to see all variables
+            debug() {
+                console.table(this.getAll());
+            },
+            
+            // Performance monitoring
+            getPerformanceStats() {
+                return {
+                    variableCount: this.variables.size,
+                    listenerCount: this.changeListeners.size,
+                    evaluationPending: this.evaluationPending,
+                    batchedChangesCount: this.batchedChanges.size
+                };
+            }
+        };
+        
+        // Make variables easily accessible for debugging
+        window.vars = window.FormVariables;
+        
+        // Enhanced debug utilities for DataTables
+        window.debugDataTables = () => {
+            console.log('🔍 [ENHANCED DEBUG] DataTable Debug Information:');
+            console.log('🕐 [ENHANCED DEBUG] Timestamp:', new Date().toISOString());
+            
+            // Variable system status
+            const variables = window.FormVariables?.getAll() || {};
+            console.log('📊 [ENHANCED DEBUG] FormVariables system:', {
+                available: !!window.FormVariables,
+                totalVariables: Object.keys(variables).length,
+                variables: variables
+            });
+            
+            // Enhanced variable analysis
+            const queryVariables = Object.keys(variables).filter(key => key.includes('QueryResults'));
+            const countVariables = Object.keys(variables).filter(key => key.includes('QueryCount'));
+            
+            console.log('📊 [ENHANCED DEBUG] Query-related variables:', {
+                queryResults: queryVariables,
+                queryCounts: countVariables,
+                totalQueryVars: queryVariables.length + countVariables.length
+            });
+            
+            // DataTable analysis
+            const dataTables = document.querySelectorAll('.datatable-field');
+            console.log(`📊 [ENHANCED DEBUG] Found ${dataTables.length} DataTable elements on page`);
+            
+            dataTables.forEach((element, index) => {
+                const fieldId = element.dataset.fieldId;
+                const tbody = element.querySelector('tbody');
+                const rows = tbody ? tbody.querySelectorAll('tr:not(.datatable-empty)') : [];
+                const emptyRow = tbody ? tbody.querySelector('.datatable-empty') : null;
+                
+                console.log(`📊 [ENHANCED DEBUG] DataTable ${index + 1}/${dataTables.length}:`, {
+                    fieldId: fieldId,
+                    element: element,
+                    hasTbody: !!tbody,
+                    dataRows: rows.length,
+                    hasEmptyRow: !!emptyRow,
+                    emptyText: emptyRow ? emptyRow.textContent : null
+                });
+                
+                // Try to get field configuration if fieldTypes module is available
+                if (fieldId && window.AppModules?.fieldTypes) {
+                    const field = window.AppModules.fieldTypes.findFieldById(fieldId);
+                    if (field) {
+                        const config = field.dataTableConfig || {};
+                        const data = window.AppModules.fieldTypes.getDataTableData(field);
+                        
+                        console.log(`📊 [ENHANCED DEBUG] DataTable ${fieldId} config:`, {
+                            dataSource: config.dataSource,
+                            sourceVariable: config.sourceVariable,
+                            sourcePageId: config.sourcePageId,
+                            hasStaticData: !!(config.staticData && config.staticData.length),
+                            dataLength: data ? data.length : 0,
+                            dataSample: data && data.length > 0 ? data[0] : null
+                        });
+                    } else {
+                        console.warn(`⚠️ [ENHANCED DEBUG] Could not find field for DataTable ${fieldId}`);
+                    }
+                }
+            });
+            
+            // Module status
+            console.log('🔧 [ENHANCED DEBUG] Module availability:', {
+                AppModules: !!window.AppModules,
+                fieldTypes: !!window.AppModules?.fieldTypes,
+                formViewer: !!window.AppModules?.formViewer,
+                conditionalLogic: !!window.AppModules?.conditionalLogic
+            });
+            
+            if (window.AppModules?.fieldTypes) {
+                console.log('🔄 Forcing refresh of all DataTables...');
+                window.AppModules.fieldTypes.refreshAllDataTables();
+            }
+        };
+        
+        // Enhanced refresh function with debugging
+        window.refreshDataTables = () => {
+            console.log('♻️ [REFRESH DEBUG] Starting DataTable refresh...');
+            console.log('♻️ [REFRESH DEBUG] window.AppModules:', window.AppModules);
+            console.log('♻️ [REFRESH DEBUG] window.AppModules?.fieldTypes:', window.AppModules?.fieldTypes);
+            
+            if (window.AppModules?.fieldTypes) {
+                console.log('♻️ [REFRESH DEBUG] fieldTypes module available');
+                
+                // Check if the method exists
+                if (typeof window.AppModules.fieldTypes.refreshAllDataTables === 'function') {
+                    console.log('♻️ [REFRESH DEBUG] refreshAllDataTables method found, calling it...');
+                    const result = window.AppModules.fieldTypes.refreshAllDataTables();
+                    console.log('♻️ [REFRESH DEBUG] refreshAllDataTables returned:', result);
+                    
+                    // Verify refresh worked
+                    setTimeout(() => {
+                        const dataTables = document.querySelectorAll('.datatable-field');
+                        let tablesWithData = 0;
+                        
+                        dataTables.forEach(element => {
+                            const tbody = element.querySelector('tbody');
+                            const dataRows = tbody ? tbody.querySelectorAll('tr:not(.datatable-empty)') : [];
+                            if (dataRows.length > 0) tablesWithData++;
+                        });
+                        
+                        console.log('♻️ [REFRESH DEBUG] Refresh verification:', {
+                            totalDataTables: dataTables.length,
+                            tablesWithData: tablesWithData,
+                            tablesEmpty: dataTables.length - tablesWithData
+                        });
+                    }, 100);
+                    
+                    return result;
+                } else {
+                    console.error('❌ [REFRESH DEBUG] refreshAllDataTables method not found!');
+                    console.error('❌ [REFRESH DEBUG] Available methods:', Object.getOwnPropertyNames(window.AppModules.fieldTypes));
+                    
+                    // Try manual refresh as fallback
+                    const dataTables = document.querySelectorAll('.datatable-field');
+                    console.log(`♻️ [REFRESH DEBUG] Manual fallback: Found ${dataTables.length} DataTables`);
+                    
+                    let refreshedCount = 0;
+                    dataTables.forEach((element, index) => {
+                        const fieldId = element.dataset.fieldId;
+                        console.log(`♻️ [REFRESH DEBUG] Manual refresh ${index + 1}/${dataTables.length}: fieldId=${fieldId}`);
+                        
+                        if (fieldId) {
+                            const field = window.AppModules.fieldTypes.findFieldById(fieldId);
+                            if (field && typeof window.AppModules.fieldTypes.refreshDataTable === 'function') {
+                                window.AppModules.fieldTypes.refreshDataTable(field);
+                                refreshedCount++;
+                            }
+                        }
+                    });
+                    
+                    console.log(`♻️ [REFRESH DEBUG] Manual refresh completed: ${refreshedCount} tables refreshed`);
+                    return refreshedCount;
+                }
+            } else {
+                console.error('❌ [REFRESH DEBUG] FieldTypes module not available!');
+                console.error('❌ [REFRESH DEBUG] window.AppModules structure:');
+                
+                if (window.AppModules) {
+                    Object.keys(window.AppModules).forEach(key => {
+                        console.error(`  ${key}:`, typeof window.AppModules[key], window.AppModules[key]);
+                    });
+                } else {
+                    console.error('  window.AppModules is null/undefined');
+                }
+                
+                return 0;
+            }
+        };
+        
+        // Debug function to test variable setting
+        window.testVariableSet = (varName, varValue) => {
+            console.log('🧪 [TEST DEBUG] Setting test variable:', { varName, varValue });
+            if (window.FormVariables) {
+                window.FormVariables.set(varName, varValue);
+                console.log('🧪 [TEST DEBUG] Variable set. Current variables:', window.FormVariables.getAll());
+                window.refreshDataTables();
+            } else {
+                console.error('❌ [TEST DEBUG] FormVariables not available');
+            }
+        };
+        
+        console.log('🌐 Global Variable System initialized');
+        console.log('🔧 Debug utilities: window.debugDataTables() and window.refreshDataTables()');
+    </script>
+
+    <!-- Load JavaScript Modules -->
+    <script type="module">
+        import { FormViewer } from '/js/modules/formViewer.js';
+        import { FieldTypes } from '/js/modules/fieldTypes.js';
+        import { ConditionalLogic } from '/js/modules/conditionalLogic.js';
+        import { AutoSave } from '/js/modules/autoSave.js';
+        import { Signature } from '/js/modules/signature.js';
+        import { MultiPage } from '/js/modules/multiPage.js';
+        import { FlowLogic } from '/js/modules/flowLogic.js';
+        import { SalesforceConnector } from '/js/modules/salesforceConnector.js';
+
+        // Initialize global modules object for form viewer
+        window.AppModules = {
+            formViewer: null,
+            fieldTypes: null,
+            conditionalLogic: null,
+            autoSave: null,
+            signature: null,
+            multiPage: null,
+            flowLogic: null,
+            salesforce: null
+        };
+
+        // Initialize global state for form viewer
+        window.AppState = {
+            salesforceConnected: true, // Form viewer assumes Salesforce is available for published forms
+            currentOrg: null,
+            selectedObject: null
+        };
+
+        // Initialize application
+        async function initializeFormViewer() {
+            console.log('Initializing Form Viewer...');
+            
+            // Initialize modules
+            window.AppModules.salesforce = new SalesforceConnector();
+            window.AppModules.fieldTypes = new FieldTypes();
+            window.AppModules.conditionalLogic = new ConditionalLogic();
+            window.AppModules.autoSave = new AutoSave();
+            window.AppModules.signature = new Signature();
+            window.AppModules.multiPage = new MultiPage();
+            window.AppModules.flowLogic = new FlowLogic();
+            window.AppModules.formViewer = new FormViewer();
+            
+            // Initialize all modules
+            await Promise.all([
+                window.AppModules.salesforce.initialize(),
+                window.AppModules.fieldTypes.initialize(),
+                window.AppModules.conditionalLogic.initialize(),
+                window.AppModules.autoSave.initialize(),
+                window.AppModules.signature.initialize(),
+                window.AppModules.multiPage.initialize(),
+                window.AppModules.flowLogic.initialize(),
+                window.AppModules.formViewer.initialize()
+            ]);
+            
+            console.log('Form Viewer initialized successfully');
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeFormViewer);
+        } else {
+            initializeFormViewer();
+        }
+    </script>
+</body>
+</html>

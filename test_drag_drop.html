@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag and Drop Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-container { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Drag and Drop Functionality Test</h1>
+    
+    <div class="test-container">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <script type="module">
+        // Import the DragDrop module to test its functionality
+        import { DragDrop } from './public/js/modules/dragDrop.js';
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+        
+        // Test 1: Module instantiation
+        try {
+            const dragDrop = new DragDrop();
+            log('✓ DragDrop module can be instantiated', 'success');
+        } catch (error) {
+            log('✗ Failed to instantiate DragDrop module: ' + error.message, 'error');
+        }
+        
+        // Test 2: Check required methods exist
+        const dragDrop = new DragDrop();
+        const requiredMethods = [
+            'initialize',
+            'setupContainerListeners', 
+            'handleContainerDragOver',
+            'handleContainerDrop',
+            'showContainerDropIndicator',
+            'calculateContainerDropIndex'
+        ];
+        
+        let methodsExist = true;
+        requiredMethods.forEach(method => {
+            if (typeof dragDrop[method] !== 'function') {
+                log(`✗ Missing required method: ${method}`, 'error');
+                methodsExist = false;
+            }
+        });
+        
+        if (methodsExist) {
+            log('✓ All required container drag/drop methods exist', 'success');
+        }
+        
+        // Test 3: Check initialization
+        try {
+            dragDrop.setupDropIndicator();
+            if (dragDrop.dropIndicator && dragDrop.dropIndicator.classList.contains('drop-indicator')) {
+                log('✓ Drop indicator setup works correctly', 'success');
+            } else {
+                log('✗ Drop indicator not properly initialized', 'error');
+            }
+        } catch (error) {
+            log('✗ Drop indicator setup failed: ' + error.message, 'error');
+        }
+        
+        log('Test completed. Check console for any additional details.', 'info');
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Column Drag Drop Test</title>
+    <style>
+        .test-container { margin: 20px; padding: 20px; border: 1px solid #ccc; }
+        .column-dropzone { 
+            min-height: 100px; 
+            padding: 10px; 
+            margin: 10px; 
+            border: 2px dashed #ccc; 
+            background: #f9f9f9;
+        }
+        .column-dropzone.container-drag-over {
+            border-color: #007bff;
+            background: #e7f3ff;
+        }
+        .draggable-item {
+            padding: 10px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            cursor: move;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h3>Test Column Drag Drop</h3>
+        
+        <!-- Draggable items -->
+        <div class="draggable-item" draggable="true" data-field-type="text">Text Field</div>
+        <div class="draggable-item" draggable="true" data-field-type="email">Email Field</div>
+        
+        <!-- Column dropzones (mimicking the structure from fieldTypes.js) -->
+        <div class="columns-container" data-columns-id="test-columns">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="column-dropzone" 
+                     data-column-index="0" 
+                     data-columns-id="test-columns">
+                    <div class="empty-column">Column 1</div>
+                </div>
+                <div class="column-dropzone" 
+                     data-column-index="1" 
+                     data-columns-id="test-columns">
+                    <div class="empty-column">Column 2</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test drag and drop functionality
+        let draggedItem = null;
+        
+        // Setup draggable items
+        document.querySelectorAll('.draggable-item').forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                draggedItem = this;
+                console.log('Drag start:', this.dataset.fieldType);
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+        });
+        
+        // Setup column dropzones
+        document.querySelectorAll('.column-dropzone[data-column-index]').forEach(column => {
+            console.log('Setting up column:', column.dataset.columnIndex);
+            
+            column.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                console.log('Column drag over:', this.dataset.columnIndex);
+                this.classList.add('container-drag-over');
+            });
+            
+            column.addEventListener('dragleave', function(e) {
+                console.log('Column drag leave:', this.dataset.columnIndex);
+                this.classList.remove('container-drag-over');
+            });
+            
+            column.addEventListener('drop', function(e) {
+                e.preventDefault();
+                console.log('Column drop:', this.dataset.columnIndex, draggedItem?.dataset.fieldType);
+                this.classList.remove('container-drag-over');
+                
+                if (draggedItem) {
+                    const fieldType = draggedItem.dataset.fieldType;
+                    this.innerHTML = `<div style="padding: 5px; background: #28a745; color: white;">Dropped: ${fieldType}</div>`;
+                }
+            });
+        });
+        
+        console.log('Column drag drop test initialized');
+        console.log('Found columns:', document.querySelectorAll('.column-dropzone[data-column-index]').length);
+    </script>
+</body>
+</html>

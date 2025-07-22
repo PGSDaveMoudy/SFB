@@ -1,0 +1,11 @@
+{
+  "queueId": "79ef3650686b20f44e1d80c8a63e31f2",
+  "deliveredAt": "2025-07-20T22:47:55.640Z",
+  "recipients": [
+    {
+      "address": "davemoudy@gmail.com",
+      "name": ""
+    }
+  ],
+  "retries": 0
+}

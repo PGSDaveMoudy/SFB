@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Org Manager - Form Builder</title>
+    <link rel="stylesheet" href="styles-notion.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Org Manager Specific Styles */
+        body {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--purple-50) 100%);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            color: var(--gray-900);
+            height: auto !important;
+            overflow: auto !important;
+            min-height: 100vh;
+        }
+        
+        .org-manager-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-8);
+        }
+        
+        .org-header {
+            text-align: center;
+            margin-bottom: var(--space-12);
+            padding: var(--space-8);
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .org-title {
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-4);
+        }
+        
+        .org-subtitle {
+            font-size: 1.25rem;
+            color: var(--gray-600);
+            margin-bottom: var(--space-6);
+        }
+        
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+        }
+        
+        .nav-link {
+            color: var(--purple-600);
+            text-decoration: none;
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-md);
+            background: var(--purple-50);
+            border: 1px solid var(--purple-200);
+            font-weight: 500;
+            transition: all var(--duration-fast);
+        }
+        
+        .nav-link:hover {
+            background: var(--purple-100);
+            border-color: var(--purple-300);
+            transform: translateY(-1px);
+        }
+        
+        .org-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+        
+        .action-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            transition: all var(--duration-fast);
+        }
+        
+        .action-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .action-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-3);
+            color: var(--gray-900);
+        }
+        
+        .action-card p {
+            color: var(--gray-600);
+            margin-bottom: var(--space-4);
+        }
+        
+        .org-list {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .org-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--gray-100);
+            transition: background-color var(--duration-fast);
+        }
+        
+        .org-item:last-child {
+            border-bottom: none;
+        }
+        
+        .org-item:hover {
+            background: var(--gray-50);
+        }
+        
+        .org-info {
+            flex: 1;
+        }
+        
+        .org-name {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-1);
+        }
+        
+        .org-details {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        .org-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-left: var(--space-4);
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gray-300);
+        }
+        
+        .status-indicator.connected {
+            background: var(--success);
+        }
+        
+        .org-actions-buttons {
+            display: flex;
+            gap: var(--space-2);
+            margin-left: var(--space-4);
+        }
+        
+        .button-danger {
+            background: #dc2626;
+            color: white;
+            padding: var(--space-2) var(--space-3);
+            min-width: auto;
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all var(--transition-base);
+        }
+        
+        .button-danger:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-2xl);
+        }
+        
+        .modal-header {
+            margin-bottom: var(--space-6);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--space-2);
+        }
+        
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: var(--space-2);
+            color: var(--gray-700);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: var(--space-3);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            transition: border-color var(--duration-fast);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--purple-500);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+        
+        .form-help {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: var(--space-1);
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: var(--space-3);
+            justify-content: flex-end;
+            margin-top: var(--space-6);
+        }
+        
+        .error-message {
+            background: var(--error);
+            color: white;
+            padding: var(--space-3);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-4);
+            display: none;
+        }
+        
+        .success-message {
+            background: var(--success);
+            color: white;
+            padding: var(--space-3);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-4);
+            display: none;
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .setup-guide {
+            background: var(--purple-50);
+            border: 1px solid var(--purple-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+        
+        .setup-guide h4 {
+            color: var(--purple-800);
+            margin-bottom: var(--space-2);
+        }
+        
+        .setup-guide ol {
+            color: var(--purple-700);
+            padding-left: var(--space-4);
+        }
+        
+        .setup-guide li {
+            margin-bottom: var(--space-1);
+        }
+        
+        @media (max-width: 768px) {
+            .org-manager-container {
+                padding: var(--space-4);
+            }
+            
+            .org-title {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .org-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .org-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-3);
+            }
+            
+            .org-status,
+            .org-actions-buttons {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="org-manager-container">
+        <!-- Header -->
+        <div class="org-header">
+            <h1 class="org-title">Salesforce Org Manager</h1>
+            <p class="org-subtitle">Connect multiple Salesforce organizations to your form builder</p>
+            <div class="nav-links">
+                <a href="/" class="nav-link">🏠 Form Builder</a>
+                <a href="./developer.html" class="nav-link">🛠️ Developer Guide</a>
+                <a href="./help.html" class="nav-link">❓ Help Center</a>
+            </div>
+        </div>
+
+        <!-- Action Cards -->
+        <div class="org-actions">
+            <div class="action-card">
+                <h3>🔗 Register New Org</h3>
+                <p>Add a new Salesforce organization by providing your Connected App credentials.</p>
+                <button class="button button-primary" onclick="openRegisterModal()">
+                    Register Organization
+                </button>
+            </div>
+            
+            <div class="action-card">
+                <h3>📊 View Analytics</h3>
+                <p>Access form submission analytics and performance metrics across all your orgs.</p>
+                <button class="button button-secondary" onclick="viewAnalytics()">
+                    View Analytics
+                </button>
+            </div>
+        </div>
+
+        <!-- Organization List -->
+        <div class="org-list">
+            <h2 style="margin-bottom: var(--space-4);">Your Organizations</h2>
+            <div id="orgList">
+                <div class="org-item" style="text-align: center; padding: var(--space-8); color: var(--gray-500);">
+                    <div>Loading organizations...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Org Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Register Salesforce Organization</h2>
+                <p>Add a new Salesforce org to use with the form builder.</p>
+            </div>
+            
+            <div class="setup-guide">
+                <h4>📋 Setup Required:</h4>
+                <ol>
+                    <li>Login to your Salesforce org</li>
+                    <li>Go to Setup → App Manager</li>
+                    <li>Create or edit a Connected App</li>
+                    <li>Set Callback URL: <code>https://www.portwoodglobalsolutions.com/oauth/callback</code></li>
+                    <li>Enable OAuth Settings and PKCE</li>
+                    <li>Copy Consumer Key and Secret below</li>
+                </ol>
+            </div>
+
+            <div id="registerError" class="error-message"></div>
+            <div id="registerSuccess" class="success-message"></div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="orgName">Organization Name *</label>
+                    <input type="text" id="orgName" name="orgName" required placeholder="My Salesforce Org">
+                    <div class="form-help">A friendly name to identify this organization</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="environment">Environment *</label>
+                    <select id="environment" name="environment" required>
+                        <option value="production">Production</option>
+                        <option value="sandbox">Sandbox</option>
+                    </select>
+                    <div class="form-help">Select production for live orgs, sandbox for testing</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="clientId">Consumer Key (Client ID) *</label>
+                    <input type="text" id="clientId" name="clientId" required placeholder="3MVG9...">
+                    <div class="form-help">From your Connected App in Salesforce Setup</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="clientSecret">Consumer Secret (Client Secret) *</label>
+                    <input type="password" id="clientSecret" name="clientSecret" required placeholder="A1B2C3...">
+                    <div class="form-help">Keep this secure - it will be encrypted in our database</div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="button button-secondary" onclick="closeRegisterModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="button button-primary">
+                        Test & Register
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let organizations = [];
+        let currentUser = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadOrganizations();
+            await checkCurrentUser();
+        });
+
+        // Load organizations
+        async function loadOrganizations() {
+            try {
+                const response = await fetch('/api/orgs');
+                const data = await response.json();
+                
+                if (data.success) {
+                    organizations = data.availableOrgs || [];
+                    renderOrganizations();
+                } else {
+                    showError('Failed to load organizations');
+                }
+            } catch (error) {
+                console.error('Error loading organizations:', error);
+                showError('Failed to load organizations');
+            }
+        }
+
+        // Check current user connection
+        async function checkCurrentUser() {
+            try {
+                const response = await fetch('/api/orgs/current');
+                const data = await response.json();
+                
+                if (data.connected) {
+                    currentUser = data;
+                }
+            } catch (error) {
+                console.error('Error checking current user:', error);
+            }
+        }
+
+        // Render organizations list
+        function renderOrganizations() {
+            const orgList = document.getElementById('orgList');
+            
+            if (!organizations || organizations.length === 0) {
+                orgList.innerHTML = `
+                    <div class="org-item" style="text-align: center; padding: var(--space-8); color: var(--gray-500);">
+                        <div>
+                            <h3>No organizations registered</h3>
+                            <p>Click "Register Organization" to add your first Salesforce org.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = organizations.map(org => `
+                <div class="org-item">
+                    <div class="org-info">
+                        <div class="org-name">${escapeHtml(org.name)}</div>
+                        <div class="org-details">
+                            ${org.environment === 'sandbox' ? '🧪 Sandbox' : '🏢 Production'} • 
+                            ${org.lastConnectedAt ? 
+                                `Last connected: ${new Date(org.lastConnectedAt).toLocaleDateString()}` : 
+                                'Never connected'
+                            }
+                        </div>
+                    </div>
+                    <div class="org-status">
+                        <span class="status-indicator ${currentUser?.org?.id === org.id ? 'connected' : ''}"></span>
+                        <span>${currentUser?.org?.id === org.id ? 'Connected' : 'Disconnected'}</span>
+                    </div>
+                    <div class="org-actions-buttons">
+                        ${currentUser?.org?.id === org.id ? 
+                            `<button class="button button-secondary" onclick="disconnectOrg()">Disconnect</button>` :
+                            `<button class="button button-primary" onclick="connectToOrg('${org.id}')">Connect</button>`
+                        }
+                        <button class="button button-danger" onclick="deleteOrg('${org.id}', '${escapeHtml(org.name)}')" title="Delete organization">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            orgList.innerHTML = html;
+        }
+
+        // Modal functions
+        function openRegisterModal() {
+            document.getElementById('registerModal').classList.add('active');
+            document.getElementById('registerForm').reset();
+            hideMessages();
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('registerModal').classList.remove('active');
+        }
+
+        // Register organization
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const orgData = {
+                name: formData.get('orgName'),
+                environment: formData.get('environment'),
+                clientId: formData.get('clientId'),
+                clientSecret: formData.get('clientSecret')
+            };
+
+            try {
+                // Show loading state
+                e.target.classList.add('loading');
+                hideMessages();
+
+                const response = await fetch('/api/orgs/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orgData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showSuccess('Organization registered successfully!');
+                    setTimeout(() => {
+                        closeRegisterModal();
+                        loadOrganizations(); // Refresh the list
+                    }, 2000);
+                } else {
+                    showError(result.error || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showError('Registration failed. Please try again.');
+            } finally {
+                e.target.classList.remove('loading');
+            }
+        });
+
+        // Connect to organization
+        async function connectToOrg(orgId) {
+            try {
+                const response = await fetch(`/api/orgs/${orgId}/auth-url`);
+                const data = await response.json();
+                
+                if (data.authUrl) {
+                    // Redirect to Salesforce OAuth
+                    window.location.href = data.authUrl;
+                } else {
+                    showError('Failed to generate authorization URL');
+                }
+            } catch (error) {
+                console.error('Connect error:', error);
+                showError('Failed to connect to organization');
+            }
+        }
+
+        // Disconnect from current org
+        async function disconnectOrg() {
+            try {
+                const response = await fetch('/api/orgs/disconnect', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    currentUser = null;
+                    renderOrganizations();
+                    showSuccess('Disconnected successfully');
+                } else {
+                    showError('Failed to disconnect');
+                }
+            } catch (error) {
+                console.error('Disconnect error:', error);
+                showError('Failed to disconnect');
+            }
+        }
+        
+        // Delete an organization
+        async function deleteOrg(orgId, orgName) {
+            // Show confirmation dialog
+            if (!confirm(`Are you sure you want to delete "${orgName}"?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/orgs/${orgId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // If we were connected to the deleted org, clear current user
+                    if (result.disconnected) {
+                        currentUser = null;
+                    }
+                    
+                    // Reload organizations list
+                    await loadOrganizations();
+                    showSuccess(result.message || 'Organization deleted successfully');
+                } else {
+                    showError(result.error || 'Failed to delete organization');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                showError('Failed to delete organization');
+            }
+        }
+
+        // View analytics
+        function viewAnalytics() {
+            if (currentUser && currentUser.connected) {
+                window.location.href = '/#analytics';
+            } else {
+                alert('Please connect to an organization first to view analytics.');
+            }
+        }
+
+        // Utility functions
+        function showError(message) {
+            const errorDiv = document.getElementById('registerError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('registerSuccess');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+        }
+
+        function hideMessages() {
+            document.getElementById('registerError').style.display = 'none';
+            document.getElementById('registerSuccess').style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Handle OAuth callback success
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('connected') === 'true') {
+            setTimeout(() => {
+                checkCurrentUser().then(() => {
+                    renderOrganizations();
+                    // Show success message
+                    const successMsg = document.createElement('div');
+                    successMsg.className = 'success-message';
+                    successMsg.textContent = 'Successfully connected to Salesforce organization!';
+                    successMsg.style.display = 'block';
+                    successMsg.style.position = 'fixed';
+                    successMsg.style.top = '20px';
+                    successMsg.style.right = '20px';
+                    successMsg.style.zIndex = '9999';
+                    document.body.appendChild(successMsg);
+                    
+                    setTimeout(() => {
+                        successMsg.remove();
+                    }, 5000);
+                });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

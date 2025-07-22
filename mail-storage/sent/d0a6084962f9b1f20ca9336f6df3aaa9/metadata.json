@@ -1,0 +1,28 @@
+{
+  "id": "d0a6084962f9b1f20ca9336f6df3aaa9",
+  "timestamp": "2025-07-20T22:47:54.638Z",
+  "session": {
+    "user": "anonymous",
+    "remoteAddress": "159.198.64.152",
+    "hostName": "server1.portwoodglobalsolutions.com"
+  },
+  "from": [
+    {
+      "address": "noreply@portwoodglobalsolutions.com",
+      "name": "Portwood Global Solutions"
+    }
+  ],
+  "to": [
+    {
+      "address": "davemoudy@gmail.com",
+      "name": ""
+    }
+  ],
+  "cc": [],
+  "bcc": [],
+  "subject": "Your Login Verification Code - Portwood Global Solutions",
+  "messageId": "<f0311a09-a638-8f14-b92d-05a47e3a59db@portwoodglobalsolutions.com>",
+  "date": "2025-07-20T22:47:53.000Z",
+  "size": 0,
+  "attachments": []
+}

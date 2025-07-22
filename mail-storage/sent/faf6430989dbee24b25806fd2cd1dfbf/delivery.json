@@ -1,0 +1,11 @@
+{
+  "queueId": "f3ee9fa1d8fbb78c49fabf494090d255",
+  "deliveredAt": "2025-07-20T22:36:23.934Z",
+  "recipients": [
+    {
+      "address": "test@example.com",
+      "name": ""
+    }
+  ],
+  "retries": 0
+}

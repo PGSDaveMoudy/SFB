@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Field Test</title>
+</head>
+<body>
+    <h1>Email Field Test</h1>
+    
+    <p>This test verifies that regular email fields don't make API calls.</p>
+    
+    <form>
+        <div class="form-field-container">
+            <label for="regularEmail">Regular Email Field:</label>
+            <input 
+                type="email" 
+                id="regularEmail"
+                name="regularEmail"
+                placeholder="test@example.com" 
+                class="form-input"
+                data-field-type="email"
+            >
+            <p><em>This should be a simple input with no API calls</em></p>
+        </div>
+        
+        <div class="form-field-container">
+            <label for="verifyEmail">Email-Verify Field:</label>
+            <div class="email-verify-field" data-field-type="email-verify" data-field-id="verifyEmail">
+                <input 
+                    type="email" 
+                    id="verifyEmail"
+                    name="verifyEmail"
+                    placeholder="test@example.com" 
+                    class="form-input verify-email-input"
+                    data-field-id="verifyEmail"
+                >
+                <button type="button" class="verify-btn" data-field-id="verifyEmail">
+                    Verify Email
+                </button>
+            </div>
+            <p><em>This should only make API calls when the button is clicked</em></p>
+        </div>
+    </form>
+
+    <script>
+        // Mock the FlowLogic module to verify no API calls are made
+        console.log('Test initialized - watch console for any unexpected API calls');
+        
+        // Monitor fetch calls
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            console.log('API call intercepted:', args[0]);
+            if (args[0].includes('contact-lookup') || args[0].includes('send-otp')) {
+                console.warn('❌ Unexpected API call from email field:', args[0]);
+            } else {
+                console.log('✅ Expected API call:', args[0]);
+            }
+            return originalFetch.apply(this, args);
+        };
+        
+        // Test regular email field
+        document.getElementById('regularEmail').addEventListener('input', function(e) {
+            console.log('Regular email field changed to:', e.target.value);
+            console.log('✅ No API calls should be made from this field');
+        });
+        
+        // Test email-verify field
+        document.getElementById('verifyEmail').addEventListener('input', function(e) {
+            console.log('Email-verify field changed to:', e.target.value);
+            console.log('✅ No API calls should be made on input - only on button click');
+        });
+        
+        document.querySelector('.verify-btn').addEventListener('click', function() {
+            console.log('Email-verify button clicked');
+            console.log('✅ API calls are expected when this button is clicked');
+        });
+    </script>
+</body>
+</html>

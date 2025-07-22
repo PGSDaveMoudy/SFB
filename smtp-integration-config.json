@@ -1,0 +1,9 @@
+{
+  "autoStart": true,
+  "port": 2525,
+  "hostname": "localhost",
+  "credentials": {
+    "username": "sfb-mailer",
+    "password": "sfb-smtp-2025"
+  }
+}

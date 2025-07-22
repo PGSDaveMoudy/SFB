@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Form Builder - Developer Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .nav {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+        }
+        
+        .nav h3 {
+            margin-bottom: 15px;
+            color: #6b73ff;
+        }
+        
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .nav-item {
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .nav-item:hover {
+            background: #6b73ff;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .module {
+            background: white;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .module-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+        }
+        
+        .module-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .module-header p {
+            opacity: 0.9;
+        }
+        
+        .module-content {
+            padding: 30px;
+        }
+        
+        .function-category {
+            margin-bottom: 40px;
+        }
+        
+        .function-category h3 {
+            color: #6b73ff;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            font-size: 1.4rem;
+        }
+        
+        .function {
+            background: #f8f9fa;
+            border-left: 4px solid #6b73ff;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .function:hover {
+            background: #f0f3ff;
+            transform: translateX(5px);
+        }
+        
+        .function-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        .function-location {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        .function-description {
+            color: #34495e;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        .function-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .function-detail {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .function-detail h5 {
+            color: #6b73ff;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .function-detail p {
+            font-size: 0.85rem;
+            color: #666;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        .search-container {
+            margin-bottom: 30px;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #6b73ff;
+            box-shadow: 0 0 0 3px rgba(107, 115, 255, 0.1);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat {
+            background: white;
+            padding: 25px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #6b73ff;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #6b73ff;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 20px rgba(107, 115, 255, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .back-to-top:hover {
+            background: #5a64f0;
+            transform: translateY(-3px);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .function-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Salesforce Form Builder</h1>
+            <p>Complete Developer Documentation & Function Library</p>
+        </div>
+
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="🔍 Search functions, modules, or descriptions..." id="searchBox">
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">300+</div>
+                <div class="stat-label">Total Functions</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">13</div>
+                <div class="stat-label">JavaScript Modules</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">15+</div>
+                <div class="stat-label">Field Types</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">50+</div>
+                <div class="stat-label">API Endpoints</div>
+            </div>
+        </div>
+
+        <nav class="nav">
+            <h3>📚 Quick Navigation</h3>
+            <div class="nav-grid">
+                <a href="#main" class="nav-item">Main Application</a>
+                <a href="#formBuilder" class="nav-item">Form Builder</a>
+                <a href="#fieldTypes" class="nav-item">Field Types</a>
+                <a href="#dragDrop" class="nav-item">Drag & Drop</a>
+                <a href="#formStorage" class="nav-item">Form Storage</a>
+                <a href="#conditionalLogic" class="nav-item">Conditional Logic</a>
+                <a href="#salesforceConnector" class="nav-item">Salesforce Connector</a>
+                <a href="#autoSave" class="nav-item">Auto Save</a>
+                <a href="#signature" class="nav-item">Signature</a>
+                <a href="#multiPage" class="nav-item">Multi Page</a>
+                <a href="#flowLogic" class="nav-item">Flow Logic</a>
+                <a href="#mobile" class="nav-item">Mobile</a>
+                <a href="#formViewer" class="nav-item">Form Viewer</a>
+            </div>
+        </nav>
+
+        <!-- Main Application Module -->
+        <div class="module" id="main">
+            <div class="module-header">
+                <h2>📱 Main Application Module</h2>
+                <p>Core application initialization, global state management, and multi-org functionality</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>🚀 Core Initialization Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">initializeApp()</div>
+                        <div class="function-location">main.js:58</div>
+                        <div class="function-description">Primary entry point that initializes all modules, sets up global state, and prepares the application for use.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;void&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Module initialization, event setup, state initialization</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">setupGlobalEventListeners()</div>
+                        <div class="function-location">main.js:93</div>
+                        <div class="function-description">Sets up document-level event handlers for form interactions, keyboard shortcuts, and global actions.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>void</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Event binding, shortcut setup, global handlers</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">connectToSalesforce()</div>
+                        <div class="function-location">main.js:145</div>
+                        <div class="function-description">Initiates Salesforce OAuth connection flow and handles authentication process.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;Object&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>OAuth flow, token management, connection validation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-category">
+                    <h3>🌐 Global State Management</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">updateAppState(key, value)</div>
+                        <div class="function-location">main.js:210</div>
+                        <div class="function-description">Updates global application state variables with validation and change notifications.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>key: string, value: any</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>boolean</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>State validation, change tracking, event dispatch</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">getAppState(key)</div>
+                        <div class="function-location">main.js:220</div>
+                        <div class="function-description">Retrieves values from global application state with fallback support.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>key: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>any</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>State retrieval, fallback handling, type validation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-category">
+                    <h3>🏢 Multi-Org Management</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">registerOrganization(orgData)</div>
+                        <div class="function-location">main.js:285</div>
+                        <div class="function-description">Registers new Salesforce organization with encrypted credential storage.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>orgData: Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;Object&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Credential encryption, database storage, validation</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">switchOrganization(orgId)</div>
+                        <div class="function-location">main.js:305</div>
+                        <div class="function-description">Switches between different Salesforce organizations with session management.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>orgId: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;boolean&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Session switching, credential loading, UI updates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Builder Module -->
+        <div class="module" id="formBuilder">
+            <div class="module-header">
+                <h2>🏗️ Form Builder Module</h2>
+                <p>Core form building functionality, field management, and property configuration</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>🎨 Core Form Building Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">newForm()</div>
+                        <div class="function-location">formBuilder.js:45</div>
+                        <div class="function-description">Creates a new blank form with default structure, settings, and initial page.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Form structure creation, default settings, page initialization</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">loadForm(formId)</div>
+                        <div class="function-location">formBuilder.js:75</div>
+                        <div class="function-description">Loads existing form data for editing with validation and error handling.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>formId: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;Object&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Data loading, validation, UI updates, error handling</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">renderFormCanvas()</div>
+                        <div class="function-location">formBuilder.js:109</div>
+                        <div class="function-description">Renders the main form canvas with all fields, containers, and interactive elements.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>void</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>DOM rendering, event binding, layout calculation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-category">
+                    <h3>🔧 Field Management Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">addField(fieldType, targetIndex)</div>
+                        <div class="function-location">formBuilder.js:311</div>
+                        <div class="function-description">Adds new field to current page with type-specific configuration and validation.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>fieldType: string, targetIndex: number</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Field creation, configuration setup, DOM insertion</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">updateField(fieldId, updates)</div>
+                        <div class="function-location">formBuilder.js:500</div>
+                        <div class="function-description">Updates field properties with validation and automatic re-rendering.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>fieldId: string, updates: Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>boolean</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Property validation, field updates, re-rendering</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">deleteField(fieldId)</div>
+                        <div class="function-location">formBuilder.js:515</div>
+                        <div class="function-description">Removes field from form with cascade deletion and reference cleanup.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>fieldId: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>boolean</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Field removal, reference cleanup, UI updates</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">findFieldById(fieldId, fields)</div>
+                        <div class="function-location">formBuilder.js:846</div>
+                        <div class="function-description">Recursively searches for field in nested structures including sections and columns.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>fieldId: string, fields: Array</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Object|null</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Recursive search, nested structure traversal</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-category">
+                    <h3>📦 Container Management Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">addFieldToContainer(fieldType, containerId, containerType, targetIndex)</div>
+                        <div class="function-location">formBuilder.js:553</div>
+                        <div class="function-description">Adds field to section or column container with proper nesting and indexing.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>fieldType: string, containerId: string, containerType: string, targetIndex: number</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Container validation, field creation, nested insertion</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">moveFieldToContainer(fieldId, containerId, containerType, targetIndex)</div>
+                        <div class="function-location">formBuilder.js:616</div>
+                        <div class="function-description">Moves existing field between containers with reference updates and validation.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>fieldId: string, containerId: string, containerType: string, targetIndex: number</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>boolean</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Field extraction, container validation, reference updates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Field Types Module -->
+        <div class="module" id="fieldTypes">
+            <div class="module-header">
+                <h2>🎯 Field Types Module</h2>
+                <p>Comprehensive field rendering system supporting 15+ field types with advanced configurations</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>🎨 Core Rendering Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">renderField(field, mode)</div>
+                        <div class="function-location">fieldTypes.js:45</div>
+                        <div class="function-description">Main field rendering function that delegates to type-specific renderers based on field configuration.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>field: Object, mode: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>string (HTML)</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Type detection, renderer delegation, HTML generation</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">renderColumnsField(field)</div>
+                        <div class="function-location">fieldTypes.js:2980</div>
+                        <div class="function-description">Renders column layout containers with configurable grid system and nested field support.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>field: Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>string (HTML)</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Grid layout, nested rendering, responsive design</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">renderNestedField(field)</div>
+                        <div class="function-location">fieldTypes.js:3056</div>
+                        <div class="function-description">Renders fields within containers with proper event handling and styling.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>field: Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>string (HTML)</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Nested rendering, event binding, container styling</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-category">
+                    <h3>📝 Basic Field Renderers</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">renderTextField(field, mode)</div>
+                        <div class="function-location">fieldTypes.js:125</div>
+                        <div class="function-description">Renders text input fields with validation, placeholder, and accessibility features.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>field: Object, mode: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>string (HTML)</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Input rendering, validation setup, accessibility</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">renderSelectField(field, mode)</div>
+                        <div class="function-location">fieldTypes.js:205</div>
+                        <div class="function-description">Renders dropdown fields with Salesforce picklist integration and custom options.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>field: Object, mode: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>string (HTML)</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Option rendering, picklist integration, selection handling</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">renderLookupField(field, mode)</div>
+                        <div class="function-location">fieldTypes.js:545</div>
+                        <div class="function-description">Renders Salesforce lookup fields with search, filtering, and relationship support.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>field: Object, mode: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>string (HTML)</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Search interface, filtering, relationship handling</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-category">
+                    <h3>🔧 Advanced Field Renderers</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">renderSignatureField(field, mode)</div>
+                        <div class="function-location">fieldTypes.js:885</div>
+                        <div class="function-description">Renders e-signature fields with canvas drawing, legal compliance, and audit trails.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>field: Object, mode: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>string (HTML)</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Canvas setup, legal compliance, audit trails</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">renderFileField(field, mode)</div>
+                        <div class="function-location">fieldTypes.js:785</div>
+                        <div class="function-description">Renders file upload fields with drag-and-drop, validation, and Salesforce integration.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>field: Object, mode: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>string (HTML)</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Upload interface, validation, Salesforce integration</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">renderRichTextField(field, mode)</div>
+                        <div class="function-location">fieldTypes.js:685</div>
+                        <div class="function-description">Renders rich text editor with Quill.js integration, formatting tools, and media support.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>field: Object, mode: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>string (HTML)</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Editor initialization, toolbar setup, content handling</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drag & Drop Module -->
+        <div class="module" id="dragDrop">
+            <div class="module-header">
+                <h2>🎯 Drag & Drop Module</h2>
+                <p>Advanced drag and drop system with touch support, field reordering, and container management</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>🎯 Core Drag & Drop Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">setupFieldPalette()</div>
+                        <div class="function-location">dragDrop.js:45</div>
+                        <div class="function-description">Configures field palette for dragging with visual feedback and type identification.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>void</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Event binding, visual feedback, type tracking</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">handleContainerDrop(e)</div>
+                        <div class="function-location">dragDrop.js:325</div>
+                        <div class="function-description">Handles dropping fields into containers with validation and positioning.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>e: DragEvent</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>boolean</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Container validation, position calculation, field insertion</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">setupContainerListeners()</div>
+                        <div class="function-location">dragDrop.js:114</div>
+                        <div class="function-description">Sets up drag and drop listeners for section and column containers.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>void</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Container detection, listener setup, event delegation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-category">
+                    <h3>📱 Touch/Mobile Support</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">setupTouchEvents()</div>
+                        <div class="function-location">dragDrop.js:725</div>
+                        <div class="function-description">Sets up touch event handlers for mobile drag and drop functionality.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>void</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Touch detection, gesture recognition, mobile optimization</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">handleTouchMove(e)</div>
+                        <div class="function-location">dragDrop.js:805</div>
+                        <div class="function-description">Handles touch move events for mobile drag operations with visual feedback.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>e: TouchEvent</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>void</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Position tracking, visual feedback, collision detection</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-category">
+                    <h3>🔄 Field Reordering Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">handleFieldReorder(fieldId, newIndex)</div>
+                        <div class="function-location">dragDrop.js:565</div>
+                        <div class="function-description">Handles field position changes within pages with animation and validation.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>fieldId: string, newIndex: number</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>boolean</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Position validation, animation, order updates</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">showDropIndicator(container, index)</div>
+                        <div class="function-location">dragDrop.js:645</div>
+                        <div class="function-description">Shows visual drop indicator at calculated position during drag operations.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>container: Element, index: number</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>void</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Visual feedback, position calculation, UI updates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Continue with remaining modules... -->
+        <!-- For brevity, I'll include a few more key modules -->
+
+        <!-- Form Storage Module -->
+        <div class="module" id="formStorage">
+            <div class="module-header">
+                <h2>💾 Form Storage Module</h2>
+                <p>Comprehensive form persistence, submission management, and data export capabilities</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>💾 Core Storage Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">saveForm(formData)</div>
+                        <div class="function-location">formStorage.js:47</div>
+                        <div class="function-description">Saves form to database with validation, encryption, and version control.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>formData: Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;Object&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Data validation, encryption, database storage</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">publishForm(formId, publishSettings)</div>
+                        <div class="function-location">formStorage.js:196</div>
+                        <div class="function-description">Publishes form for public access with date range controls and settings.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>formId: string, publishSettings: Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;Object&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>URL generation, settings validation, publication</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">exportForm(formId)</div>
+                        <div class="function-location">formStorage.js:239</div>
+                        <div class="function-description">Exports form configuration as downloadable JSON file with metadata.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>formId: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;boolean&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Data export, file generation, download trigger</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conditional Logic Module -->
+        <div class="module" id="conditionalLogic">
+            <div class="module-header">
+                <h2>🔀 Conditional Logic Module</h2>
+                <p>Advanced conditional visibility system with variable support and complex logic evaluation</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>🧠 Core Logic Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">evaluateAllConditions()</div>
+                        <div class="function-location">conditionalLogic.js:85</div>
+                        <div class="function-description">Evaluates all form conditions and updates field visibility in real-time.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>void</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Condition evaluation, visibility updates, cascade handling</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">evaluateCondition(condition, formData)</div>
+                        <div class="function-location">conditionalLogic.js:525</div>
+                        <div class="function-description">Evaluates single condition against form data with operator support.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>condition: Object, formData: Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>boolean</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Value comparison, operator handling, result calculation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salesforce Connector Module -->
+        <div class="module" id="salesforceConnector">
+            <div class="module-header">
+                <h2>☁️ Salesforce Connector Module</h2>
+                <p>Complete Salesforce integration with OAuth, CRUD operations, and metadata access</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>🔐 Connection Management</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">connectWithOAuth()</div>
+                        <div class="function-location">salesforceConnector.js:45</div>
+                        <div class="function-description">Initiates Salesforce OAuth connection flow with PKCE security.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;Object&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>OAuth flow, PKCE generation, token exchange</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="function">
+                        <div class="function-name">createRecord(objectName, recordData)</div>
+                        <div class="function-location">salesforceConnector.js:365</div>
+                        <div class="function-description">Creates new Salesforce record with validation and error handling.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>objectName: string, recordData: Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;Object&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Data validation, API call, error handling</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Continue with remaining modules... -->
+        
+        <!-- Auto Save Module -->
+        <div class="module" id="autoSave">
+            <div class="module-header">
+                <h2>💾 Auto Save Module</h2>
+                <p>Intelligent auto-save system with crash recovery and progress preservation</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>⏰ Auto-Save Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">scheduleAutoSave()</div>
+                        <div class="function-location">autoSave.js:45</div>
+                        <div class="function-description">Schedules auto-save with intelligent debounce to prevent server overload.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>void</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Debounce handling, schedule management, timing optimization</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signature Module -->
+        <div class="module" id="signature">
+            <div class="module-header">
+                <h2>✍️ Signature Module</h2>
+                <p>Enterprise-grade e-signature system with legal compliance and audit trails</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>✏️ Signature Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">initializeSignaturePad(fieldId, config)</div>
+                        <div class="function-location">signature.js:45</div>
+                        <div class="function-description">Sets up signature canvas with touch support and legal compliance features.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>fieldId: string, config: Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Object</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Canvas setup, touch handling, legal compliance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi Page Module -->
+        <div class="module" id="multiPage">
+            <div class="module-header">
+                <h2>📄 Multi Page Module</h2>
+                <p>Advanced multi-page navigation with conditional flow and repeat functionality</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>🧭 Navigation Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">nextPage()</div>
+                        <div class="function-location">multiPage.js:45</div>
+                        <div class="function-description">Navigates to next page with validation and conditional flow support.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;boolean&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Validation, conditional flow, page transition</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flow Logic Module -->
+        <div class="module" id="flowLogic">
+            <div class="module-header">
+                <h2>🌊 Flow Logic Module</h2>
+                <p>Advanced form flow control with email lookup, OTP verification, and dynamic actions</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>📧 Email & OTP Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">performEmailLookup(email)</div>
+                        <div class="function-location">flowLogic.js:77</div>
+                        <div class="function-description">Performs Salesforce contact lookup by email with OTP verification flow.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>email: string</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;Object&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Contact lookup, OTP generation, verification flow</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Module -->
+        <div class="module" id="mobile">
+            <div class="module-header">
+                <h2>📱 Mobile Module</h2>
+                <p>Comprehensive mobile optimization with touch gestures and responsive design</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>📱 Mobile Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">setupSwipeGestures()</div>
+                        <div class="function-location">mobile.js:154</div>
+                        <div class="function-description">Sets up swipe gesture recognition for mobile navigation and interactions.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>None</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>void</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Gesture detection, touch handling, navigation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Viewer Module -->
+        <div class="module" id="formViewer">
+            <div class="module-header">
+                <h2>👁️ Form Viewer Module</h2>
+                <p>End-user form viewing and submission system with full feature support</p>
+            </div>
+            <div class="module-content">
+                <div class="function-category">
+                    <h3>👀 Viewer Functions</h3>
+                    
+                    <div class="function">
+                        <div class="function-name">handleFormSubmission(e)</div>
+                        <div class="function-location">formViewer.js:165</div>
+                        <div class="function-description">Handles complete form submission with validation and Salesforce integration.</div>
+                        <div class="function-details">
+                            <div class="function-detail">
+                                <h5>Parameters</h5>
+                                <p>e: Event</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Returns</h5>
+                                <p>Promise&lt;boolean&gt;</p>
+                            </div>
+                            <div class="function-detail">
+                                <h5>Key Operations</h5>
+                                <p>Validation, data collection, Salesforce submission</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <button class="back-to-top" onclick="scrollToTop()">↑</button>
+
+    <script>
+        // Search functionality
+        const searchBox = document.getElementById('searchBox');
+        const modules = document.querySelectorAll('.module');
+        const functions = document.querySelectorAll('.function');
+
+        searchBox.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            functions.forEach(func => {
+                const functionName = func.querySelector('.function-name').textContent.toLowerCase();
+                const functionDesc = func.querySelector('.function-description').textContent.toLowerCase();
+                const functionLocation = func.querySelector('.function-location').textContent.toLowerCase();
+                
+                if (functionName.includes(searchTerm) || 
+                    functionDesc.includes(searchTerm) || 
+                    functionLocation.includes(searchTerm)) {
+                    func.style.display = 'block';
+                } else {
+                    func.style.display = 'none';
+                }
+            });
+
+            // Hide modules with no visible functions
+            modules.forEach(module => {
+                const visibleFunctions = module.querySelectorAll('.function[style="display: block"], .function:not([style*="display: none"])');
+                if (searchTerm === '' || visibleFunctions.length > 0) {
+                    module.style.display = 'block';
+                } else {
+                    module.style.display = 'none';
+                }
+            });
+        });
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Back to top functionality
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Show/hide back to top button
+        window.addEventListener('scroll', function() {
+            const backToTopBtn = document.querySelector('.back-to-top');
+            if (window.pageYOffset > 300) {
+                backToTopBtn.style.display = 'block';
+            } else {
+                backToTopBtn.style.display = 'none';
+            }
+        });
+
+        // Function expansion for mobile
+        if (window.innerWidth <= 768) {
+            functions.forEach(func => {
+                func.addEventListener('click', function() {
+                    const details = this.querySelector('.function-details');
+                    if (details.style.display === 'none' || details.style.display === '') {
+                        details.style.display = 'grid';
+                    } else {
+                        details.style.display = 'none';
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

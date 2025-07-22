@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Form Builder - Enterprise Edition</title>
+    <link rel="stylesheet" href="styles-notion-enhanced.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Introduction Modal -->
+    <div id="introModal" class="modal intro-modal">
+        <div class="modal-content intro-modal-content">
+            <div class="intro-header">
+                <div class="intro-logo">🚀</div>
+                <h2>Welcome to Salesforce Form Builder</h2>
+                <p class="intro-subtitle">Build professional forms with enterprise-grade features</p>
+            </div>
+            
+            <div class="intro-steps">
+                <div class="intro-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>🔗 Connect to Salesforce</h3>
+                        <p>Link your Salesforce org using OAuth or username/password</p>
+                    </div>
+                </div>
+                
+                <div class="intro-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>🎨 Drag & Drop Fields</h3>
+                        <p>Build forms using our intuitive drag-and-drop interface</p>
+                    </div>
+                </div>
+                
+                <div class="intro-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>⚙️ Configure Properties</h3>
+                        <p>Set up conditional logic, Salesforce mapping, and styling</p>
+                    </div>
+                </div>
+                
+                <div class="intro-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>🚀 Publish & Share</h3>
+                        <p>Deploy your form and start collecting submissions</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="intro-features">
+                <h3>✨ Key Features</h3>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <span class="feature-icon">👁️</span>
+                        <span>WYSIWYG Builder</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔐</span>
+                        <span>E-Signatures</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📄</span>
+                        <span>Multi-Page Forms</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔄</span>
+                        <span>Conditional Logic</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📎</span>
+                        <span>File Uploads</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="intro-actions">
+                <button class="button button-secondary" onclick="closeIntroModal(false)">Skip Tutorial</button>
+                <button class="button button-primary" onclick="closeIntroModal(true)">Let's Start Building!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legacy Welcome Modal (kept for compatibility) -->
+    <div id="welcomeModal" class="modal" style="display: none;">
+        <div class="modal-content welcome-modal">
+            <h2>Welcome to Salesforce Form Builder</h2>
+            <p>Build professional forms with advanced features:</p>
+            <ul class="feature-list">
+                <li>✨ <strong>WYSIWYG Builder</strong> - What you build is what users see</li>
+                <li>🔐 <strong>E-Signatures</strong> - Legally compliant electronic signatures</li>
+                <li>📄 <strong>Multi-Page Forms</strong> - Complex workflows with conditional logic</li>
+                <li>💾 <strong>Auto-Save</strong> - Never lose form data</li>
+                <li>📎 <strong>File Uploads</strong> - Direct attachment to Salesforce records</li>
+                <li>🎨 <strong>Rich Text</strong> - Full formatting capabilities</li>
+                <li>🔄 <strong>Repeat Pages</strong> - Create multiple related records</li>
+                <li>🌙 <strong>Dark Mode</strong> - Easy on the eyes</li>
+            </ul>
+            <button class="button button-primary" onclick="closeWelcomeModal()">Get Started</button>
+        </div>
+    </div>
+
+
+    <!-- Mobile Navigation (Only visible on mobile) -->
+    <div class="mobile-nav">
+        <div class="mobile-nav-title">Form Builder</div>
+        <div class="mobile-nav-controls">
+            <button class="mobile-nav-btn" id="mobileSidebarBtn" title="Fields & Tools">
+                🧩
+            </button>
+            <button class="mobile-nav-btn" id="mobilePropertiesBtn" title="Properties">
+                ⚙️
+            </button>
+            <button class="mobile-nav-btn" id="mobilePreviewBtn" title="Preview">
+                👁️
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <div class="sidebar-header">
+                    <h1>Form Builder</h1>
+                    <p class="subtitle">Enterprise Edition</p>
+                    <div class="header-links">
+                        <a href="./developer.html" class="header-link" target="_blank">
+                            🛠️ Developer
+                        </a>
+                        <a href="./help.html" class="header-link" target="_blank">
+                            ❓ Help
+                        </a>
+                        <a href="./org-manager.html" class="header-link" target="_blank">
+                            🏢 Org Manager
+                        </a>
+                    </div>
+                </div>
+
+            <!-- Organization Selection -->
+            <div class="section" id="orgSelection" style="display: none;">
+                <h3>Select Organization</h3>
+                <div class="org-selector">
+                    <select id="orgSelector" class="form-select">
+                        <option value="">Choose Salesforce Org...</option>
+                    </select>
+                    <button id="connectToOrgBtn" class="button button-primary" style="margin-top: var(--space-2); width: 100%;" disabled>
+                        Connect to Selected Org
+                    </button>
+                </div>
+                <div class="org-status-display" id="currentOrgStatus" style="display: none;">
+                    <div class="current-org-info">
+                        <div class="org-connected-indicator">
+                            <span class="status-icon connected">●</span>
+                            <span class="status-text">Connected to:</span>
+                        </div>
+                        <div class="org-details">
+                            <div class="org-name" id="currentOrgName"></div>
+                            <div class="org-type" id="currentOrgType"></div>
+                        </div>
+                        <button id="disconnectOrgBtn" class="button button-secondary" style="margin-top: var(--space-2); width: 100%;">
+                            Disconnect
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connection Status -->
+            <div id="connectionStatus" class="connection-status disconnected">
+                <span class="status-icon">●</span>
+                <span class="status-text">Not Connected</span>
+            </div>
+
+            <!-- Salesforce Connection -->
+            <div class="section">
+                <h3>Salesforce Connection</h3>
+                <button id="connectBtn" class="button button-primary">
+                    Connect with OAuth
+                </button>
+                <button id="connectUsernameBtn" class="button button-secondary">
+                    Username/Password
+                </button>
+            </div>
+
+            <!-- Building Blocks -->
+            <div class="section" id="buildingBlocks" style="display: none;">
+                <h3>Building Blocks</h3>
+                <div class="field-palette">
+                    <div class="field-block" draggable="true" data-field-type="text">
+                        <span class="field-icon">📝</span>
+                        <span>Text Field</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="email">
+                        <span class="field-icon">✉️</span>
+                        <span>Email</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="phone">
+                        <span class="field-icon">📞</span>
+                        <span>Phone</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="number">
+                        <span class="field-icon">🔢</span>
+                        <span>Number</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="date">
+                        <span class="field-icon">📅</span>
+                        <span>Date</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="select">
+                        <span class="field-icon">📋</span>
+                        <span>Dropdown</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="textarea">
+                        <span class="field-icon">📄</span>
+                        <span>Text Area</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="checkbox">
+                        <span class="field-icon">✅</span>
+                        <span>Checkbox</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="radio">
+                        <span class="field-icon">⭕</span>
+                        <span>Radio</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="lookup">
+                        <span class="field-icon">🔍</span>
+                        <span>Lookup</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="richtext">
+                        <span class="field-icon">✏️</span>
+                        <span>Rich Text</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="file">
+                        <span class="field-icon">📎</span>
+                        <span>File Upload</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="signature">
+                        <span class="field-icon">✍️</span>
+                        <span>E-Signature</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="display">
+                        <span class="field-icon">ℹ️</span>
+                        <span>Display Text</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="login">
+                        <span class="field-icon">🔐</span>
+                        <span>Login</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="email-verify">
+                        <span class="field-icon">📧</span>
+                        <span>Verify Email</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="datatable">
+                        <span class="field-icon">📊</span>
+                        <span>Data Table</span>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: var(--space-4);">Layout Elements</h3>
+                <div class="field-palette">
+                    <div class="field-block" draggable="true" data-field-type="section">
+                        <span class="field-icon">📦</span>
+                        <span>Section</span>
+                    </div>
+                    <div class="field-block" draggable="true" data-field-type="columns">
+                        <span class="field-icon">📐</span>
+                        <span>Columns</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="section" id="formActions" style="display: none;">
+                <button class="button button-primary" onclick="newForm()">✨ New Form</button>
+                <button class="button button-primary" onclick="saveForm()">💾 Save Draft</button>
+                <button class="button button-primary" onclick="publishForm()">🚀 Publish Form</button>
+                <button class="button button-secondary" onclick="showMyForms()">📋 My Forms</button>
+                <button class="button button-secondary" onclick="previewForm()">👁️ Preview</button>
+                <button class="button button-secondary" onclick="showVariablesManager()">🔧 Variables</button>
+                <button class="button button-secondary" onclick="addNewPage()">➕ Add Page</button>
+            </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Tabs -->
+            <div id="pageTabs" class="page-tabs" style="display: none;">
+                <!-- Tabs will be dynamically added here -->
+            </div>
+
+            <!-- Form Canvas -->
+            <div id="formCanvas" class="form-canvas">
+                <div class="empty-state">
+                    <h2>Start Building Your Form</h2>
+                    <p>Connect to Salesforce and drag fields from the sidebar to begin</p>
+                </div>
+            </div>
+
+            <!-- Auto-save Indicator -->
+            <div id="autoSaveIndicator" class="auto-save-indicator">
+                <span class="save-icon">💾</span>
+                <span class="save-text">Auto-saved</span>
+            </div>
+        </main>
+
+        <!-- Properties Panel -->
+        <aside class="properties-panel" id="propertiesPanel">
+            <div class="properties-header">
+                <h3>Properties</h3>
+                <div class="property-tabs">
+                    <button class="property-tab active" data-tab="form">Form</button>
+                    <button class="property-tab" data-tab="page">Page</button>
+                    <button class="property-tab" data-tab="field">Field</button>
+                </div>
+            </div>
+            <div id="propertyContent">
+                <div id="formProperties" class="property-section" style="display: none;">
+                    <!-- Form properties will be rendered here -->
+                </div>
+                <div id="pageProperties" class="property-section" style="display: none;">
+                    <!-- Page properties will be rendered here -->
+                </div>
+                <div id="fieldProperties" class="property-section">
+                    <p class="empty-state">Select a field to view properties</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Modals -->
+    <!-- Username/Password Login Modal -->
+    <div id="usernameModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUsernameModal()">&times;</span>
+            <h2>Connect with Username/Password</h2>
+            <form id="usernameForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="sfUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="sfPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Security Token</label>
+                    <input type="text" id="sfToken" required>
+                    <small>Find your security token in Salesforce Setup → Personal → Security Token</small>
+                </div>
+                <button type="submit" class="button button-primary">Connect</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- My Forms Modal - Enhanced with Search -->
+    <div id="myFormsModal" class="modal">
+        <div class="modal-content my-forms-modal">
+            <span class="close" onclick="closeMyFormsModal()">&times;</span>
+            <div class="my-forms-header">
+                <h2>📋 My Forms</h2>
+                <p class="modal-subtitle">Manage and organize your form collection</p>
+                <div class="bulk-actions" style="display: none;">
+                    <button class="button button-danger" onclick="bulkDeleteSelectedForms()">
+                        🗑️ Delete Selected
+                    </button>
+                    <button class="button button-secondary" onclick="selectAllForms()">
+                        ✅ Select All
+                    </button>
+                    <button class="button button-secondary" onclick="clearFormSelection()">
+                        ❌ Clear Selection
+                    </button>
+                </div>
+                
+            </div>
+            
+            <div class="forms-search-bar">
+                <div class="search-input-wrapper">
+                    <input type="text" id="formsSearchInput" placeholder="🔍 Search forms by name, description, or date..." class="search-input">
+                    <button class="search-clear-btn" onclick="clearFormsSearch()" style="display: none;">×</button>
+                </div>
+                <div class="forms-filters">
+                    <select id="formsStatusFilter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                    </select>
+                    <select id="formsSortOrder" class="filter-select">
+                        <option value="date-desc">Newest First</option>
+                        <option value="date-asc">Oldest First</option>
+                        <option value="name-asc">Name A-Z</option>
+                        <option value="name-desc">Name Z-A</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="formsList" class="forms-list">
+                <!-- Forms will be loaded here -->
+            </div>
+            
+            <div id="formsNoResults" class="no-results" style="display: none;">
+                <div class="no-results-icon">🔍</div>
+                <h3>No forms found</h3>
+                <p>Try adjusting your search criteria or create a new form</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content preview-modal-content">
+            <span class="close" onclick="closePreviewModal()">&times;</span>
+            <h2>Form Preview</h2>
+            <div id="previewContainer" class="preview-container">
+                <!-- Preview will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Publish Settings Modal -->
+    <div id="publishSettingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePublishSettingsModal()">&times;</span>
+            <h2>📅 Publish Form Settings</h2>
+            <p>Configure when your form should be available</p>
+            
+            <form id="publishSettingsForm">
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="enableDateRange" onchange="toggleDateRangeFields(this.checked)">
+                        Set availability date range (temporary form)
+                    </label>
+                </div>
+                
+                <div id="dateRangeFields" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Start Date & Time</label>
+                            <input type="datetime-local" id="publishStartDate" class="form-input">
+                            <div class="help-text">When the form becomes available</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>End Date & Time</label>
+                            <input type="datetime-local" id="publishEndDate" class="form-input">
+                            <div class="help-text">When the form expires and is no longer accessible</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Expiration Message</label>
+                        <textarea id="expirationMessage" class="form-input" rows="3" 
+                                  placeholder="This form is no longer accepting submissions.">This form is no longer accepting submissions.</textarea>
+                        <div class="help-text">Message shown to users after the form expires</div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="button button-secondary" onclick="closePublishSettingsModal()">Cancel</button>
+                    <button type="button" class="button button-primary" onclick="confirmPublish()">🚀 Publish Form</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Publish Success Modal -->
+    <div id="publishSuccessModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePublishSuccessModal()">&times;</span>
+            <h2>🎉 Form Published Successfully!</h2>
+            <p>Your form is now live and ready to collect submissions.</p>
+            
+            <div class="publish-links">
+                <div class="link-group">
+                    <label>Form Link:</label>
+                    <div class="copy-group">
+                        <input type="text" id="formLinkInput" readonly>
+                        <button class="button button-primary" onclick="copyFormLink()">📋 Copy Link</button>
+                    </div>
+                </div>
+                
+                <div class="link-group">
+                    <label>Embed Code:</label>
+                    <div class="copy-group">
+                        <textarea id="embedCodeInput" readonly rows="3"></textarea>
+                        <button class="button button-primary" onclick="copyEmbedCode()">📋 Copy Code</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="button button-secondary" onclick="window.open(document.getElementById('formLinkInput').value, '_blank')">🌐 View Form</button>
+                <button class="button button-secondary" onclick="exportPublishedForm()">📥 Export Form</button>
+                <button class="button button-primary" onclick="closePublishSuccessModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Variables Manager Modal -->
+    <div id="variablesModal" class="modal">
+        <div class="modal-content variables-modal">
+            <span class="close" onclick="closeVariablesModal()">&times;</span>
+            <h2>🔧 Variables Manager</h2>
+            <p>Manage and monitor all form variables in one central location.</p>
+            
+            <!-- Variables List -->
+            <div class="variables-section">
+                <div class="section-header">
+                    <h3>📊 Current Variables</h3>
+                    <button class="button button-small" onclick="refreshVariables()">🔄 Refresh</button>
+                </div>
+                <div id="variablesList" class="variables-list">
+                    <div class="empty-variables">
+                        <p>No variables found. Variables will appear here when set by Login fields, Email Verify fields, or manually created.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add New Variable -->
+            <div class="variables-section">
+                <div class="section-header">
+                    <h3>➕ Add New Variable</h3>
+                </div>
+                <div class="add-variable-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Variable Name</label>
+                            <input type="text" id="newVariableName" placeholder="e.g., recordId, isLoggedIn" />
+                        </div>
+                        <div class="form-group">
+                            <label>Variable Value</label>
+                            <input type="text" id="newVariableValue" placeholder="e.g., 003xx000004TmiQAAS, true" />
+                        </div>
+                        <div class="form-group">
+                            <button class="button button-primary" onclick="addVariable()">Add Variable</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Get from Salesforce -->
+            <div class="variables-section">
+                <div class="section-header">
+                    <h3>🔍 Get from Salesforce</h3>
+                    <p class="section-description">Fetch records from Salesforce and import their data as form variables</p>
+                </div>
+                <div class="salesforce-record-browser" id="salesforceRecordBrowser">
+                    
+                    <!-- Connection Status -->
+                    <div id="sfBrowserConnectionStatus" class="sf-connection-status">
+                        <div class="connection-check">
+                            <span class="status-icon">⚠️</span>
+                            <span class="status-text">Connect to Salesforce to browse records</span>
+                        </div>
+                    </div>
+
+                    <!-- Salesforce Browser Interface (hidden until connected) -->
+                    <div id="sfBrowserInterface" class="sf-browser-interface" style="display: none;">
+                        
+                        <!-- Object Selection -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Salesforce Object</label>
+                                <select id="sfObjectSelector" class="form-select" onchange="window.AppModules.formBuilder.loadObjectFieldsForBrowser()">
+                                    <option value="">Select Object...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Field Selection -->
+                        <div class="form-row" id="sfFieldSelectionRow" style="display: none;">
+                            <div class="form-group">
+                                <label>Fields to Import</label>
+                                <div class="help-text">Select which fields to import as variables</div>
+                                <div id="sfFieldCheckboxes" class="field-checkboxes">
+                                    <!-- Field checkboxes will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Search Interface -->
+                        <div class="form-row" id="sfSearchRow" style="display: none;">
+                            <div class="form-group">
+                                <label>Search Records</label>
+                                <div class="search-input-wrapper">
+                                    <input type="text" id="sfRecordSearch" placeholder="Search by name, email, or other fields..." class="search-input">
+                                    <button class="button button-primary" onclick="window.AppModules.formBuilder.searchSalesforceRecords()">🔍 Search</button>
+                                </div>
+                                <div class="help-text">Leave empty and click Search to browse all records</div>
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="sfSearchLoading" class="loading-state" style="display: none;">
+                            <div class="loading-spinner">⏳</div>
+                            <div class="loading-text">Searching Salesforce records...</div>
+                        </div>
+
+                        <!-- Results Table -->
+                        <div id="sfResultsContainer" class="results-container" style="display: none;">
+                            <div class="results-header">
+                                <h4 id="sfResultsTitle">Search Results</h4>
+                                <div class="results-actions">
+                                    <button class="button button-secondary button-small" onclick="window.AppModules.formBuilder.selectAllSalesforceRecords()">Select All</button>
+                                    <button class="button button-secondary button-small" onclick="window.AppModules.formBuilder.clearSalesforceSelection()">Clear</button>
+                                </div>
+                            </div>
+                            <div class="results-table-container">
+                                <table id="sfResultsTable" class="results-table">
+                                    <!-- Results will be populated here -->
+                                </table>
+                            </div>
+                            <div class="import-actions">
+                                <div class="selection-info" id="sfSelectionInfo">
+                                    <span id="sfSelectedCount">0</span> records selected
+                                </div>
+                                <button class="button button-primary" id="sfImportButton" onclick="window.AppModules.formBuilder.importSelectedRecords()" disabled>
+                                    📥 Import Selected Variables
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="sfEmptyState" class="empty-state" style="display: none;">
+                            <div class="empty-icon">📭</div>
+                            <h4>No Records Found</h4>
+                            <p>Try adjusting your search criteria or browse all records</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Variable Sources -->
+            <div class="variables-section">
+                <div class="section-header">
+                    <h3>📝 Variable Sources</h3>
+                </div>
+                <div class="variable-sources">
+                    <div class="source-item">
+                        <strong>🔐 Login Fields:</strong> Set variables when users authenticate (isLoggedIn, userEmail, etc.)
+                    </div>
+                    <div class="source-item">
+                        <strong>📧 Email Verify Fields:</strong> Set variables when emails are verified (emailVerified, verifiedEmail)
+                    </div>
+                    <div class="source-item">
+                        <strong>🔍 Lookup Fields:</strong> Automatically set record ID variables when selections are made
+                    </div>
+                    <div class="source-item">
+                        <strong>🔍 Salesforce Records:</strong> Fetch and import data from existing Salesforce records
+                    </div>
+                    <div class="source-item">
+                        <strong>🔧 Manual:</strong> Add variables manually using the form above
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Debug Actions -->
+            <div class="variables-section">
+                <div class="section-header">
+                    <h3>🛠️ Debug Actions</h3>
+                </div>
+                <div class="debug-actions">
+                    <button class="button button-secondary" onclick="debugConsole()">📊 Log to Console</button>
+                    <button class="button button-secondary" onclick="exportVariables()">💾 Export JSON</button>
+                    <button class="button button-danger" onclick="clearAllVariables()">🗑️ Clear All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <!-- Global Variable Manager -->
+    <script>
+        // Enhanced Global Variable System for Form Variables with Reactive Conditional Logic
+        window.FormVariables = window.FormVariables || {
+            variables: new Map(),
+            changeListeners: new Set(),
+            evaluationPending: false,
+            evaluationTimeout: null,
+            batchedChanges: new Set(),
+            
+            set(name, value) {
+                const oldValue = this.variables.get(name);
+                const hasChanged = oldValue !== value;
+                
+                console.log(`🌐 GLOBAL: Set variable "${name}" = "${value}" (type: ${typeof value})${hasChanged ? ' [CHANGED]' : ' [NO CHANGE]'}`);
+                this.variables.set(name, value);
+                
+                // Only trigger re-evaluation if the value actually changed
+                if (hasChanged) {
+                    this.batchedChanges.add(name);
+                    this.scheduleEvaluation();
+                    
+                    // Dispatch custom event for variable changes
+                    this.dispatchVariableChangeEvent(name, value, oldValue);
+                }
+            },
+            
+            // Method to set multiple variables at once with single evaluation
+            setMultiple(variableObject) {
+                console.log('🌐 GLOBAL: Setting multiple variables:', Object.keys(variableObject));
+                let hasAnyChanges = false;
+                
+                Object.entries(variableObject).forEach(([name, value]) => {
+                    const oldValue = this.variables.get(name);
+                    if (oldValue !== value) {
+                        this.variables.set(name, value);
+                        this.batchedChanges.add(name);
+                        hasAnyChanges = true;
+                        console.log(`🌐 GLOBAL: Batch set "${name}" = "${value}" (type: ${typeof value}) [CHANGED]`);
+                    } else {
+                        console.log(`🌐 GLOBAL: Batch set "${name}" = "${value}" (type: ${typeof value}) [NO CHANGE]`);
+                    }
+                });
+                
+                if (hasAnyChanges) {
+                    this.scheduleEvaluation();
+                }
+            },
+            
+            // Intelligent scheduling of conditional logic evaluation
+            scheduleEvaluation() {
+                if (this.evaluationPending) {
+                    // Already scheduled, just extend the timeout
+                    clearTimeout(this.evaluationTimeout);
+                } else {
+                    this.evaluationPending = true;
+                }
+                
+                this.evaluationTimeout = setTimeout(() => {
+                    this.performEvaluation();
+                }, 50); // Reduced from 100ms for better responsiveness
+            },
+            
+            // Perform the actual evaluation with batched changes
+            performEvaluation() {
+                const changedVariables = Array.from(this.batchedChanges);
+                console.log(`🔄 REACTIVE: Performing batched conditional logic evaluation for variables:`, changedVariables);
+                
+                // Reset batching state
+                this.evaluationPending = false;
+                this.batchedChanges.clear();
+                
+                // Trigger conditional logic re-evaluation
+                if (window.AppModules?.conditionalLogic) {
+                    const startTime = performance.now();
+                    window.AppModules.conditionalLogic.evaluateAllConditions();
+                    const endTime = performance.now();
+                    console.log(`🔄 REACTIVE: Conditional evaluation completed in ${(endTime - startTime).toFixed(2)}ms`);
+                }
+                
+                // Refresh form builder properties panel to show new variables
+                if (window.AppModules?.formBuilder) {
+                    setTimeout(() => {
+                        console.log('🔄 REACTIVE: Refreshing form builder properties panel for new variables...');
+                        const currentTab = document.querySelector('.property-tab.active');
+                        if (currentTab && currentTab.dataset.tab === 'page') {
+                            window.AppModules.formBuilder.showPageProperties();
+                        }
+                        
+                        // Also refresh Variables Manager modal if it's open
+                        const variablesModal = document.getElementById('variablesModal');
+                        if (variablesModal && variablesModal.style.display === 'block') {
+                            window.AppModules.formBuilder.refreshVariablesList();
+                        }
+                    }, 75); // Reduced timeout for better responsiveness
+                }
+            },
+            
+            // Dispatch custom events for variable changes
+            dispatchVariableChangeEvent(name, newValue, oldValue) {
+                const event = new CustomEvent('variableChanged', {
+                    detail: {
+                        name,
+                        newValue,
+                        oldValue,
+                        timestamp: Date.now()
+                    }
+                });
+                document.dispatchEvent(event);
+            },
+            
+            // Add a change listener for external modules
+            addChangeListener(callback) {
+                this.changeListeners.add(callback);
+                return () => this.changeListeners.delete(callback); // Return cleanup function
+            },
+            
+            // Remove a change listener
+            removeChangeListener(callback) {
+                this.changeListeners.delete(callback);
+            },
+            
+            // Force immediate evaluation (bypass batching)
+            forceEvaluation() {
+                console.log('🔄 REACTIVE: Force evaluation requested');
+                if (this.evaluationTimeout) {
+                    clearTimeout(this.evaluationTimeout);
+                }
+                this.performEvaluation();
+            },
+            
+            get(name) {
+                const value = this.variables.get(name);
+                // Reduce logging verbosity for get operations in production
+                if (console.log.toString().indexOf('native') === -1) { // Only log in dev mode
+                    console.log(`🌐 GLOBAL: Get variable "${name}" = "${value}"`);
+                }
+                return value;
+            },
+            
+            has(name) {
+                return this.variables.has(name);
+            },
+            
+            getAll() {
+                return Object.fromEntries(this.variables);
+            },
+            
+            clear() {
+                console.log('🌐 GLOBAL: Clearing all variables');
+                this.variables.clear();
+                this.batchedChanges.clear();
+                if (this.evaluationTimeout) {
+                    clearTimeout(this.evaluationTimeout);
+                    this.evaluationPending = false;
+                }
+                
+                // Trigger evaluation after clearing
+                this.scheduleEvaluation();
+            },
+            
+            // Debug method to see all variables
+            debug() {
+                console.table(this.getAll());
+            },
+            
+            // Performance monitoring
+            getPerformanceStats() {
+                return {
+                    variableCount: this.variables.size,
+                    listenerCount: this.changeListeners.size,
+                    evaluationPending: this.evaluationPending,
+                    batchedChangesCount: this.batchedChanges.size
+                };
+            }
+        };
+        
+        // Make variables easily accessible for debugging
+        window.vars = window.FormVariables;
+        
+        console.log('🌐 Global Variable System initialized (Form Builder)');
+    </script>
+
+    <!-- Load JavaScript Modules -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

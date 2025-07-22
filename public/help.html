@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Form Builder - Help & Support</title>
+    <link rel="stylesheet" href="styles-notion.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--purple-50) 100%);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            color: var(--gray-900);
+            min-height: 100vh;
+            height: auto !important;
+            overflow: visible !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+        }
+        
+        .help-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-8);
+            height: auto !important;
+            overflow: visible !important;
+        }
+        
+        .help-header {
+            text-align: center;
+            margin-bottom: var(--space-12);
+            padding: var(--space-8);
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .help-section {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .help-section h2 {
+            color: var(--purple-700);
+            margin-bottom: var(--space-6);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+            margin-top: var(--space-6);
+        }
+        
+        .feature-card {
+            background: var(--gray-50);
+            padding: var(--space-6);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--purple-500);
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            color: var(--purple-700);
+            margin-bottom: var(--space-2);
+        }
+        
+        .step-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .step-list li {
+            padding: var(--space-3) 0;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+        }
+        
+        .step-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .step-number {
+            background: var(--purple-500);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        
+        .variable-tag {
+            background: var(--purple-100);
+            color: var(--purple-700);
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-md);
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .quick-tips {
+            background: var(--info);
+            color: white;
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-6);
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            color: var(--purple-600);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: var(--space-6);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-md);
+            transition: all var(--duration-normal);
+        }
+        
+        .back-link:hover {
+            background: var(--purple-100);
+            color: var(--purple-700);
+        }
+    </style>
+</head>
+<body>
+    <div class="help-container">
+        <a href="index.html" class="back-link">
+            ← Back to Form Builder
+        </a>
+        
+        <div class="help-header">
+            <h1>📚 Salesforce Form Builder Help</h1>
+            <p>Complete guide to building professional forms with advanced features</p>
+        </div>
+
+        <!-- Getting Started -->
+        <div class="help-section">
+            <h2>🚀 Getting Started</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-title">1. Connect to Salesforce</div>
+                    <p>Register your Salesforce org using the Org Manager or connect directly with OAuth authentication.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">2. Create Your First Form</div>
+                    <p>Click "✨ New Form" and drag field types from the sidebar to build your form.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">3. Configure Salesforce Integration</div>
+                    <p>Set up each page to create or update records in your chosen Salesforce objects.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">4. Test and Publish</div>
+                    <p>Preview your form, test all functionality, then publish to get a public URL.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Latest Features -->
+        <div class="help-section">
+            <h2>🆕 Latest Features (January 2025)</h2>
+            
+            <div class="feature-card">
+                <div class="feature-title">🔧 Variables Management System</div>
+                <p><strong>Access:</strong> Click the "🔧 Variables" button in the form builder.</p>
+                <ul class="step-list">
+                    <li><span class="step-number">1</span> View all active variables with their types and values</li>
+                    <li><span class="step-number">2</span> Create new variables manually with automatic type detection</li>
+                    <li><span class="step-number">3</span> Export variables as JSON for backup or debugging</li>
+                    <li><span class="step-number">4</span> Debug variables using console tools</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-title">🔐 Login Building Block Integration</div>
+                <p><strong>Problem Solved:</strong> Login variables now appear in conditional visibility dropdowns!</p>
+                <p><strong>Available Variables:</strong></p>
+                <ul>
+                    <li><span class="variable-tag">isLoggedIn</span> - Set to "true" after authentication</li>
+                    <li><span class="variable-tag">userEmail</span> - Contains user's email</li>
+                    <li><span class="variable-tag">userName</span> - Contains contact name</li>
+                </ul>
+                <p><strong>Quick Setup:</strong> Use "🔐 Require Login" buttons in Navigation Button Controls.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-title">📝 Smart Dropdown Enhancements</div>
+                <ul>
+                    <li><strong>RecordId Variables:</strong> Update Existing Record now shows available variables in a dropdown</li>
+                    <li><strong>Relationship Fields:</strong> Repeat configuration loads Salesforce relationship fields automatically</li>
+                    <li><strong>Dynamic Discovery:</strong> Real-time loading of fields from your Salesforce org</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Field Types -->
+        <div class="help-section">
+            <h2>📝 Field Types Guide</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-title">Basic Fields</div>
+                    <ul>
+                        <li><strong>Text:</strong> Single-line text input</li>
+                        <li><strong>Email:</strong> Email validation included</li>
+                        <li><strong>Phone:</strong> Phone number formatting</li>
+                        <li><strong>Number:</strong> Numeric input with validation</li>
+                        <li><strong>Date:</strong> Date picker interface</li>
+                        <li><strong>Textarea:</strong> Multi-line text input</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Selection Fields</div>
+                    <ul>
+                        <li><strong>Dropdown:</strong> Single selection from list</li>
+                        <li><strong>Radio:</strong> Single selection with all options visible</li>
+                        <li><strong>Checkbox:</strong> Multiple selections</li>
+                        <li><strong>Lookup:</strong> Search and select Salesforce records</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Advanced Fields</div>
+                    <ul>
+                        <li><strong>Rich Text:</strong> Formatted text with editor</li>
+                        <li><strong>File Upload:</strong> Attach files to Salesforce</li>
+                        <li><strong>E-Signature:</strong> Legally compliant signatures</li>
+                        <li><strong>Login:</strong> Contact authentication with OTP</li>
+                        <li><strong>Display Text:</strong> Information display only</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conditional Visibility -->
+        <div class="help-section">
+            <h2>👁️ Conditional Visibility</h2>
+            
+            <h3>Field Conditional Visibility</h3>
+            <ol class="step-list">
+                <li><span class="step-number">1</span> Select a field and scroll to "Conditional Visibility" section</li>
+                <li><span class="step-number">2</span> Enable conditional visibility</li>
+                <li><span class="step-number">3</span> Choose the field or variable this field depends on</li>
+                <li><span class="step-number">4</span> Set the condition (equals, contains, etc.) and value</li>
+            </ol>
+
+            <h3>Page Conditional Visibility</h3>
+            <ol class="step-list">
+                <li><span class="step-number">1</span> Go to Page Properties → "🔍 Page Conditional Visibility"</li>
+                <li><span class="step-number">2</span> Enable conditional visibility</li>
+                <li><span class="step-number">3</span> Add multiple conditions with AND/OR logic</li>
+                <li><span class="step-number">4</span> Pages will automatically show/hide based on previous page inputs</li>
+            </ol>
+
+            <h3>Navigation Button Controls</h3>
+            <ol class="step-list">
+                <li><span class="step-number">1</span> Go to Page Properties → "🔘 Navigation Button Controls"</li>
+                <li><span class="step-number">2</span> Enable conditional visibility for Next or Submit buttons</li>
+                <li><span class="step-number">3</span> Add conditions (commonly: <span class="variable-tag">isLoggedIn</span> equals "true")</li>
+                <li><span class="step-number">4</span> Or use "🔐 Require Login" buttons for quick setup</li>
+            </ol>
+
+            <div class="quick-tips">
+                <strong>💡 Quick Tip:</strong> Login variables only appear after a user authenticates. Use the Variables Manager to see all available variables in real-time.
+            </div>
+        </div>
+
+        <!-- Multi-Page Forms -->
+        <div class="help-section">
+            <h2>📄 Multi-Page Forms</h2>
+            
+            <h3>Creating Multi-Page Forms</h3>
+            <ol class="step-list">
+                <li><span class="step-number">1</span> Click "➕ Add Page" to create additional pages</li>
+                <li><span class="step-number">2</span> Drag page tabs to reorder pages</li>
+                <li><span class="step-number">3</span> Configure each page to work with different Salesforce objects</li>
+                <li><span class="step-number">4</span> Set up page conditional visibility to create dynamic workflows</li>
+            </ol>
+
+            <h3>Repeat Pages</h3>
+            <ol class="step-list">
+                <li><span class="step-number">1</span> Go to Page Properties → "🔄 Repeat Configuration"</li>
+                <li><span class="step-number">2</span> Enable repeat functionality</li>
+                <li><span class="step-number">3</span> Set minimum/maximum instances</li>
+                <li><span class="step-number">4</span> Choose relationship field from dropdown (links to parent record)</li>
+                <li><span class="step-number">5</span> Customize "Add Another" and "Remove" button text</li>
+            </ol>
+        </div>
+
+        <!-- Salesforce Integration -->
+        <div class="help-section">
+            <h2>🔗 Salesforce Integration</h2>
+            
+            <h3>Page-Level Integration</h3>
+            <ol class="step-list">
+                <li><span class="step-number">1</span> Go to Page Properties → "🔗 Salesforce Integration"</li>
+                <li><span class="step-number">2</span> Select Salesforce Object (Contact, Account, Lead, etc.)</li>
+                <li><span class="step-number">3</span> Choose Action Type: "Create New Record" or "Update Existing Record"</li>
+                <li><span class="step-number">4</span> For updates: Select Record ID Variable from dropdown</li>
+            </ol>
+
+            <h3>Field Mapping</h3>
+            <ol class="step-list">
+                <li><span class="step-number">1</span> Select a field and scroll to "Salesforce Mapping" section</li>
+                <li><span class="step-number">2</span> Choose the Salesforce field to map to</li>
+                <li><span class="step-number">3</span> For picklist fields: Enable "Sync options from Salesforce"</li>
+                <li><span class="step-number">4</span> Lookup fields automatically connect to related records</li>
+            </ol>
+
+            <h3>Hidden Fields</h3>
+            <ol class="step-list">
+                <li><span class="step-number">1</span> Go to Page Properties → "🔒 Hidden Fields"</li>
+                <li><span class="step-number">2</span> Add fields like RecordTypeId, OwnerId</li>
+                <li><span class="step-number">3</span> Set static values or use variables</li>
+                <li><span class="step-number">4</span> Fields are invisible to users but submitted to Salesforce</li>
+            </ol>
+        </div>
+
+        <!-- Advanced Features -->
+        <div class="help-section">
+            <h2>⚡ Advanced Features</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-title">🛡️ Auto-Save Protection</div>
+                    <p>Forms automatically save user progress every 3 seconds. Data is restored if users accidentally close their browser.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-title">📧 Email Integration</div>
+                    <p>Configure SMTP or SendGrid for Login field OTP verification. Supports Gmail, custom SMTP, and SendGrid API.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-title">✍️ E-Signatures</div>
+                    <p>Legally compliant electronic signatures with full audit trails. Works on touch devices and with mouse input.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-title">🏢 Multi-Org Support</div>
+                    <p>Connect to multiple Salesforce orgs. Each org is isolated with encrypted credential storage.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Troubleshooting -->
+        <div class="help-section">
+            <h2>🔧 Troubleshooting</h2>
+            
+            <div class="feature-card">
+                <div class="feature-title">Common Issues</div>
+                <ul class="step-list">
+                    <li><span class="step-number">1</span><strong>Variables not showing:</strong> Use the Variables Manager (🔧 Variables) to see all available variables</li>
+                    <li><span class="step-number">2</span><strong>Form not saving:</strong> Check browser console for errors and ensure Salesforce connection is active</li>
+                    <li><span class="step-number">3</span><strong>Conditional logic not working:</strong> Verify field names and variable values using browser developer tools</li>
+                    <li><span class="step-number">4</span><strong>Login variables missing:</strong> Variables only appear after successful authentication</li>
+                    <li><span class="step-number">5</span><strong>Org disconnected:</strong> Check the encryption key is set in server environment variables</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-title">Debug Tools</div>
+                <ul>
+                    <li><strong>Variables Manager:</strong> Real-time view of all variables and their values</li>
+                    <li><strong>Browser Console:</strong> Use <code>window.vars.debug()</code> to see all variables</li>
+                    <li><strong>Form Preview:</strong> Test your form thoroughly before publishing</li>
+                    <li><strong>Network Tab:</strong> Check API calls to Salesforce in browser developer tools</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Support -->
+        <div class="help-section">
+            <h2>💬 Need More Help?</h2>
+            <p>For additional support and advanced configurations:</p>
+            <ul>
+                <li>Check the <a href="developer.html" target="_blank">Developer Documentation</a> for technical details</li>
+                <li>Use the Variables Manager for real-time debugging</li>
+                <li>Test all functionality in Preview mode before publishing</li>
+                <li>Review browser console logs for detailed error information</li>
+            </ul>
+            
+            <div class="quick-tips">
+                <strong>💡 Pro Tip:</strong> Most issues can be diagnosed using the Variables Manager and browser developer tools. The system provides extensive logging to help identify problems.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
