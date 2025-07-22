@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salesforce Form Builder - Enterprise Edition</title>
+    <title>Salesforce Form Builder - Modern Edition</title>
     <link rel="stylesheet" href="styles-notion-enhanced.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles-modern-redesign.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Introduction Modal -->
@@ -149,6 +150,9 @@
                 <a href="./org-manager.html" class="header-link" target="_blank">
                     🏢 Org Manager
                 </a>
+                <button class="header-link" onclick="toggleModernMode()" style="border: none; background: none; cursor: pointer; color: var(--make-purple-600);">
+                    ✨ Modern UI
+                </button>
             </div>
             
             <!-- Salesforce Connection Buttons -->
@@ -163,7 +167,222 @@
         </div>
     </header>
 
-    <!-- Main Container -->
+    <!-- Modern App Shell -->
+    <div class="modern-app-shell" id="modernAppShell" style="display: none;">
+        <!-- Floating Navigation -->
+        <nav class="floating-nav">
+            <div class="app-logo">
+                <span>🚀</span>
+                <span>Form Builder</span>
+            </div>
+            
+            <div class="connection-indicator disconnected" id="modernConnectionStatus">
+                <span class="status-icon">●</span>
+                <span class="status-text">Not Connected</span>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="nav-action-btn" onclick="toggleTheme()" title="Toggle Dark Mode">
+                    🌙
+                </button>
+                <button class="nav-action-btn" onclick="showMyForms()" title="My Forms">
+                    📋
+                </button>
+                <button class="nav-action-btn" onclick="showHelp()" title="Help">
+                    ❓
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Workspace -->
+        <main class="main-workspace">
+            <!-- Floating Page Tabs -->
+            <div id="modernPageTabs" class="floating-page-tabs" style="display: none;">
+                <!-- Tabs will be dynamically added here -->
+            </div>
+
+            <!-- Modern Form Canvas -->
+            <div class="modern-form-canvas" id="modernFormCanvas">
+                <div class="empty-canvas-state">
+                    <div class="empty-canvas-icon">✨</div>
+                    <h2 class="empty-canvas-title">Start Building Your Form</h2>
+                    <p class="empty-canvas-description">
+                        Connect to Salesforce and use the floating action button to add fields, 
+                        or click the + button to access the field palette.
+                    </p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Floating Action Buttons -->
+        <div class="fab-container">
+            <div class="fab-menu" id="fabMenu">
+                <button class="fab-action" data-tooltip="Add Field" onclick="toggleFieldPalette()">
+                    🧩
+                </button>
+                <button class="fab-action" data-tooltip="Properties" onclick="togglePropertiesPanel()">
+                    ⚙️
+                </button>
+                <button class="fab-action" data-tooltip="Preview" onclick="previewForm()">
+                    👁️
+                </button>
+                <button class="fab-action" data-tooltip="Save" onclick="saveForm()">
+                    💾
+                </button>
+                <button class="fab-action" data-tooltip="Publish" onclick="publishForm()">
+                    🚀
+                </button>
+            </div>
+            <button class="main-fab" onclick="toggleFabMenu()">
+                <span>+</span>
+            </button>
+        </div>
+
+        <!-- Field Palette Drawer -->
+        <div class="field-palette-drawer" id="modernFieldPalette">
+            <div class="palette-header">
+                <h3 class="palette-title">Add Fields</h3>
+                <button class="palette-close" onclick="toggleFieldPalette()">
+                    ×
+                </button>
+            </div>
+            <div class="palette-content">
+                <div class="field-categories">
+                    <!-- Basic Fields -->
+                    <div class="field-category">
+                        <h4 class="category-title">
+                            <span>📝</span>
+                            Basic Fields
+                        </h4>
+                        <div class="field-grid">
+                            <div class="modern-field-block" data-field-type="text" onclick="addFieldFromModernPalette('text')">
+                                <span class="field-icon">📝</span>
+                                <div class="field-name">Text Field</div>
+                                <div class="field-description">Single line text input</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="email" onclick="addFieldFromModernPalette('email')">
+                                <span class="field-icon">✉️</span>
+                                <div class="field-name">Email</div>
+                                <div class="field-description">Email address input</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="phone" onclick="addFieldFromModernPalette('phone')">
+                                <span class="field-icon">📞</span>
+                                <div class="field-name">Phone</div>
+                                <div class="field-description">Phone number input</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="number" onclick="addFieldFromModernPalette('number')">
+                                <span class="field-icon">🔢</span>
+                                <div class="field-name">Number</div>
+                                <div class="field-description">Numeric input field</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="date" onclick="addFieldFromModernPalette('date')">
+                                <span class="field-icon">📅</span>
+                                <div class="field-name">Date</div>
+                                <div class="field-description">Date picker field</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="textarea" onclick="addFieldFromModernPalette('textarea')">
+                                <span class="field-icon">📄</span>
+                                <div class="field-name">Text Area</div>
+                                <div class="field-description">Multi-line text input</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Selection Fields -->
+                    <div class="field-category">
+                        <h4 class="category-title">
+                            <span>📋</span>
+                            Selection Fields
+                        </h4>
+                        <div class="field-grid">
+                            <div class="modern-field-block" data-field-type="select" onclick="addFieldFromModernPalette('select')">
+                                <span class="field-icon">📋</span>
+                                <div class="field-name">Dropdown</div>
+                                <div class="field-description">Select from options</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="radio" onclick="addFieldFromModernPalette('radio')">
+                                <span class="field-icon">⭕</span>
+                                <div class="field-name">Radio</div>
+                                <div class="field-description">Single choice options</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="checkbox" onclick="addFieldFromModernPalette('checkbox')">
+                                <span class="field-icon">✅</span>
+                                <div class="field-name">Checkbox</div>
+                                <div class="field-description">Yes/no or multiple choice</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="lookup" onclick="addFieldFromModernPalette('lookup')">
+                                <span class="field-icon">🔍</span>
+                                <div class="field-name">Lookup</div>
+                                <div class="field-description">Salesforce record lookup</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Fields -->
+                    <div class="field-category">
+                        <h4 class="category-title">
+                            <span>🔧</span>
+                            Advanced Fields
+                        </h4>
+                        <div class="field-grid">
+                            <div class="modern-field-block" data-field-type="file" onclick="addFieldFromModernPalette('file')">
+                                <span class="field-icon">📎</span>
+                                <div class="field-name">File Upload</div>
+                                <div class="field-description">Upload documents</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="signature" onclick="addFieldFromModernPalette('signature')">
+                                <span class="field-icon">✍️</span>
+                                <div class="field-name">E-Signature</div>
+                                <div class="field-description">Digital signature pad</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="richtext" onclick="addFieldFromModernPalette('richtext')">
+                                <span class="field-icon">✏️</span>
+                                <div class="field-name">Rich Text</div>
+                                <div class="field-description">Formatted text editor</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="display" onclick="addFieldFromModernPalette('display')">
+                                <span class="field-icon">ℹ️</span>
+                                <div class="field-name">Display Text</div>
+                                <div class="field-description">Information display</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="login" onclick="addFieldFromModernPalette('login')">
+                                <span class="field-icon">🔐</span>
+                                <div class="field-name">Login</div>
+                                <div class="field-description">User authentication</div>
+                            </div>
+                            <div class="modern-field-block" data-field-type="email-verify" onclick="addFieldFromModernPalette('email-verify')">
+                                <span class="field-icon">📧</span>
+                                <div class="field-name">Email Verify</div>
+                                <div class="field-description">OTP email verification</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Properties Panel -->
+        <div class="properties-card" id="modernPropertiesCard">
+            <div class="properties-header">
+                <div>
+                    <h3 class="properties-title">Properties</h3>
+                    <div class="properties-tabs">
+                        <button class="properties-tab active" data-tab="form">Form</button>
+                        <button class="properties-tab" data-tab="page">Page</button>
+                        <button class="properties-tab" data-tab="field">Field</button>
+                    </div>
+                </div>
+                <button class="palette-close" onclick="togglePropertiesPanel()">
+                    ×
+                </button>
+            </div>
+            <div class="properties-content" id="modernPropertiesContent">
+                <p>Select a field, page, or form to view properties</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legacy Main Container -->
     <div class="container">
         <!-- Sidebar -->
         <aside class="sidebar">
@@ -922,6 +1141,8 @@
     </footer>
 
     <!-- Load JavaScript Modules -->
+    <script src="js/debug.js"></script>
+    <script src="js/modern-interface.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>
 </html>

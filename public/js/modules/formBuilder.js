@@ -1,5 +1,7 @@
 // FormBuilder Module - Core form building functionality
 
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 export class FormBuilder {
     constructor() {
         this.currentForm = {
@@ -56,7 +58,7 @@ export class FormBuilder {
     }
     
     async initialize() {
-        console.log('Initializing FormBuilder module...');
+        debugInfo('FormBuilder', 'Initializing FormBuilder module...');
         this.setupEventListeners();
         this.renderFormCanvas();
         
@@ -93,7 +95,7 @@ export class FormBuilder {
                 e.preventDefault();
                 e.stopPropagation();
                 const tabType = e.target.closest('.property-tab').dataset.tab;
-                console.log('Switching to property tab:', tabType);
+                debugInfo('FormBuilder', 'Switching to property tab:', tabType);
                 this.switchPropertyTab(tabType);
             }
         });
@@ -107,15 +109,15 @@ export class FormBuilder {
     }
     
     renderFormCanvas() {
-        console.log('🔄 renderFormCanvas called');
+        debugInfo('FormBuilder', '🔄 renderFormCanvas called');
         const canvas = document.getElementById('formCanvas');
         const currentPage = this.getCurrentPage();
         
         // Debug: Log current DOM state before render
         const existingColumns = document.querySelectorAll('.column-dropzone');
-        console.log('📊 Before render - existing columns in DOM:', existingColumns.length);
+        debugInfo('FormBuilder', '📊 Before render - existing columns in DOM:', existingColumns.length);
         existingColumns.forEach((col, i) => {
-            console.log(`  Column ${i}:`, col.dataset.columnsId, col.dataset.columnIndex);
+            debugInfo("FormBuilder", `  Column ${i}:`, col.dataset.columnsId, col.dataset.columnIndex);
         });
         
         if (!currentPage.fields || currentPage.fields.length === 0) {
@@ -126,21 +128,21 @@ export class FormBuilder {
                 </div>
             `;
         } else {
-            console.log('🔄 Rendering', currentPage.fields.length, 'fields');
+            debugInfo('FormBuilder', '🔄 Rendering fields', { fieldsCount: currentPage.fields.length });
             canvas.innerHTML = '';
             currentPage.fields.forEach((field, index) => {
-                console.log(`📝 Rendering field ${index}:`, field.id, field.type);
+                debugInfo('FormBuilder', `📝 Rendering field ${index}:`, { fieldId: field.id, fieldType: field.type });
                 canvas.appendChild(this.createFieldElement(field));
             });
         }
         
         // Debug: Log DOM state after render
         const newColumns = document.querySelectorAll('.column-dropzone');
-        console.log('📊 After render - columns in DOM:', newColumns.length);
+        debugInfo('FormBuilder', '📊 After render - columns in DOM:', newColumns.length);
         newColumns.forEach((col, i) => {
-            console.log(`  Column ${i}:`, col.dataset.columnsId, col.dataset.columnIndex);
+            debugInfo("FormBuilder", `  Column ${i}:`, col.dataset.columnsId, col.dataset.columnIndex);
             const fieldsInColumn = col.querySelectorAll('.form-field');
-            console.log(`    Fields in column: ${fieldsInColumn.length}`);
+            debugInfo("FormBuilder", `    Fields in column: ${fieldsInColumn.length}`);
         });
         
         this.renderPageTabs();
@@ -148,7 +150,7 @@ export class FormBuilder {
         // Ensure container drag and drop listeners are set up
         setTimeout(() => {
             if (window.AppModules.dragDrop) {
-                console.log('🔧 FormBuilder: Setting up container listeners after render');
+                debugInfo("FormBuilder", '🔧 FormBuilder: Setting up container listeners after render');
                 window.AppModules.dragDrop.setupContainerListeners();
             }
             
@@ -509,7 +511,7 @@ export class FormBuilder {
             
             this.markFormDirty();
         } else {
-            console.warn(`Field with ID ${fieldId} not found for update`);
+            debugWarn('FormBuilder', `Field with ID ${fieldId} not found for update`);
         }
     }
     
@@ -532,6 +534,7 @@ export class FormBuilder {
         const removedField = this.removeFieldFromAnyLocation(fieldId);
         
         if (removedField) {
+            this.renderFormCanvas(); // Re-render the form to update UI
             this.markFormDirty();
             document.dispatchEvent(new CustomEvent('fieldRemoved', { detail: removedField }));
         }
@@ -550,11 +553,11 @@ export class FormBuilder {
     
     // Methods for handling fields within containers (sections and columns)
     addFieldToContainer(fieldType, containerId, containerType, targetIndex = null) {
-        console.log('🚀 addFieldToContainer called:', { fieldType, containerId, containerType, targetIndex });
+        debugInfo("FormBuilder", '🚀 addFieldToContainer called:', { fieldType, containerId, containerType, targetIndex });
         
         // First create the field
         const field = this.createField(fieldType);
-        console.log('📝 Created field:', field);
+        debugInfo("FormBuilder", '📝 Created field:', field);
         
         // Find the container and add the field to it
         if (containerType === 'section') {
@@ -568,22 +571,22 @@ export class FormBuilder {
                 } else {
                     sectionField.sectionConfig.fields.push(field);
                 }
-                console.log('✅ Added field to section:', sectionField.sectionConfig.fields);
+                debugInfo("FormBuilder", '✅ Added field to section:', sectionField.sectionConfig.fields);
             }
         } else if (containerType === 'column') {
             // containerId format is "field_X_Y" where X is part of columnsId and Y is columnIndex
             const parts = containerId.split('_');
             const columnIndex = parts.pop(); // Get the last part (column index)
             const columnsId = parts.join('_'); // Join the rest back together
-            console.log('🔍 Column container info:', { columnsId, columnIndex, originalContainerId: containerId });
+            debugInfo("FormBuilder", '🔍 Column container info:', { columnsId, columnIndex, originalContainerId: containerId });
             
             const columnsField = this.findFieldById(columnsId);
-            console.log('📋 Found columns field:', columnsField);
+            debugInfo("FormBuilder", '📋 Found columns field:', columnsField);
             
             if (columnsField && columnsField.type === 'columns') {
                 const colIndex = parseInt(columnIndex);
-                console.log('📍 Column index:', colIndex);
-                console.log('📋 Columns config:', columnsField.columnsConfig);
+                debugInfo("FormBuilder", '📍 Column index:', colIndex);
+                debugInfo("FormBuilder", '📋 Columns config:', columnsField.columnsConfig);
                 
                 if (columnsField.columnsConfig.columns[colIndex]) {
                     if (!columnsField.columnsConfig.columns[colIndex].fields) {
@@ -594,17 +597,17 @@ export class FormBuilder {
                     } else {
                         columnsField.columnsConfig.columns[colIndex].fields.push(field);
                     }
-                    console.log('✅ Added field to column:', columnsField.columnsConfig.columns[colIndex].fields);
-                    console.log('🔍 Full columns field after addition:', JSON.stringify(columnsField, null, 2));
+                    debugInfo("FormBuilder", '✅ Added field to column:', columnsField.columnsConfig.columns[colIndex].fields);
+                    debugInfo("FormBuilder", '🔍 Full columns field after addition:', JSON.stringify(columnsField, null, 2));
                 } else {
-                    console.error('❌ Column not found:', colIndex);
+                    debugError("FormBuilder", '❌ Column not found:', colIndex);
                 }
             } else {
-                console.error('❌ Columns field not found or wrong type:', columnsField);
+                debugError("FormBuilder", '❌ Columns field not found or wrong type:', columnsField);
             }
         }
         
-        console.log('🔄 Re-rendering form canvas...');
+        debugInfo("FormBuilder", '🔄 Re-rendering form canvas...');
         this.markFormDirty();
         document.dispatchEvent(new CustomEvent('fieldAdded', { detail: field }));
         
@@ -612,7 +615,7 @@ export class FormBuilder {
     }
     
     moveFieldToContainer(fieldId, containerId, containerType, targetIndex = null) {
-        console.log('🔄 moveFieldToContainer called:', { fieldId, containerId, containerType, targetIndex });
+        debugInfo("FormBuilder", '🔄 moveFieldToContainer called:', { fieldId, containerId, containerType, targetIndex });
         
         // Safety check: Don't allow moving a columns field into its own columns
         if (containerType === 'column') {
@@ -620,14 +623,14 @@ export class FormBuilder {
             const columnIndex = parseInt(parts.pop());
             const columnsId = parts.join('_');
             if (fieldId === columnsId) {
-                console.warn('⚠️ Cannot move columns field into its own columns');
+                debugWarn("FormBuilder", '⚠️ Cannot move columns field into its own columns');
                 return;
             }
         }
         
         const fieldLocation = this.findFieldLocation(fieldId);
         if (!fieldLocation) {
-            console.error(`❌ Field ${fieldId} not found - cannot move to container`);
+            debugError("FormBuilder", `❌ Field ${fieldId} not found - cannot move to container`);
             return;
         }
         const { field, parentArray, index: oldIndex } = fieldLocation;
@@ -650,7 +653,7 @@ export class FormBuilder {
         }
 
         if (!targetArray) {
-            console.error(`❌ Target container ${containerId} not found or invalid type`);
+            debugError("FormBuilder", `❌ Target container ${containerId} not found or invalid type`);
             return;
         }
 
@@ -661,13 +664,13 @@ export class FormBuilder {
 
         // Check if moving within the same array
         if (parentArray === targetArray) {
-            console.log(`🔄 Reordering field ${fieldId} within the same array (index ${oldIndex} to ${targetIndex})`);
+            debugInfo("FormBuilder", `🔄 Reordering field ${fieldId} within the same array (index ${oldIndex} to ${targetIndex})`);
             // Adjust targetIndex if moving from a lower index to a higher index
             const adjustedTargetIndex = (oldIndex < targetIndex) ? targetIndex - 1 : targetIndex;
             parentArray.splice(oldIndex, 1);
             parentArray.splice(adjustedTargetIndex, 0, field);
         } else {
-            console.log(`🔄 Moving field ${fieldId} from one container to another`);
+            debugInfo("FormBuilder", `🔄 Moving field ${fieldId} from one container to another`);
             // Remove from old location
             this.removeFieldFromAnyLocation(fieldId);
             // Add to new location
@@ -691,12 +694,12 @@ export class FormBuilder {
             newFieldId = `field_${this.fieldIdCounter++}`;
             attempts++;
             if (attempts > 10) {
-                console.error('❌ Too many attempts to create unique field ID');
+                debugError("FormBuilder", '❌ Too many attempts to create unique field ID');
                 break;
             }
         } while (this.findFieldById(newFieldId) !== null);
         
-        console.log('🆔 Creating field with ID:', newFieldId, 'Counter now:', this.fieldIdCounter, 'Attempts:', attempts);
+        debugInfo("FormBuilder", '🆔 Creating field with ID:', newFieldId, 'Counter now:', this.fieldIdCounter, 'Attempts:', attempts);
         
         const field = {
             id: newFieldId,
@@ -936,14 +939,14 @@ export class FormBuilder {
         // Safety check: Prevent removing container fields only when they're being deleted, not moved
         const field = this.findFieldById(fieldId);
         if (field && (field.type === 'columns' || field.type === 'section')) {
-            console.log(`🔍 Removing container field ${fieldId} - checking if this is for deletion or move`);
+            debugInfo("FormBuilder", `🔍 Removing container field ${fieldId} - checking if this is for deletion or move`);
             // Check if this is an explicit delete operation vs a move operation
             const stack = new Error().stack;
             const isExplicitDelete = stack.includes('removeField(') && !stack.includes('moveFieldToContainer');
             if (isExplicitDelete) {
-                console.log(`✅ Allowing deletion of container field ${fieldId}`);
+                debugInfo("FormBuilder", `✅ Allowing deletion of container field ${fieldId}`);
             } else {
-                console.log(`🔄 Allowing removal of container field ${fieldId} for move operation`);
+                debugInfo("FormBuilder", `🔄 Allowing removal of container field ${fieldId} for move operation`);
             }
         }
         
@@ -1008,7 +1011,7 @@ export class FormBuilder {
             // Switch to field tab and show properties
             this.switchPropertyTab('field');
         } else {
-            console.warn(`Field with ID ${fieldId} not found`);
+            debugWarn("FormBuilder", `Field with ID ${fieldId} not found`);
         }
     }
     
@@ -1172,7 +1175,7 @@ export class FormBuilder {
         this.applyFieldStyling(this.selectedField);
         this.markFormDirty();
         document.dispatchEvent(new CustomEvent('fieldStyleUpdated', { detail: { field: this.selectedField, property, value } }));
-        console.log(`Field styling ${property} updated to:`, value);
+        debugInfo("FormBuilder", `Field styling ${property} updated to:`, value);
     }
 
     applyFieldStyling(field) {
@@ -1275,7 +1278,7 @@ export class FormBuilder {
         this.showFieldProperties();
         this.markFormDirty();
         
-        console.log(`✅ Field ID updated from "${oldId}" to "${newId}"`);
+        debugInfo("FormBuilder", `✅ Field ID updated from "${oldId}" to "${newId}"`);
     }
     
     updateConditionalReferences(oldId, newId) {
@@ -1578,7 +1581,7 @@ export class FormBuilder {
             }
             
         } catch (error) {
-            console.error('Email verification error:', error);
+            debugError("FormBuilder", 'Email verification error:', error);
             this.showEmailVerificationStatus(
                 '❌ Failed to send verification email. Please check your email settings.',
                 'error'
@@ -1677,7 +1680,7 @@ export class FormBuilder {
             }
             
         } catch (error) {
-            console.error('Email confirmation error:', error);
+            debugError("FormBuilder", 'Email confirmation error:', error);
             this.showEmailVerificationStatus(
                 '❌ Failed to verify code. Please try again.',
                 'error'
@@ -1988,7 +1991,7 @@ export class FormBuilder {
     
     initializeDisplayContentEditor() {
         if (typeof Quill === 'undefined') {
-            console.warn('Quill is not loaded, cannot initialize display content editor');
+            debugWarn("FormBuilder", 'Quill is not loaded, cannot initialize display content editor');
             return;
         }
         
@@ -1996,7 +1999,7 @@ export class FormBuilder {
         const hiddenInput = document.getElementById('prop-displayContent');
         
         if (!editorContainer || !hiddenInput) {
-            console.warn('Display content editor elements not found');
+            debugWarn("FormBuilder", 'Display content editor elements not found');
             return;
         }
         
@@ -2564,18 +2567,18 @@ export class FormBuilder {
         // Initialize conditional logic AFTER other modules
         const conditionalLogic = window.AppModules?.conditionalLogic;
         if (conditionalLogic) {
-            console.log('🔄 PREVIEW: Initializing conditional logic module');
+            debugInfo("FormBuilder", '🔄 PREVIEW: Initializing conditional logic module');
             conditionalLogic.initializePreview();
             conditionalLogic.setupConditionalLogic();
         }
     }
     
     setupPreviewConditionalLogicListeners() {
-        console.log('🔄 PREVIEW: Setting up conditional logic field listeners');
+        debugInfo("FormBuilder", '🔄 PREVIEW: Setting up conditional logic field listeners');
         
         const conditionalLogic = window.AppModules.conditionalLogic;
         if (!conditionalLogic) {
-            console.warn('ConditionalLogic module not available');
+            debugWarn("FormBuilder", 'ConditionalLogic module not available');
             return;
         }
         
@@ -2587,17 +2590,17 @@ export class FormBuilder {
             
             events.forEach(eventType => {
                 field.addEventListener(eventType, () => {
-                    console.log('🔄 PREVIEW FIELD CHANGE: Field changed:', field.name || field.id, 'Value:', field.value);
+                    debugInfo("FormBuilder", '🔄 PREVIEW FIELD CHANGE: Field changed:', field.name || field.id, 'Value:', field.value);
                     conditionalLogic.handleFieldChange(field);
                 });
             });
         });
         
         // Initial evaluation of all conditions
-        console.log('🔄 PREVIEW: Performing initial conditional logic evaluation');
+        debugInfo("FormBuilder", '🔄 PREVIEW: Performing initial conditional logic evaluation');
         conditionalLogic.evaluateAllConditions();
         
-        console.log('🔄 PREVIEW: Conditional logic listeners setup complete');
+        debugInfo("FormBuilder", '🔄 PREVIEW: Conditional logic listeners setup complete');
     }
     
     escapeHtml(text) {
@@ -2611,7 +2614,7 @@ export class FormBuilder {
         this.currentForm = formData;
         this.currentPageIndex = 0;
         this.fieldIdCounter = this.calculateNextFieldId();
-        console.log('📋 Form loaded, fieldIdCounter set to:', this.fieldIdCounter);
+        debugInfo("FormBuilder", '📋 Form loaded, fieldIdCounter set to:', this.fieldIdCounter);
         
         // Show form builder UI
         document.getElementById('buildingBlocks').style.display = 'block';
@@ -2654,7 +2657,7 @@ export class FormBuilder {
             findMaxIdInFields(page.fields);
         });
         
-        console.log('🔢 Calculated next field ID:', maxId + 1);
+        debugInfo("FormBuilder", '🔢 Calculated next field ID:', maxId + 1);
         return maxId + 1;
     }
     
@@ -2680,7 +2683,7 @@ export class FormBuilder {
                     });
                 }
             }).catch(error => {
-                console.error('Error loading Salesforce objects for page:', error);
+                debugError("FormBuilder", 'Error loading Salesforce objects for page:', error);
             });
         }
     }
@@ -2703,7 +2706,7 @@ export class FormBuilder {
                     });
                 }
             }).catch(error => {
-                console.error('Error loading Salesforce objects for page:', error);
+                debugError("FormBuilder", 'Error loading Salesforce objects for page:', error);
             });
         }
     }
@@ -2726,14 +2729,14 @@ export class FormBuilder {
                     });
                 }
             }).catch(error => {
-                console.error('Error loading Salesforce objects for page:', error);
+                debugError("FormBuilder", 'Error loading Salesforce objects for page:', error);
             });
         }
     }
 
     // Property Tab Management
     switchPropertyTab(tabType) {
-        console.log('switchPropertyTab called with:', tabType);
+        debugInfo("FormBuilder", 'switchPropertyTab called with:', tabType);
         
         // Update tab visual state
         document.querySelectorAll('.property-tab').forEach(tab => {
@@ -2743,9 +2746,9 @@ export class FormBuilder {
         const targetTab = document.querySelector(`[data-tab="${tabType}"]`);
         if (targetTab) {
             targetTab.classList.add('active');
-            console.log('✅ Tab visual state updated for:', tabType);
+            debugInfo("FormBuilder", '✅ Tab visual state updated for:', tabType);
         } else {
-            console.error('❌ Tab not found:', tabType);
+            debugError("FormBuilder", '❌ Tab not found:', tabType);
             return;
         }
 
@@ -2753,36 +2756,36 @@ export class FormBuilder {
         document.querySelectorAll('.property-section').forEach(section => {
             section.style.display = 'none';
         });
-        console.log('🔧 All property sections hidden');
+        debugInfo("FormBuilder", '🔧 All property sections hidden');
 
         // Show selected section and render content
         const section = document.getElementById(`${tabType}Properties`);
         if (section) {
             section.style.display = 'block';
-            console.log('✅ Property section shown:', `${tabType}Properties`);
+            debugInfo("FormBuilder", '✅ Property section shown:', `${tabType}Properties`);
         } else {
-            console.error('❌ Property section not found:', `${tabType}Properties`);
+            debugError("FormBuilder", '❌ Property section not found:', `${tabType}Properties`);
             return;
         }
 
         switch (tabType) {
             case 'form':
-                console.log('📋 Showing form properties');
+                debugInfo("FormBuilder", '📋 Showing form properties');
                 this.showFormProperties();
                 break;
             case 'page':
-                console.log('📄 Showing page properties');
+                debugInfo("FormBuilder", '📄 Showing page properties');
                 this.showPageProperties();
                 break;
             case 'field':
-                console.log('🔧 Showing field properties');
+                debugInfo("FormBuilder", '🔧 Showing field properties');
                 this.showFieldProperties();
                 break;
             default:
-                console.error('❌ Unknown tab type:', tabType);
+                debugError("FormBuilder", '❌ Unknown tab type:', tabType);
         }
         
-        console.log('🎉 switchPropertyTab completed for:', tabType);
+        debugInfo("FormBuilder", '🎉 switchPropertyTab completed for:', tabType);
     }
 
     // Form Properties
@@ -3701,10 +3704,10 @@ export class FormBuilder {
                 this.currentForm.settings = {};
             }
             this.currentForm.settings[key] = value;
-            console.log(`📝 Updated form setting: ${key} =`, value);
+            debugInfo("FormBuilder", `📝 Updated form setting: ${key} =`, value);
             this.markFormDirty();
         } catch (error) {
-            console.error('❌ Error updating form setting:', error, { key, value });
+            debugError("FormBuilder", '❌ Error updating form setting:', error, { key, value });
         }
     }
 
@@ -3742,7 +3745,7 @@ export class FormBuilder {
     }
 
     applyFormThemePreset(theme) {
-        console.log(`🎨 Applying theme preset: ${theme}`);
+        debugInfo("FormBuilder", `🎨 Applying theme preset: ${theme}`);
         
         const presets = {
             modern: {
@@ -3883,7 +3886,7 @@ export class FormBuilder {
     }
 
     resetFormStyles() {
-        console.log('🔄 Resetting form styles to default');
+        debugInfo("FormBuilder", '🔄 Resetting form styles to default');
         
         const defaultSettings = {
             primaryColor: '#8b5cf6',
@@ -3921,9 +3924,9 @@ export class FormBuilder {
 
             cssEditor.value = css;
             this.updateFormSetting('customCSS', css);
-            console.log('✨ CSS formatted successfully');
+            debugInfo("FormBuilder", '✨ CSS formatted successfully');
         } catch (error) {
-            console.error('❌ Error formatting CSS:', error);
+            debugError("FormBuilder", '❌ Error formatting CSS:', error);
         }
     }
 
@@ -3975,7 +3978,7 @@ export class FormBuilder {
             cssEditor.value = template;
             this.updateFormSetting('customCSS', template);
             this.updateStylePreview();
-            console.log('📝 CSS template inserted');
+            debugInfo("FormBuilder", '📝 CSS template inserted');
         }
     }
 
@@ -4010,7 +4013,7 @@ export class FormBuilder {
             alert('✅ CSS appears to be valid!');
         }
 
-        console.log('✅ CSS validation completed');
+        debugInfo("FormBuilder", '✅ CSS validation completed');
     }
 
     clearCustomCSS() {
@@ -4020,7 +4023,7 @@ export class FormBuilder {
                 cssEditor.value = '';
                 this.updateFormSetting('customCSS', '');
                 this.updateStylePreview();
-                console.log('🗑️ Custom CSS cleared');
+                debugInfo("FormBuilder", '🗑️ Custom CSS cleared');
             }
         }
     }
@@ -4071,7 +4074,7 @@ export class FormBuilder {
                 cssEditor.value = newCSS;
                 this.updateFormSetting('customCSS', newCSS);
                 this.updateStylePreview();
-                console.log(`📝 CSS snippet "${snippetType}" inserted`);
+                debugInfo("FormBuilder", `📝 CSS snippet "${snippetType}" inserted`);
             }
         }
     }
@@ -4089,12 +4092,12 @@ export class FormBuilder {
         }
 
         currentPage.styleSettings[key] = value;
-        console.log(`🎨 Updated page style setting: ${key} =`, value);
+        debugInfo("FormBuilder", `🎨 Updated page style setting: ${key} =`, value);
         this.markFormDirty();
     }
 
     applyPageThemePreset(theme) {
-        console.log(`🎨 Applying page theme preset: ${theme}`);
+        debugInfo("FormBuilder", `🎨 Applying page theme preset: ${theme}`);
         const currentPage = this.getCurrentPage();
         if (!currentPage) return;
 
@@ -4192,12 +4195,12 @@ export class FormBuilder {
 
             // Refresh the page properties to show new values
             this.showPageProperties();
-            console.log(`✅ Applied page theme: ${theme}`);
+            debugInfo("FormBuilder", `✅ Applied page theme: ${theme}`);
         }
     }
 
     resetPageStyles() {
-        console.log('🔄 Resetting page styles to default');
+        debugInfo("FormBuilder", '🔄 Resetting page styles to default');
         const currentPage = this.getCurrentPage();
         if (!currentPage) return;
 
@@ -4215,7 +4218,7 @@ export class FormBuilder {
         });
 
         this.showPageProperties();
-        console.log('✅ Page styles reset to default');
+        debugInfo("FormBuilder", '✅ Page styles reset to default');
     }
 
     formatPageCSS() {
@@ -4234,9 +4237,9 @@ export class FormBuilder {
 
             cssEditor.value = css;
             this.updatePageStyleProperty('customCSS', css);
-            console.log('✨ Page CSS formatted successfully');
+            debugInfo("FormBuilder", '✨ Page CSS formatted successfully');
         } catch (error) {
-            console.error('❌ Error formatting page CSS:', error);
+            debugError("FormBuilder", '❌ Error formatting page CSS:', error);
         }
     }
 
@@ -4278,7 +4281,7 @@ export class FormBuilder {
         if (cssEditor) {
             cssEditor.value = template;
             this.updatePageStyleProperty('customCSS', template);
-            console.log('📝 Page CSS template inserted');
+            debugInfo("FormBuilder", '📝 Page CSS template inserted');
         }
     }
 
@@ -4288,7 +4291,7 @@ export class FormBuilder {
             if (cssEditor) {
                 cssEditor.value = '';
                 this.updatePageStyleProperty('customCSS', '');
-                console.log('🗑️ Page CSS cleared');
+                debugInfo("FormBuilder", '🗑️ Page CSS cleared');
             }
         }
     }
@@ -4313,7 +4316,7 @@ export class FormBuilder {
         }
         
         this.markFormDirty();
-        console.log(`Navigation config updated for ${buttonType}: ${property} = ${value}`);
+        debugInfo("FormBuilder", `Navigation config updated for ${buttonType}: ${property} = ${value}`);
     }
 
     updateEmailSetting(key, value) {
@@ -4329,33 +4332,33 @@ export class FormBuilder {
 
     // Page Properties
     showPageProperties() {
-        console.log('📄 showPageProperties called');
+        debugInfo("FormBuilder", '📄 showPageProperties called');
         const pageSection = document.getElementById('pageProperties');
-        console.log('📄 pageSection element:', pageSection);
+        debugInfo("FormBuilder", '📄 pageSection element:', pageSection);
         
         const currentPage = this.getCurrentPage();
-        console.log('📄 currentPage:', currentPage);
+        debugInfo("FormBuilder", '📄 currentPage:', currentPage);
 
         if (!currentPage) {
-            console.log('❌ No current page found');
+            debugInfo("FormBuilder", '❌ No current page found');
             pageSection.innerHTML = '<p class="empty-state">Select a page to view properties</p>';
             return;
         }
 
-        console.log('📄 Rendering page properties...');
+        debugInfo("FormBuilder", '📄 Rendering page properties...');
         const renderedHTML = this.renderPageProperties(currentPage);
-        console.log('📄 Rendered HTML length:', renderedHTML.length);
+        debugInfo("FormBuilder", '📄 Rendered HTML length:', renderedHTML.length);
         pageSection.innerHTML = renderedHTML;
 
-        console.log('📄 Attaching page property listeners...');
+        debugInfo("FormBuilder", '📄 Attaching page property listeners...');
         // Attach listeners for page properties
         this.attachPagePropertyListeners(currentPage);
 
-        console.log('📄 Loading Salesforce objects...');
+        debugInfo("FormBuilder", '📄 Loading Salesforce objects...');
         // Load Salesforce objects for mapping
         this.loadSalesforceObjectsForPage();
         
-        console.log('✅ showPageProperties completed');
+        debugInfo("FormBuilder", '✅ showPageProperties completed');
     }
 
     renderPageProperties(page) {
@@ -4951,13 +4954,13 @@ export class FormBuilder {
         const addVariable = (id, label, page, source) => {
             if (!variableMap.has(id)) {
                 variableMap.set(id, { id, label, page, source });
-                console.log(`  ✅ PAGE CONDITIONS: Added variable "${id}" (${source})`);
+                debugInfo("FormBuilder", `  ✅ PAGE CONDITIONS: Added variable "${id}" (${source})`);
             } else {
                 const existing = variableMap.get(id);
                 // Update label to show multiple sources if different
                 if (existing.source !== source) {
                     existing.label = `${id} (${existing.source} + ${source})`;
-                    console.log(`  🔄 PAGE CONDITIONS: Updated variable "${id}" to show multiple sources`);
+                    debugInfo("FormBuilder", `  🔄 PAGE CONDITIONS: Updated variable "${id}" to show multiple sources`);
                 }
             }
         };
@@ -4978,14 +4981,14 @@ export class FormBuilder {
         }
         
         // Add global variables
-        console.log('🔍 PAGE CONDITIONS: Checking FormVariables availability...');
+        debugInfo("FormBuilder", '🔍 PAGE CONDITIONS: Checking FormVariables availability...');
         if (window.FormVariables) {
             try {
                 // Check if getAll method exists
                 if (typeof window.FormVariables.getAll === 'function') {
                     const globalVars = window.FormVariables.getAll();
                     const varCount = Object.keys(globalVars).length;
-                    console.log(`📊 PAGE CONDITIONS: Found ${varCount} global variables:`, globalVars);
+                    debugInfo("FormBuilder", `📊 PAGE CONDITIONS: Found ${varCount} global variables:`, globalVars);
                     
                     Object.entries(globalVars).forEach(([varName, value]) => {
                         addVariable(
@@ -4996,10 +4999,10 @@ export class FormBuilder {
                         );
                     });
                 } else {
-                    console.warn('⚠️ PAGE CONDITIONS: FormVariables.getAll method not available');
+                    debugWarn("FormBuilder", '⚠️ PAGE CONDITIONS: FormVariables.getAll method not available');
                     // Fallback: try to access the variables Map directly
                     if (window.FormVariables.variables && window.FormVariables.variables instanceof Map) {
-                        console.log('🔄 PAGE CONDITIONS: Using direct Map access as fallback...');
+                        debugInfo("FormBuilder", '🔄 PAGE CONDITIONS: Using direct Map access as fallback...');
                         window.FormVariables.variables.forEach((value, varName) => {
                             addVariable(
                                 varName,
@@ -5011,18 +5014,18 @@ export class FormBuilder {
                     }
                 }
             } catch (error) {
-                console.warn('Error accessing FormVariables in getAvailableFieldsForPageConditions:', error);
+                debugWarn("FormBuilder", 'Error accessing FormVariables in getAvailableFieldsForPageConditions:', error);
             }
         } else {
-            console.warn('⚠️ PAGE CONDITIONS: FormVariables not available');
+            debugWarn("FormBuilder", '⚠️ PAGE CONDITIONS: FormVariables not available');
         }
         
         // Add Login field variables from ALL pages
-        console.log('🔍 PAGE CONDITIONS: Checking Login field variables...');
+        debugInfo("FormBuilder", '🔍 PAGE CONDITIONS: Checking Login field variables...');
         this.currentForm.pages.forEach((formPage, pageIdx) => {
             formPage.fields.forEach(field => {
                 if (field.type === 'login' && field.loginConfig && field.loginConfig.setVariables) {
-                    console.log(`📝 PAGE CONDITIONS: Found login field "${field.label}" (${field.id}) with variables:`, Object.keys(field.loginConfig.setVariables));
+                    debugInfo("FormBuilder", `📝 PAGE CONDITIONS: Found login field "${field.label}" (${field.id}) with variables:`, Object.keys(field.loginConfig.setVariables));
                     Object.keys(field.loginConfig.setVariables).forEach(varName => {
                         // Only add the simple variable name (no field-specific duplicates)
                         addVariable(
@@ -5046,11 +5049,11 @@ export class FormBuilder {
         });
         
         // Add variables from field setVariablesConfig for ALL field types
-        console.log('🔍 PAGE CONDITIONS: Checking field setVariablesConfig variables...');
+        debugInfo("FormBuilder", '🔍 PAGE CONDITIONS: Checking field setVariablesConfig variables...');
         this.currentForm.pages.forEach((formPage, pageIdx) => {
             formPage.fields.forEach(field => {
                 if (field.setVariablesConfig && field.setVariablesConfig.enabled && field.setVariablesConfig.setVariables) {
-                    console.log(`📝 PAGE CONDITIONS: Found field "${field.label}" (${field.id}) with setVariablesConfig:`, Object.keys(field.setVariablesConfig.setVariables));
+                    debugInfo("FormBuilder", `📝 PAGE CONDITIONS: Found field "${field.label}" (${field.id}) with setVariablesConfig:`, Object.keys(field.setVariablesConfig.setVariables));
                     Object.keys(field.setVariablesConfig.setVariables).forEach(varName => {
                         addVariable(
                             varName,
@@ -5064,11 +5067,11 @@ export class FormBuilder {
         });
 
         // Add Email Verify field variables from ALL pages
-        console.log('🔍 PAGE CONDITIONS: Checking Email Verify field variables...');
+        debugInfo("FormBuilder", '🔍 PAGE CONDITIONS: Checking Email Verify field variables...');
         this.currentForm.pages.forEach((formPage, pageIdx) => {
             formPage.fields.forEach(field => {
                 if (field.type === 'email-verify' && field.verifyConfig && field.verifyConfig.setVariables) {
-                    console.log(`📝 PAGE CONDITIONS: Found email verify field "${field.label}" (${field.id}) with variables:`, Object.keys(field.verifyConfig.setVariables));
+                    debugInfo("FormBuilder", `📝 PAGE CONDITIONS: Found email verify field "${field.label}" (${field.id}) with variables:`, Object.keys(field.verifyConfig.setVariables));
                     Object.keys(field.verifyConfig.setVariables).forEach(varName => {
                         addVariable(
                             varName,
@@ -5083,7 +5086,7 @@ export class FormBuilder {
         
         // Convert variableMap back to fields array
         const fields = [];
-        console.log(`🔍 PAGE CONDITIONS: Found ${variableMap.size} unique variables total`);
+        debugInfo("FormBuilder", `🔍 PAGE CONDITIONS: Found ${variableMap.size} unique variables total`);
         variableMap.forEach(variable => {
             fields.push(variable);
         });
@@ -5106,7 +5109,7 @@ export class FormBuilder {
                 // Create the variable in the global system if it doesn't exist
                 if (window.FormVariables && !window.FormVariables.has(varName)) {
                     window.FormVariables.set(varName, '');
-                    console.log(`Created new RecordId variable: ${varName}`);
+                    debugInfo("FormBuilder", `Created new RecordId variable: ${varName}`);
                 }
                 
                 // Refresh the page properties to show the new variable in dropdown
@@ -5241,7 +5244,7 @@ export class FormBuilder {
             if (element) {
                 element.addEventListener(event, handler);
             } else {
-                console.warn(`Element with ID '${id}' not found when attaching listeners`);
+                debugWarn("FormBuilder", `Element with ID '${id}' not found when attaching listeners`);
             }
         };
 
@@ -5351,7 +5354,7 @@ export class FormBuilder {
     addPageCondition() {
         const currentPage = this.getCurrentPage();
         if (!currentPage) {
-            console.error('No current page found for adding condition');
+            debugError("FormBuilder", 'No current page found for adding condition');
             return;
         }
         if (!currentPage.conditionalVisibility) {
@@ -5372,7 +5375,7 @@ export class FormBuilder {
     removePageCondition(index, type) {
         const currentPage = this.getCurrentPage();
         if (!currentPage) {
-            console.error('No current page found for removing condition');
+            debugError("FormBuilder", 'No current page found for removing condition');
             return;
         }
         
@@ -5396,7 +5399,7 @@ export class FormBuilder {
     updatePageCondition(index, property, value, type) {
         const currentPage = this.getCurrentPage();
         if (!currentPage) {
-            console.error('No current page found for updating condition');
+            debugError("FormBuilder", 'No current page found for updating condition');
             return;
         }
         
@@ -5587,7 +5590,7 @@ export class FormBuilder {
     togglePageNavigationButtonConditionalVisibility(buttonType, enabled) {
         const currentPage = this.getCurrentPage();
         if (!currentPage) {
-            console.error('No current page found for navigation button conditional visibility');
+            debugError("FormBuilder", 'No current page found for navigation button conditional visibility');
             return;
         }
         
@@ -5616,7 +5619,7 @@ export class FormBuilder {
     updatePageNavigationButtonConditionalProperty(buttonType, property, value) {
         const currentPage = this.getCurrentPage();
         if (!currentPage) {
-            console.error('No current page found for navigation button property update');
+            debugError("FormBuilder", 'No current page found for navigation button property update');
             return;
         }
         
@@ -5643,7 +5646,7 @@ export class FormBuilder {
     addPageNavigationButtonCondition(buttonType) {
         const currentPage = this.getCurrentPage();
         if (!currentPage) {
-            console.error('No current page found for adding navigation button condition');
+            debugError("FormBuilder", 'No current page found for adding navigation button condition');
             return;
         }
         
@@ -5960,7 +5963,7 @@ export class FormBuilder {
             if (currentPage) {
                 currentPage.actionType = e.target.value;
                 this.markFormDirty();
-                console.log(`Page action type changed to: ${e.target.value}`);
+                debugInfo("FormBuilder", `Page action type changed to: ${e.target.value}`);
             }
         });
 
@@ -6108,7 +6111,7 @@ export class FormBuilder {
     loadParentPages() {
         const select = document.getElementById('page-parent-page');
         if (!select) {
-            console.warn('page-parent-page element not found, skipping loadParentPages');
+            debugWarn("FormBuilder", 'page-parent-page element not found, skipping loadParentPages');
             return;
         }
         
@@ -6189,7 +6192,7 @@ export class FormBuilder {
                         if (autoSelectedField) {
                             currentPage.parentField = autoSelectedField.name;
                             this.markFormDirty();
-                            console.log(`Auto-selected relationship field: ${autoSelectedField.name} for ${currentPage.salesforceObject} → ${parentObjectName}`);
+                            debugInfo("FormBuilder", `Auto-selected relationship field: ${autoSelectedField.name} for ${currentPage.salesforceObject} → ${parentObjectName}`);
                         }
                     }
                     
@@ -6210,7 +6213,7 @@ export class FormBuilder {
     loadConditionalPages() {
         const select = document.getElementById('page-conditional-depends-page');
         if (!select) {
-            console.warn('page-conditional-depends-page element not found, skipping loadConditionalPages');
+            debugWarn("FormBuilder", 'page-conditional-depends-page element not found, skipping loadConditionalPages');
             return;
         }
         
@@ -6364,7 +6367,7 @@ export class FormBuilder {
         // Store the original page index
         this.draggedPageIndex = parseInt(e.target.dataset.pageIndex);
         
-        console.log('Started dragging page:', this.draggedPageIndex);
+        debugInfo("FormBuilder", 'Started dragging page:', this.draggedPageIndex);
     }
 
     handlePageTabDragOver(e) {
@@ -6390,7 +6393,7 @@ export class FormBuilder {
         // Clear visual feedback
         targetTab.classList.remove('drag-over');
         
-        console.log('Dropped page at index:', targetIndex);
+        debugInfo("FormBuilder", 'Dropped page at index:', targetIndex);
     }
 
     handlePageTabDragEnd(e) {
@@ -6415,7 +6418,7 @@ export class FormBuilder {
         
         this.draggedPageIndex = undefined;
         
-        console.log('Drag operation completed and cleaned up');
+        debugInfo("FormBuilder", 'Drag operation completed and cleaned up');
     }
 
     reorderPages(fromIndex, toIndex) {
@@ -6444,7 +6447,7 @@ export class FormBuilder {
         // Mark form as dirty
         this.markFormDirty();
         
-        console.log(`Reordered page from index ${fromIndex} to ${toIndex}`);
+        debugInfo("FormBuilder", `Reordered page from index ${fromIndex} to ${toIndex}`);
     }
 
     renderHiddenFields(page) {
@@ -6534,10 +6537,10 @@ export class FormBuilder {
             
             select.innerHTML = options.join('');
             
-            console.log(`✅ Loaded ${relationshipFields.length} relationship fields for ${currentPage.salesforceObject}`);
+            debugInfo("FormBuilder", `✅ Loaded ${relationshipFields.length} relationship fields for ${currentPage.salesforceObject}`);
             
         } catch (error) {
-            console.error('Error loading relationship fields:', error);
+            debugError("FormBuilder", 'Error loading relationship fields:', error);
             select.innerHTML = `
                 <option value="">No relationship field (standalone records)</option>
                 <option value="" disabled>Error loading fields from Salesforce</option>
@@ -6739,7 +6742,7 @@ export class FormBuilder {
         this.showPageProperties();
         this.markFormDirty();
         
-        console.log(`✅ Set up ${buttonType} button to require login on page "${currentPage.name}"`);
+        debugInfo("FormBuilder", `✅ Set up ${buttonType} button to require login on page "${currentPage.name}"`);
         alert(`${buttonType === 'next' ? 'Next' : 'Submit'} button will now only show after user login.`);
     }
 
@@ -6837,7 +6840,7 @@ export class FormBuilder {
         // Refresh the list
         this.refreshVariablesList();
 
-        console.log(`✅ Added variable: ${name} = ${JSON.stringify(parsedValue)}`);
+        debugInfo("FormBuilder", `✅ Added variable: ${name} = ${JSON.stringify(parsedValue)}`);
     }
 
     editVariable(name) {
@@ -6859,7 +6862,7 @@ export class FormBuilder {
 
             window.FormVariables.set(name, parsedValue);
             this.refreshVariablesList();
-            console.log(`✏️ Updated variable: ${name} = ${JSON.stringify(parsedValue)}`);
+            debugInfo("FormBuilder", `✏️ Updated variable: ${name} = ${JSON.stringify(parsedValue)}`);
         }
     }
 
@@ -6867,13 +6870,13 @@ export class FormBuilder {
         if (confirm(`Are you sure you want to delete the variable "${name}"?`)) {
             window.FormVariables.variables.delete(name);
             this.refreshVariablesList();
-            console.log(`🗑️ Deleted variable: ${name}`);
+            debugInfo("FormBuilder", `🗑️ Deleted variable: ${name}`);
         }
     }
 
     debugConsole() {
-        console.log('🔧 VARIABLES MANAGER DEBUG:');
-        console.log('===========================');
+        debugInfo("FormBuilder", '🔧 VARIABLES MANAGER DEBUG:');
+        debugInfo("FormBuilder", '===========================');
         window.FormVariables.debug();
         alert('Variable data logged to console. Check Developer Tools > Console.');
     }
@@ -6893,7 +6896,7 @@ export class FormBuilder {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        console.log('💾 Variables exported:', variables);
+        debugInfo("FormBuilder", '💾 Variables exported:', variables);
         alert('Variables exported as JSON file!');
     }
 
@@ -6901,7 +6904,7 @@ export class FormBuilder {
         if (confirm('Are you sure you want to clear ALL variables? This cannot be undone.')) {
             window.FormVariables.clear();
             this.refreshVariablesList();
-            console.log('🗑️ All variables cleared');
+            debugInfo("FormBuilder", '🗑️ All variables cleared');
             alert('All variables have been cleared.');
         }
     }
@@ -7123,7 +7126,7 @@ export class FormBuilder {
             this.showQueryFieldsModal(fields, currentPage.queryFields || '');
 
         } catch (error) {
-            console.error('Error loading fields:', error);
+            debugError("FormBuilder", 'Error loading fields:', error);
             alert('Failed to load Salesforce fields. Please try again.');
         } finally {
             // Restore button state
@@ -7328,7 +7331,7 @@ export class FormBuilder {
             this.showOrderByModal(sortableFields, currentPage.queryOrderBy || '');
 
         } catch (error) {
-            console.error('Error loading fields:', error);
+            debugError("FormBuilder", 'Error loading fields:', error);
             alert('Failed to load Salesforce fields. Please try again.');
         } finally {
             // Restore button state
@@ -7641,7 +7644,7 @@ export class FormBuilder {
             this.showWhereBuilderModal(fields, currentPage.queryWhereConditions || []);
 
         } catch (error) {
-            console.error('Error loading fields:', error);
+            debugError("FormBuilder", 'Error loading fields:', error);
             alert('Failed to load Salesforce fields. Please try again.');
         } finally {
             // Restore button state
@@ -8035,7 +8038,7 @@ export class FormBuilder {
     // =============================================================================
 
     initializeSalesforceRecordBrowser() {
-        console.log('🔍 Initializing Salesforce Record Browser...');
+        debugInfo("FormBuilder", '🔍 Initializing Salesforce Record Browser...');
         
         // Check connection status
         this.updateSalesforceRecordBrowserStatus();
@@ -8116,10 +8119,10 @@ export class FormBuilder {
                 selector.appendChild(this.createObjectOption(obj, false));
             });
 
-            console.log(`✅ Loaded ${objects.length} Salesforce objects for browser`);
+            debugInfo("FormBuilder", `✅ Loaded ${objects.length} Salesforce objects for browser`);
             
         } catch (error) {
-            console.error('❌ Error loading Salesforce objects for browser:', error);
+            debugError("FormBuilder", '❌ Error loading Salesforce objects for browser:', error);
             selector.innerHTML = '<option value="" disabled>Error loading objects</option>';
         }
     }
@@ -8181,10 +8184,10 @@ export class FormBuilder {
             // Show search row
             searchRow.style.display = 'block';
             
-            console.log(`✅ Loaded ${importantFields.length} fields for ${selectedObject}`);
+            debugInfo("FormBuilder", `✅ Loaded ${importantFields.length} fields for ${selectedObject}`);
             
         } catch (error) {
-            console.error('❌ Error loading object fields:', error);
+            debugError("FormBuilder", '❌ Error loading object fields:', error);
             checkboxContainer.innerHTML = '<div class="error-message">Error loading fields. Please try again.</div>';
         }
     }
@@ -8231,7 +8234,7 @@ export class FormBuilder {
             this.displaySalesforceSearchResults(records, selectedFields, searchTerm);
             
         } catch (error) {
-            console.error('❌ Error searching Salesforce records:', error);
+            debugError("FormBuilder", '❌ Error searching Salesforce records:', error);
             this.showSalesforceError('Failed to search records. Please check your connection and try again.');
         } finally {
             this.showSalesforceSearchLoading(false);
@@ -8420,13 +8423,13 @@ export class FormBuilder {
             // Show success message
             const message = `Successfully imported ${totalVariables} variables from ${selectedCheckboxes.length} record${selectedCheckboxes.length > 1 ? 's' : ''}!`;
             alert(message);
-            console.log('✅ Salesforce records imported:', { totalVariables, records: selectedCheckboxes.length });
+            debugInfo("FormBuilder", '✅ Salesforce records imported:', { totalVariables, records: selectedCheckboxes.length });
 
             // Clear selection
             this.clearSalesforceSelection();
             
         } catch (error) {
-            console.error('❌ Error importing Salesforce records:', error);
+            debugError("FormBuilder", '❌ Error importing Salesforce records:', error);
             alert('Failed to import records. Please try again.');
         } finally {
             const importButton = document.getElementById('sfImportButton');
@@ -8523,7 +8526,7 @@ export class FormBuilder {
         
         this.renderFormCanvas();
         this.markFormDirty();
-        console.log(`Updated DataTable config ${property}:`, value);
+        debugInfo("FormBuilder", `Updated DataTable config ${property}:`, value);
     }
 
     renderDataTableColumns(columns) {
@@ -8644,7 +8647,7 @@ export class FormBuilder {
         this.showFieldProperties();
         this.renderFormCanvas();
         this.markFormDirty();
-        console.log('Added new DataTable column:', newColumn);
+        debugInfo("FormBuilder", 'Added new DataTable column:', newColumn);
     }
 
     removeDataTableColumn(columnIndex) {
@@ -8658,7 +8661,7 @@ export class FormBuilder {
             this.showFieldProperties();
             this.renderFormCanvas();
             this.markFormDirty();
-            console.log('Removed DataTable column at index:', columnIndex);
+            debugInfo("FormBuilder", 'Removed DataTable column at index:', columnIndex);
         }
     }
 
@@ -8678,7 +8681,7 @@ export class FormBuilder {
         
         this.renderFormCanvas();
         this.markFormDirty();
-        console.log(`Updated DataTable column ${columnIndex} ${property}:`, value);
+        debugInfo("FormBuilder", `Updated DataTable column ${columnIndex} ${property}:`, value);
     }
 
     updateDataTableColumnOptions(columnIndex, optionsText) {
@@ -8694,7 +8697,7 @@ export class FormBuilder {
         
         this.renderFormCanvas();
         this.markFormDirty();
-        console.log(`Updated DataTable column ${columnIndex} options:`, options);
+        debugInfo("FormBuilder", `Updated DataTable column ${columnIndex} options:`, options);
     }
 
     renderAvailableFields(sourcePageId) {
@@ -8817,7 +8820,7 @@ export class FormBuilder {
         this.renderFormCanvas();
         this.markFormDirty();
         
-        console.log(`Created ${newColumns.length} columns from selected fields:`, newColumns.map(col => col.field));
+        debugInfo("FormBuilder", `Created ${newColumns.length} columns from selected fields:`, newColumns.map(col => col.field));
         
         // Show success message
         const info = document.querySelector('.field-selection-info');
@@ -8837,14 +8840,14 @@ export class FormBuilder {
         try {
             const field = this.selectedField;
             if (!field) {
-                console.warn('⚠️ No field selected for styling update');
+                debugWarn("FormBuilder", '⚠️ No field selected for styling update');
                 return;
             }
             
             if (!field.styling) field.styling = {};
             field.styling[property] = value;
             
-            console.log(`🎨 Updated field styling: ${property} =`, value, `for field:`, field.id);
+            debugInfo("FormBuilder", `🎨 Updated field styling: ${property} =`, value, `for field:`, field.id);
             
             // If width changed to custom, refresh properties to show custom width input
             if (property === 'width' && value === 'custom') {
@@ -8854,7 +8857,7 @@ export class FormBuilder {
             this.renderFormCanvas();
             this.markFormDirty();
         } catch (error) {
-            console.error('❌ Error updating field styling:', error, { property, value });
+            debugError("FormBuilder", '❌ Error updating field styling:', error, { property, value });
         }
     }
 
@@ -8998,7 +9001,7 @@ export class FormBuilder {
         const field = this.selectedField;
         if (!field) return;
 
-        console.log('🔄 Resetting field styles to default');
+        debugInfo("FormBuilder", '🔄 Resetting field styles to default');
 
         // Reset field styling to defaults
         field.styling = {};
@@ -9007,7 +9010,7 @@ export class FormBuilder {
         this.showFieldProperties();
         this.renderFormCanvas();
         this.markFormDirty();
-        console.log('✅ Field styles reset to default');
+        debugInfo("FormBuilder", '✅ Field styles reset to default');
     }
 
     formatFieldCSS() {
@@ -9026,9 +9029,9 @@ export class FormBuilder {
 
             cssEditor.value = css;
             this.updateFieldStyling('customCSS', css);
-            console.log('✨ Field CSS formatted successfully');
+            debugInfo("FormBuilder", '✨ Field CSS formatted successfully');
         } catch (error) {
-            console.error('❌ Error formatting field CSS:', error);
+            debugError("FormBuilder", '❌ Error formatting field CSS:', error);
         }
     }
 
@@ -9074,7 +9077,7 @@ export class FormBuilder {
         if (cssEditor) {
             cssEditor.value = template;
             this.updateFieldStyling('customCSS', template);
-            console.log('📝 Field CSS template inserted');
+            debugInfo("FormBuilder", '📝 Field CSS template inserted');
         }
     }
 
@@ -9084,7 +9087,7 @@ export class FormBuilder {
             if (cssEditor) {
                 cssEditor.value = '';
                 this.updateFieldStyling('customCSS', '');
-                console.log('🗑️ Field CSS cleared');
+                debugInfo("FormBuilder", '🗑️ Field CSS cleared');
             }
         }
     }
@@ -9114,7 +9117,7 @@ export class FormBuilder {
         const settings = this.currentForm.settings || {};
         const formId = this.currentForm.id;
         
-        console.log('🧪 Testing email configuration:', { settings, formId });
+        debugInfo("FormBuilder", '🧪 Testing email configuration:', { settings, formId });
         
         if (!settings.useCustomEmail) {
             alert('Please enable "Use Custom SMTP Server" first');
@@ -9152,7 +9155,7 @@ export class FormBuilder {
         }
         
         try {
-            console.log('📤 Sending test email request:', {
+            debugInfo("FormBuilder", '📤 Sending test email request:', {
                 formId: formId,
                 emailConfig: emailConfig,
                 testEmail: emailConfig.fromEmail
@@ -9170,11 +9173,11 @@ export class FormBuilder {
                 })
             });
             
-            console.log('📥 Response status:', response.status, response.statusText);
+            debugInfo("FormBuilder", '📥 Response status:', response.status, response.statusText);
             
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('❌ Response error:', errorText);
+                debugError("FormBuilder", '❌ Response error:', errorText);
                 throw new Error(`Server error (${response.status}): ${errorText}`);
             }
             
@@ -9186,7 +9189,7 @@ export class FormBuilder {
                 alert(`❌ Email configuration test failed: ${result.error}`);
             }
         } catch (error) {
-            console.error('Error testing email configuration:', error);
+            debugError("FormBuilder", 'Error testing email configuration:', error);
             alert(`❌ Test failed: ${error.message}`);
         }
     }
@@ -9239,7 +9242,7 @@ export class FormBuilder {
                 availableFieldsList.innerHTML = fieldsHtml;
             })
             .catch(error => {
-                console.error('Error loading Salesforce fields:', error);
+                debugError("FormBuilder", 'Error loading Salesforce fields:', error);
                 availableFieldsList.innerHTML = '<div class="field-selection-info error">Error loading fields. Please try again.</div>';
             });
     }
@@ -9260,7 +9263,7 @@ export class FormBuilder {
         }
         
         this.markFormDirty();
-        console.log(`Updated Section config ${property}:`, value);
+        debugInfo("FormBuilder", `Updated Section config ${property}:`, value);
     }
     
     updateColumnsConfig(property, value) {
@@ -9274,7 +9277,7 @@ export class FormBuilder {
         this.updateField(field.id, { columnsConfig: field.columnsConfig });
         this.renderFormCanvas();
         this.markFormDirty();
-        console.log(`Updated Columns config ${property}:`, value);
+        debugInfo("FormBuilder", `Updated Columns config ${property}:`, value);
     }
     
     updateColumnsCount(count) {
@@ -9321,7 +9324,7 @@ export class FormBuilder {
         this.renderFormCanvas();
         this.showFieldProperties(); // Refresh properties to show new column width inputs
         this.markFormDirty();
-        console.log(`Updated column count to ${count}`);
+        debugInfo("FormBuilder", `Updated column count to ${count}`);
     }
     
     updateColumnWidth(columnIndex, width) {
@@ -9335,7 +9338,7 @@ export class FormBuilder {
             this.updateField(field.id, { columnsConfig: field.columnsConfig });
             this.renderFormCanvas();
             this.markFormDirty();
-            console.log(`Updated column ${columnIndex} width to ${width}`);
+            debugInfo("FormBuilder", `Updated column ${columnIndex} width to ${width}`);
         }
     }
 }

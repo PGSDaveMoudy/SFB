@@ -1,5 +1,7 @@
 // ConditionalLogic Module - Handles conditional field visibility and logic
 
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 export class ConditionalLogic {
     constructor() {
         this.conditions = new Map();
@@ -8,7 +10,7 @@ export class ConditionalLogic {
     }
     
     async initialize() {
-        console.log('Initializing ConditionalLogic module...');
+        debugInfo("ConditionalLogic", 'Initializing ConditionalLogic module...');
         this.setupEventListeners();
         this.setupVariableChangeListener();
     }
@@ -42,13 +44,13 @@ export class ConditionalLogic {
         // Listen for variable changes via custom events for additional reactivity
         document.addEventListener('variableChanged', (e) => {
             const { name, newValue, oldValue } = e.detail;
-            console.log(`🔄 REACTIVE: Variable change detected via event - "${name}": "${oldValue}" -> "${newValue}"`);
+            debugInfo("ConditionalLogic", `🔄 REACTIVE: Variable change detected via event - "${name}": "${oldValue}" -> "${newValue}"`);
             
             // This provides an additional layer of reactivity beyond the automatic triggering
             // in FormVariables.set() - useful for modules that need immediate notification
         });
         
-        console.log('🔄 REACTIVE: Variable change listener setup complete');
+        debugInfo("ConditionalLogic", '🔄 REACTIVE: Variable change listener setup complete');
     }
     
     setupConditionalLogic() {
@@ -72,7 +74,7 @@ export class ConditionalLogic {
             return;
         }
         
-        console.log('🔄 CONDITIONAL: Setting up conditional logic for form:', currentForm.name || 'Untitled');
+        debugInfo("ConditionalLogic", '🔄 CONDITIONAL: Setting up conditional logic for form:', currentForm.name || 'Untitled');
         
         // Setup field-level conditional logic
         currentForm.pages.forEach((page, pageIndex) => {
@@ -201,7 +203,7 @@ export class ConditionalLogic {
         console.group(`🔍 Page Visibility Evaluation for ${pageId} (Logic: ${logic})`);
 
         if (conditions.length === 0) {
-            console.log('No conditions defined, page is visible.');
+            debugInfo("ConditionalLogic", 'No conditions defined, page is visible.');
             shouldShow = true;
         } else {
             const results = conditions.map(condition => {
@@ -239,7 +241,7 @@ export class ConditionalLogic {
                 }
 
                 const result = this.evaluateSingleCondition(dependentValue, condition.condition, condition.value);
-                console.log(`  Condition: ${condition.dependsOn} ${condition.condition} ${condition.value} -> Value: ${dependentValue} -> Result: ${result}`);
+                debugInfo("ConditionalLogic", `  Condition: ${condition.dependsOn} ${condition.condition} ${condition.value} -> Value: ${dependentValue} -> Result: ${result}`);
                 return result;
             });
 
@@ -250,7 +252,7 @@ export class ConditionalLogic {
             }
         }
 
-        console.log(`🎯 Final Result for Page ${pageId}: ${shouldShow ? 'SHOW' : 'HIDE'}`);
+        debugInfo("ConditionalLogic", `🎯 Final Result for Page ${pageId}: ${shouldShow ? 'SHOW' : 'HIDE'}`);
         console.groupEnd();
 
         this.setPageVisibility(pageId, shouldShow);
@@ -496,25 +498,25 @@ export class ConditionalLogic {
         const addVariable = (id, label, page, source) => {
             if (!variableMap.has(id)) {
                 variableMap.set(id, { id, label, page, source });
-                console.log(`  ✅ FIELD CONDITIONS: Added variable "${id}" (${source})`);
+                debugInfo("ConditionalLogic", `  ✅ FIELD CONDITIONS: Added variable "${id}" (${source})`);
             } else {
                 const existing = variableMap.get(id);
                 // Update label to show multiple sources if different
                 if (existing.source !== source) {
                     existing.label = `${id} (${existing.source} + ${source})`;
-                    console.log(`  🔄 FIELD CONDITIONS: Updated variable "${id}" to show multiple sources`);
+                    debugInfo("ConditionalLogic", `  🔄 FIELD CONDITIONS: Updated variable "${id}" to show multiple sources`);
                 }
             }
         };
 
         // Add global variables from FormVariables system
-        console.log('🔍 FIELD CONDITIONS: Checking FormVariables availability...');
+        debugInfo("ConditionalLogic", '🔍 FIELD CONDITIONS: Checking FormVariables availability...');
         if (window.FormVariables) {
             try {
                 if (typeof window.FormVariables.getAll === 'function') {
                     const globalVars = window.FormVariables.getAll();
                     const varCount = Object.keys(globalVars).length;
-                    console.log(`📊 FIELD CONDITIONS: Found ${varCount} global variables:`, globalVars);
+                    debugInfo("ConditionalLogic", `📊 FIELD CONDITIONS: Found ${varCount} global variables:`, globalVars);
                     
                     Object.keys(globalVars).forEach(varName => {
                         const value = globalVars[varName];
@@ -536,11 +538,11 @@ export class ConditionalLogic {
         }
 
         // Add Login field variables from ALL pages (not just previous pages)
-        console.log('🔍 FIELD CONDITIONS: Checking Login field variables...');
+        debugInfo("ConditionalLogic", '🔍 FIELD CONDITIONS: Checking Login field variables...');
         form.pages.forEach((page, pageIndex) => {
             page.fields.forEach(field => {
                 if (field.type === 'login' && field.loginConfig && field.loginConfig.setVariables) {
-                    console.log(`📝 FIELD CONDITIONS: Found login field "${field.label}" (${field.id}) with variables:`, Object.keys(field.loginConfig.setVariables));
+                    debugInfo("ConditionalLogic", `📝 FIELD CONDITIONS: Found login field "${field.label}" (${field.id}) with variables:`, Object.keys(field.loginConfig.setVariables));
                     Object.keys(field.loginConfig.setVariables).forEach(varName => {
                         // Only add the simple variable name (stored in FormVariables) - no field-specific duplicates
                         addVariable(
@@ -564,11 +566,11 @@ export class ConditionalLogic {
         });
 
         // Add field setVariablesConfig variables
-        console.log('🔍 FIELD CONDITIONS: Checking field setVariablesConfig variables...');
+        debugInfo("ConditionalLogic", '🔍 FIELD CONDITIONS: Checking field setVariablesConfig variables...');
         form.pages.forEach((page, pageIndex) => {
             page.fields.forEach(field => {
                 if (field.setVariablesConfig && field.setVariablesConfig.setVariables) {
-                    console.log(`📝 FIELD CONDITIONS: Found field "${field.label}" (${field.id}) with setVariablesConfig:`, Object.keys(field.setVariablesConfig.setVariables));
+                    debugInfo("ConditionalLogic", `📝 FIELD CONDITIONS: Found field "${field.label}" (${field.id}) with setVariablesConfig:`, Object.keys(field.setVariablesConfig.setVariables));
                     Object.keys(field.setVariablesConfig.setVariables).forEach(varName => {
                         addVariable(
                             varName,
@@ -582,11 +584,11 @@ export class ConditionalLogic {
         });
 
         // Add Email Verify field variables
-        console.log('🔍 FIELD CONDITIONS: Checking Email Verify field variables...');
+        debugInfo("ConditionalLogic", '🔍 FIELD CONDITIONS: Checking Email Verify field variables...');
         form.pages.forEach((page, pageIndex) => {
             page.fields.forEach(field => {
                 if (field.type === 'email-verify' && field.verifyConfig && field.verifyConfig.setVariables) {
-                    console.log(`📝 FIELD CONDITIONS: Found email verify field "${field.label}" (${field.id}) with variables:`, Object.keys(field.verifyConfig.setVariables));
+                    debugInfo("ConditionalLogic", `📝 FIELD CONDITIONS: Found email verify field "${field.label}" (${field.id}) with variables:`, Object.keys(field.verifyConfig.setVariables));
                     Object.keys(field.verifyConfig.setVariables).forEach(varName => {
                         addVariable(
                             varName,
@@ -600,7 +602,7 @@ export class ConditionalLogic {
         });
 
         // Convert variableMap back to fields array
-        console.log(`🔍 FIELD CONDITIONS: Found ${variableMap.size} unique variables total`);
+        debugInfo("ConditionalLogic", `🔍 FIELD CONDITIONS: Found ${variableMap.size} unique variables total`);
         variableMap.forEach(variable => {
             fields.push(variable);
         });
@@ -638,17 +640,17 @@ export class ConditionalLogic {
 
     // Method to initialize conditional logic for preview/published forms
     initializePreview() {
-        console.log('🔄 CONDITIONAL: Initializing preview mode');
+        debugInfo("ConditionalLogic", '🔄 CONDITIONAL: Initializing preview mode');
         
         // Get all form fields and setup value tracking
         const formFields = document.querySelectorAll('input, select, textarea');
-        console.log(`🔄 CONDITIONAL: Found ${formFields.length} form fields`);
+        debugInfo("ConditionalLogic", `🔄 CONDITIONAL: Found ${formFields.length} form fields`);
 
         formFields.forEach(field => {
             const fieldId = field.name || field.id;
             const initialValue = this.getFieldValue(field);
             this.fieldValues.set(fieldId, initialValue);
-            console.log(`🔄 CONDITIONAL: Set initial value for ${fieldId}:`, initialValue);
+            debugInfo("ConditionalLogic", `🔄 CONDITIONAL: Set initial value for ${fieldId}:`, initialValue);
 
             // Add event listeners
             field.addEventListener('input', (e) => this.handleFieldChange(e.target));
@@ -656,7 +658,7 @@ export class ConditionalLogic {
         });
 
         // Don't call setupConditionalLogic here - it will be called separately
-        console.log('🔄 CONDITIONAL: Preview initialization complete');
+        debugInfo("ConditionalLogic", '🔄 CONDITIONAL: Preview initialization complete');
     }
 
     // Method to evaluate page conditions for multi-page forms
@@ -758,7 +760,7 @@ export class ConditionalLogic {
             return true; // Show by default if no conditions
         }
         
-        console.log('🔄 CONDITIONAL: Evaluating condition group:', conditionGroup);
+        debugInfo("ConditionalLogic", '🔄 CONDITIONAL: Evaluating condition group:', conditionGroup);
         
         const results = conditionGroup.conditions.map(condition => {
             // Get field value using the same priority system as other evaluation methods
@@ -797,7 +799,7 @@ export class ConditionalLogic {
             
             const result = this.evaluateSingleCondition(dependentValue, condition.condition, condition.value);
             
-            console.log(`  Condition: ${condition.dependsOn} ${condition.condition} ${condition.value} -> Value: ${dependentValue} -> Result: ${result}`);
+            debugInfo("ConditionalLogic", `  Condition: ${condition.dependsOn} ${condition.condition} ${condition.value} -> Value: ${dependentValue} -> Result: ${result}`);
             return result;
         });
         
@@ -810,7 +812,7 @@ export class ConditionalLogic {
             finalResult = results.length > 0 ? results[0] : true;
         }
         
-        console.log('🔄 CONDITIONAL: Condition group result:', finalResult);
+        debugInfo("ConditionalLogic", '🔄 CONDITIONAL: Condition group result:', finalResult);
         return finalResult;
     }
     
@@ -845,8 +847,8 @@ export class ConditionalLogic {
             return; // No variable configuration found
         }
         
-        console.log(`🔧 VARIABLES: Processing field "${fieldId}" value change:`, value);
-        console.log(`🔧 VARIABLES: Field has variable config:`, fieldConfig.setVariablesConfig.setVariables);
+        debugInfo("ConditionalLogic", `🔧 VARIABLES: Processing field "${fieldId}" value change:`, value);
+        debugInfo("ConditionalLogic", `🔧 VARIABLES: Field has variable config:`, fieldConfig.setVariablesConfig.setVariables);
         
         // Collect all variables to set for batched processing
         const variablesToSet = {};
@@ -865,7 +867,7 @@ export class ConditionalLogic {
             }
             
             variablesToSet[varName] = finalValue;
-            console.log(`🔧 VARIABLES: Prepared variable "${varName}" = "${finalValue}"`);
+            debugInfo("ConditionalLogic", `🔧 VARIABLES: Prepared variable "${varName}" = "${finalValue}"`);
             
             // Also set in multiPage for compatibility
             const multiPage = window.AppModules.multiPage;
@@ -876,7 +878,7 @@ export class ConditionalLogic {
         
         // Set all variables at once using the new batching system
         if (window.FormVariables && Object.keys(variablesToSet).length > 0) {
-            console.log(`🔧 VARIABLES: Setting ${Object.keys(variablesToSet).length} variables via batching system`);
+            debugInfo("ConditionalLogic", `🔧 VARIABLES: Setting ${Object.keys(variablesToSet).length} variables via batching system`);
             
             if (window.FormVariables.setMultiple) {
                 // Use the new batched setting method for better performance

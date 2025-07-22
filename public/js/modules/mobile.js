@@ -1,4 +1,7 @@
 // Mobile Module - Handles mobile-specific functionality
+
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 export class Mobile {
     constructor() {
         this.isMobile = window.innerWidth <= 768;
@@ -8,7 +11,7 @@ export class Mobile {
     }
 
     async initialize() {
-        console.log('Initializing Mobile module...');
+        debugInfo('Mobile', 'Initializing Mobile module...');
         
         // Set up responsive detection
         this.setupResponsiveDetection();
@@ -54,13 +57,13 @@ export class Mobile {
         if (isMobile) {
             // Enable mobile mode
             this.closeMobilePanels();
-            console.log('📱 Mobile mode enabled');
+            debugInfo('Mobile', '📱 Mobile mode enabled');
         } else {
             // Disable mobile mode
             this.closeMobilePanels();
             sidebar.classList.remove('mobile-open');
             propertiesPanel.classList.remove('mobile-open');
-            console.log('💻 Desktop mode enabled');
+            debugInfo('Mobile', '💻 Desktop mode enabled');
         }
     }
 

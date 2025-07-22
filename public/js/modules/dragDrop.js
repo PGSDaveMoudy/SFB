@@ -1,5 +1,7 @@
 // DragDrop Module - Handles drag and drop functionality for form builder
 
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 export class DragDrop {
     constructor() {
         this.draggedElement = null;
@@ -10,7 +12,7 @@ export class DragDrop {
     }
     
     async initialize() {
-        console.log('Initializing DragDrop module...');
+        debugInfo("DragDrop", 'Initializing DragDrop module...');
         this.setupDropIndicator();
         this.setupPaletteListeners();
         this.setupCanvasListeners();
@@ -41,8 +43,16 @@ export class DragDrop {
         const fieldBlocks = document.querySelectorAll('.field-block[draggable="true"]');
         
         fieldBlocks.forEach(block => {
+            // Drag functionality
             block.addEventListener('dragstart', (e) => this.handlePaletteDragStart(e));
             block.addEventListener('dragend', (e) => this.handleDragEnd(e));
+            
+            // Click functionality for mobile/accessibility
+            block.addEventListener('click', (e) => this.handlePaletteClick(e));
+            
+            // Add visual feedback for interactive elements
+            block.style.cursor = 'pointer';
+            block.title = `Drag or click to add ${block.dataset.fieldType} field`;
         });
     }
     
@@ -70,14 +80,14 @@ export class DragDrop {
                 mutation.addedNodes.forEach((node) => {
                     if (node.nodeType === Node.ELEMENT_NODE) {
                         if (node.classList.contains('form-field')) {
-                            console.log('🔍 Setting up drag listeners for field:', node.dataset.fieldId);
+                            debugInfo("DragDrop", '🔍 Setting up drag listeners for field:', node.dataset.fieldId);
                             this.setupFieldDragListeners(node);
                         }
                         
                         // Set up listeners for any nested fields within the added node
                         const nestedFields = node.querySelectorAll && node.querySelectorAll('.form-field');
                         if (nestedFields && nestedFields.length > 0) {
-                            console.log(`🔍 Setting up drag listeners for ${nestedFields.length} nested fields`);
+                            debugInfo("DragDrop", `🔍 Setting up drag listeners for ${nestedFields.length} nested fields`);
                             nestedFields.forEach(field => this.setupFieldDragListeners(field));
                         }
                         
@@ -88,7 +98,7 @@ export class DragDrop {
                             node.querySelector('.section-fields-dropzone') ||
                             node.querySelector('.column-dropzone') ||
                             node.querySelector('.columns-container')) {
-                            console.log('🔍 Setting up container listeners due to DOM change - detected:', node.className);
+                            debugInfo("DragDrop", '🔍 Setting up container listeners due to DOM change - detected:', node.className);
                             // Use setTimeout to ensure DOM is fully rendered
                             setTimeout(() => {
                                 this.setupContainerListeners();
@@ -111,7 +121,7 @@ export class DragDrop {
     setupContainerListeners() {
         // Set up listeners for section dropzones
         const sectionDropzones = document.querySelectorAll('.section-fields-dropzone');
-        console.log(`🔧 Setting up listeners for ${sectionDropzones.length} section dropzones`);
+        debugInfo("DragDrop", `🔧 Setting up listeners for ${sectionDropzones.length} section dropzones`);
         sectionDropzones.forEach(dropzone => {
             if (!dropzone.dataset.listenersSetup) {
                 dropzone.addEventListener('dragover', (e) => this.handleContainerDragOver(e));
@@ -119,15 +129,15 @@ export class DragDrop {
                 dropzone.addEventListener('dragenter', (e) => this.handleContainerDragEnter(e));
                 dropzone.addEventListener('dragleave', (e) => this.handleContainerDragLeave(e));
                 dropzone.dataset.listenersSetup = 'true';
-                console.log('✅ Section dropzone listeners set up:', dropzone.dataset.sectionId);
+                debugInfo("DragDrop", '✅ Section dropzone listeners set up:', dropzone.dataset.sectionId);
             }
         });
         
         // Set up listeners for column containers - ENHANCED
         const columns = document.querySelectorAll('.column-dropzone');
-        console.log(`🔧 Setting up listeners for ${columns.length} column dropzones (all columns)`);
+        debugInfo("DragDrop", `🔧 Setting up listeners for ${columns.length} column dropzones (all columns)`);
         columns.forEach((column, index) => {
-            console.log(`🔍 Column ${index}:`, {
+            debugInfo("DragDrop", `🔍 Column ${index}:`, {
                 hasDataColumnIndex: column.hasAttribute('data-column-index'),
                 hasDataColumnsId: column.hasAttribute('data-columns-id'),
                 dataColumnIndex: column.dataset.columnIndex,
@@ -143,14 +153,14 @@ export class DragDrop {
                 column.addEventListener('dragenter', (e) => this.handleContainerDragEnter(e));
                 column.addEventListener('dragleave', (e) => this.handleContainerDragLeave(e));
                 column.dataset.listenersSetup = 'true';
-                console.log('✅ Column dropzone listeners set up:', `${column.dataset.columnsId}_${column.dataset.columnIndex}`);
+                debugInfo("DragDrop", '✅ Column dropzone listeners set up:', `${column.dataset.columnsId}_${column.dataset.columnIndex}`);
             }
         });
         
         // Additional check - setup listeners specifically for columns with data-column-index
         const columnsWithIndex = document.querySelectorAll('.column-dropzone[data-column-index]');
         if (columnsWithIndex.length !== columns.length) {
-            console.log(`⚠️  Mismatch: Found ${columns.length} .column-dropzone elements but ${columnsWithIndex.length} with [data-column-index]`);
+            debugInfo("DragDrop", `⚠️  Mismatch: Found ${columns.length} .column-dropzone elements but ${columnsWithIndex.length} with [data-column-index]`);
         }
     }
     
@@ -169,7 +179,84 @@ export class DragDrop {
         // Add CSS class for styling
         document.body.classList.add('dragging-field');
         
-        console.log(`Started dragging field type: ${this.draggedFieldType}`);
+        debugInfo("DragDrop", `Started dragging field type: ${this.draggedFieldType}`);
+    }
+    
+    handlePaletteClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const fieldType = e.currentTarget.dataset.fieldType;
+        debugInfo("DragDrop", `🖱️ Clicked to add field type: ${fieldType}`);
+        
+        // Add field to the current page at the end
+        const formBuilder = window.AppModules.formBuilder;
+        if (formBuilder && formBuilder.getCurrentPage()) {
+            const newFieldId = formBuilder.generateFieldId();
+            const newField = formBuilder.createFieldFromType(fieldType, newFieldId);
+            
+            // Add to the current page's fields
+            const currentPage = formBuilder.getCurrentPage();
+            if (!currentPage.fields) {
+                currentPage.fields = [];
+            }
+            currentPage.fields.push(newField);
+            
+            // Visual feedback
+            e.currentTarget.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                e.currentTarget.style.transform = '';
+            }, 150);
+            
+            // Render the updated form and select the new field
+            formBuilder.renderFormCanvas();
+            formBuilder.selectField(newFieldId);
+            
+            // Show success feedback
+            const fieldIcon = e.currentTarget.querySelector('.field-icon').textContent;
+            const fieldName = e.currentTarget.querySelector('span:last-child').textContent;
+            
+            // Create temporary success indicator
+            const successIndicator = document.createElement('div');
+            successIndicator.innerHTML = `${fieldIcon} ${fieldName} added!`;
+            successIndicator.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--make-purple-500);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                z-index: 10000;
+                animation: fadeInOut 1.5s ease-out forwards;
+            `;
+            
+            // Add animation keyframes if not already added
+            if (!document.querySelector('#click-success-animation')) {
+                const style = document.createElement('style');
+                style.id = 'click-success-animation';
+                style.textContent = `
+                    @keyframes fadeInOut {
+                        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                        30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                        70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                        100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(successIndicator);
+            setTimeout(() => {
+                document.body.removeChild(successIndicator);
+            }, 1500);
+            
+            debugInfo("DragDrop", `✅ Field ${fieldType} added via click`);
+        } else {
+            debugError("DragDrop", '❌ Cannot add field - no current page or form builder');
+        }
     }
     
     handleFieldDragStart(e) {
@@ -183,7 +270,7 @@ export class DragDrop {
         if (formBuilder) {
             const field = formBuilder.findFieldById(this.draggedFieldId);
             if (field && (field.type === 'columns' || field.type === 'section')) {
-                console.log(`🚫 Preventing drag of container field: ${this.draggedFieldId} (${field.type})`);
+                debugInfo("DragDrop", `🚫 Preventing drag of container field: ${this.draggedFieldId} (${field.type})`);
                 // Allow dragging container fields, but we'll handle them specially
                 this.isContainerDrag = true;
             } else {
@@ -200,7 +287,7 @@ export class DragDrop {
         // Add CSS class for styling
         document.body.classList.add('dragging-field');
         
-        console.log(`Started dragging existing field: ${this.draggedFieldId}`);
+        debugInfo("DragDrop", `Started dragging existing field: ${this.draggedFieldId}`);
     }
     
     // Container drag and drop handlers
@@ -209,7 +296,7 @@ export class DragDrop {
         e.stopPropagation();
         
         const container = e.currentTarget;
-        console.log('🎯 Container drag enter:', container.classList.toString());
+        debugInfo("DragDrop", '🎯 Container drag enter:', container.classList.toString());
         container.classList.add('container-drag-over');
         
         // Prevent the canvas from also receiving the drag enter event
@@ -235,7 +322,7 @@ export class DragDrop {
         e.dataTransfer.dropEffect = this.isReordering ? 'move' : 'copy';
         
         const container = e.currentTarget;
-        console.log('🔄 Container drag over:', container.classList.toString());
+        debugInfo("DragDrop", '🔄 Container drag over:', container.classList.toString());
         this.showContainerDropIndicator(container, e);
     }
     
@@ -244,29 +331,29 @@ export class DragDrop {
         e.stopPropagation();
         
         const container = e.currentTarget;
-        console.log('🎯 Container drop:', container.classList.toString(), 'Field type:', this.draggedFieldType, 'Field ID:', this.draggedFieldId);
+        debugInfo("DragDrop", '🎯 Container drop:', container.classList.toString(), 'Field type:', this.draggedFieldType, 'Field ID:', this.draggedFieldId);
         container.classList.remove('container-drag-over');
         
         // Prevent dropping container fields into containers
         if (this.isContainerDrag) {
-            console.warn('⚠️ Cannot drop container fields into other containers');
+            debugWarn("DragDrop", '⚠️ Cannot drop container fields into other containers');
             this.hideContainerDropIndicator(container);
             return;
         }
         
         const dropIndex = this.calculateContainerDropIndex(container);
-        console.log('📍 Drop index:', dropIndex);
+        debugInfo("DragDrop", '📍 Drop index:', dropIndex);
         
         if (this.isReordering && this.draggedFieldId) {
             // Reordering existing field into container
-            console.log('🔄 Reordering field into container');
+            debugInfo("DragDrop", '🔄 Reordering field into container');
             this.handleFieldReorderToContainer(container, dropIndex);
         } else if (this.draggedFieldType) {
             // Adding new field from palette to container
-            console.log('➕ Adding new field to container');
+            debugInfo("DragDrop", '➕ Adding new field to container');
             this.handleNewFieldDropToContainer(container, dropIndex);
         } else {
-            console.warn('❌ No field type or field ID found for drop');
+            debugWarn("DragDrop", '❌ No field type or field ID found for drop');
         }
         
         this.hideContainerDropIndicator(container);
@@ -436,7 +523,7 @@ export class DragDrop {
             }
             
             formBuilder.moveField(this.draggedFieldId, dropIndex);
-            console.log(`Moved field ${this.draggedFieldId} from index ${oldIndex} to ${dropIndex}`);
+            debugInfo("DragDrop", `Moved field ${this.draggedFieldId} from index ${oldIndex} to ${dropIndex}`);
         }
     }
     
@@ -445,7 +532,7 @@ export class DragDrop {
         if (!formBuilder) return;
         
         const field = formBuilder.addField(this.draggedFieldType, dropIndex);
-        console.log(`Added new ${this.draggedFieldType} field at index ${dropIndex}`);
+        debugInfo("DragDrop", `Added new ${this.draggedFieldType} field at index ${dropIndex}`);
         
         // Auto-select the new field
         setTimeout(() => {
@@ -487,7 +574,7 @@ export class DragDrop {
         this.draggedFieldId = null;
         this.isReordering = false;
         
-        console.log('Drag operation ended');
+        debugInfo("DragDrop", 'Drag operation ended');
     }
     
     // Container-specific helper methods
@@ -587,9 +674,9 @@ export class DragDrop {
                 const columnIndex = parseInt(container.dataset.columnIndex);
                 containerId = `${columnsId}_${columnIndex}`;
                 containerType = 'column';
-                console.log('✅ Column container detected:', {columnsId, columnIndex, containerId});
+                debugInfo("DragDrop", '✅ Column container detected:', {columnsId, columnIndex, containerId});
             } else {
-                console.warn('❌ Column dropzone missing required attributes:', {
+                debugWarn("DragDrop", '❌ Column dropzone missing required attributes:', {
                     hasColumnIndex: container.hasAttribute('data-column-index'),
                     hasColumnsId: container.hasAttribute('data-columns-id'),
                     columnIndex: container.dataset.columnIndex,
@@ -601,7 +688,7 @@ export class DragDrop {
         
         if (containerId) {
             formBuilder.moveFieldToContainer(this.draggedFieldId, containerId, containerType, dropIndex);
-            console.log(`Moved field ${this.draggedFieldId} to ${containerType} ${containerId} at index ${dropIndex}`);
+            debugInfo("DragDrop", `Moved field ${this.draggedFieldId} to ${containerType} ${containerId} at index ${dropIndex}`);
         }
     }
     
@@ -621,9 +708,9 @@ export class DragDrop {
                 const columnIndex = parseInt(container.dataset.columnIndex);
                 containerId = `${columnsId}_${columnIndex}`;
                 containerType = 'column';
-                console.log('✅ Column container detected:', {columnsId, columnIndex, containerId});
+                debugInfo("DragDrop", '✅ Column container detected:', {columnsId, columnIndex, containerId});
             } else {
-                console.warn('❌ Column dropzone missing required attributes:', {
+                debugWarn("DragDrop", '❌ Column dropzone missing required attributes:', {
                     hasColumnIndex: container.hasAttribute('data-column-index'),
                     hasColumnsId: container.hasAttribute('data-columns-id'),
                     columnIndex: container.dataset.columnIndex,
@@ -635,39 +722,39 @@ export class DragDrop {
         
         if (containerId) {
             const field = formBuilder.addFieldToContainer(this.draggedFieldType, containerId, containerType, dropIndex);
-            console.log(`Added new ${this.draggedFieldType} field to ${containerType} ${containerId} at index ${dropIndex}`);
-            console.log('🔍 Created field details:', field);
+            debugInfo("DragDrop", `Added new ${this.draggedFieldType} field to ${containerType} ${containerId} at index ${dropIndex}`);
+            debugInfo("DragDrop", '🔍 Created field details:', field);
             
             // Debug: Check if field appears in DOM after render completes
             setTimeout(() => {
                 const fieldElement = document.querySelector(`[data-field-id="${field.id}"]`);
-                console.log('🔍 Field element in DOM:', fieldElement);
+                debugInfo("DragDrop", '🔍 Field element in DOM:', fieldElement);
                 
                 if (fieldElement) {
                     formBuilder.selectField(fieldElement);
-                    console.log('✅ Field selected successfully');
+                    debugInfo("DragDrop", '✅ Field selected successfully');
                 } else {
-                    console.error('❌ Field element not found in DOM after creation');
-                    console.log('🔍 All field elements:', document.querySelectorAll('.form-field'));
+                    debugError("DragDrop", '❌ Field element not found in DOM after creation');
+                    debugInfo("DragDrop", '🔍 All field elements:', document.querySelectorAll('.form-field'));
                     
                     // Check if the column container has the field
                     if (containerType === 'column') {
                         const [columnsId, columnIndex] = containerId.split('_');
                         const container = document.querySelector(`.column-dropzone[data-columns-id="${columnsId}"][data-column-index="${columnIndex}"]`);
                         if (container) {
-                            console.log('🔍 Container found:', container);
-                            console.log('🔍 Container innerHTML:', container.innerHTML);
+                            debugInfo("DragDrop", '🔍 Container found:', container);
+                            debugInfo("DragDrop", '🔍 Container innerHTML:', container.innerHTML);
                             
                             // Try to find the field within the specific column container
                             const fieldInColumn = container.querySelector(`[data-field-id="${field.id}"]`);
                             if (fieldInColumn) {
-                                console.log('✅ Found field in column container, selecting it');
+                                debugInfo("DragDrop", '✅ Found field in column container, selecting it');
                                 formBuilder.selectField(fieldInColumn);
                             } else {
-                                console.error('❌ Field not found even in column container');
+                                debugError("DragDrop", '❌ Field not found even in column container');
                             }
                         } else {
-                            console.error('❌ Container not found in DOM');
+                            debugError("DragDrop", '❌ Container not found in DOM');
                         }
                     }
                 }
@@ -751,7 +838,7 @@ export class DragDrop {
                             this.isReordering = true;
                         }
                         
-                        console.log('📱 Touch drag started:', this.draggedFieldType || this.draggedFieldId);
+                        debugInfo("DragDrop", '📱 Touch drag started:', this.draggedFieldType || this.draggedFieldId);
                     }
                 }, longPressDelay);
             }
@@ -807,12 +894,12 @@ export class DragDrop {
                 const touch = e.changedTouches[0];
                 const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
                 
-                console.log('📱 Touch drop at:', touch.clientX, touch.clientY, elementBelow);
+                debugInfo("DragDrop", '📱 Touch drop at:', touch.clientX, touch.clientY, elementBelow);
                 
                 // Check for container drop first
                 const container = elementBelow?.closest('.section-fields-dropzone, .column-dropzone');
                 if (container) {
-                    console.log('📱 Dropping in container:', container.className);
+                    debugInfo("DragDrop", '📱 Dropping in container:', container.className);
                     const dropIndex = this.calculateContainerDropIndex(container);
                     
                     if (this.isReordering && this.draggedFieldId) {
@@ -824,7 +911,7 @@ export class DragDrop {
                     // Check for canvas drop
                     const canvas = document.getElementById('formCanvas');
                     if (canvas && (canvas.contains(elementBelow) || elementBelow === canvas)) {
-                        console.log('📱 Dropping in canvas');
+                        debugInfo("DragDrop", '📱 Dropping in canvas');
                         const dropIndex = this.calculateDropIndex();
                         
                         if (this.isReordering && this.draggedFieldId) {

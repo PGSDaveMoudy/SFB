@@ -1,4 +1,7 @@
 // FlowLogic Module - Handles complex flow logic for forms including email lookup and OTP
+
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 export class FlowLogic {
     constructor() {
         this.flowActions = new Map();
@@ -8,7 +11,7 @@ export class FlowLogic {
     }
     
     async initialize() {
-        console.log('Initializing FlowLogic module...');
+        debugInfo('FlowLogic', 'Initializing FlowLogic module...');
         this.setupEventListeners();
     }
     
@@ -70,7 +73,7 @@ export class FlowLogic {
             this.emailCache.set(email, result);
             await this.handleEmailLookupResult(fieldId, email, result, field);
         } catch (error) {
-            console.error('Email lookup error:', error);
+            debugError('FlowLogic', 'Email lookup error:', error);
         }
     }
     
@@ -97,7 +100,7 @@ export class FlowLogic {
             
             return await response.json();
         } catch (error) {
-            console.error('Email lookup error:', error);
+            debugError('FlowLogic', 'Email lookup error:', error);
             return { found: false, contact: null };
         }
     }
@@ -267,7 +270,7 @@ export class FlowLogic {
             }
             
         } catch (error) {
-            console.error('Error sending OTP:', error);
+            debugError('FlowLogic', 'Error sending OTP:', error);
             this.showOTPMessage('Failed to send OTP. Please try again.', 'error');
         }
     }
@@ -314,7 +317,7 @@ export class FlowLogic {
             }
             
         } catch (error) {
-            console.error('OTP verification error:', error);
+            debugError('FlowLogic', 'OTP verification error:', error);
             this.showOTPMessage('Verification failed. Please try again.', 'error');
         }
     }
@@ -355,7 +358,7 @@ export class FlowLogic {
                 'loggedIn': 'true'
             };
             
-            console.log('🔐 OTP SUCCESS: Setting login variables via batching system:', loginVariables);
+            debugInfo('FlowLogic', '🔐 OTP SUCCESS: Setting login variables via batching system:', loginVariables);
             
             if (window.FormVariables.setMultiple) {
                 window.FormVariables.setMultiple(loginVariables);
@@ -540,7 +543,7 @@ export class FlowLogic {
     
     handlePageChange(pageInfo) {
         // Handle any page-specific flow logic
-        console.log('Page changed:', pageInfo);
+        debugInfo('FlowLogic', 'Page changed:', pageInfo);
     }
     
     getCurrentFormId() {
@@ -550,13 +553,13 @@ export class FlowLogic {
         const path = window.location.pathname;
         const formMatch = path.match(/\/form\/([^\/]+)/);
         if (formMatch) {
-            console.log('📧 Form ID from URL path:', formMatch[1]);
+            debugInfo('FlowLogic', '📧 Form ID from URL path:', formMatch[1]);
             return formMatch[1];
         }
         
         // 2. From global app state (form builder)
         if (window.AppModules?.formBuilder?.currentForm?.id) {
-            console.log('📧 Form ID from form builder:', window.AppModules.formBuilder.currentForm.id);
+            debugInfo('FlowLogic', '📧 Form ID from form builder:', window.AppModules.formBuilder.currentForm.id);
             return window.AppModules.formBuilder.currentForm.id;
         }
         
@@ -564,17 +567,17 @@ export class FlowLogic {
         const urlParams = new URLSearchParams(window.location.search);
         const formIdFromQuery = urlParams.get('formId');
         if (formIdFromQuery) {
-            console.log('📧 Form ID from query params:', formIdFromQuery);
+            debugInfo('FlowLogic', '📧 Form ID from query params:', formIdFromQuery);
             return formIdFromQuery;
         }
         
         // 4. From form viewer state
         if (window.AppModules?.formViewer?.currentFormId) {
-            console.log('📧 Form ID from form viewer:', window.AppModules.formViewer.currentFormId);
+            debugInfo('FlowLogic', '📧 Form ID from form viewer:', window.AppModules.formViewer.currentFormId);
             return window.AppModules.formViewer.currentFormId;
         }
         
-        console.warn('📧 Could not determine current form ID for email configuration - this means custom email settings cannot be loaded');
+        debugWarn('FlowLogic', '📧 Could not determine current form ID for email configuration - this means custom email settings cannot be loaded');
         return null;
     }
 }

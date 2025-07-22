@@ -1,5 +1,7 @@
 // AutoSave Module - Handles automatic saving of form data and user progress
 
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 export class AutoSave {
     constructor() {
         this.autoSaveInterval = 3000; // 3 seconds - reduced from 500ms to prevent server overload
@@ -12,7 +14,7 @@ export class AutoSave {
     }
     
     async initialize() {
-        console.log('Initializing AutoSave module...');
+        debugInfo('AutoSave', 'Initializing AutoSave module...');
         this.setupEventListeners();
         this.checkRestorationNeeded();
         this.startPeriodicSave();
@@ -110,12 +112,12 @@ export class AutoSave {
                 
                 this.lastSaveTime = new Date().toISOString();
                 this.showAutoSaveIndicator('Draft saved to My Forms');
-                console.log('Auto-saved draft to server:', result.draftId);
+                debugInfo('AutoSave', 'Auto-saved draft to server:', result.draftId);
             } else {
-                console.error('Failed to save draft:', response.status);
+                debugError('AutoSave', 'Failed to save draft:', response.status);
             }
         } catch (error) {
-            console.error('Error auto-saving builder data:', error);
+            debugError('AutoSave', 'Error auto-saving builder data:', error);
         }
     }
     
@@ -140,9 +142,9 @@ export class AutoSave {
             this.lastSaveTime = timestamp;
             
             this.showAutoSaveIndicator('Progress saved');
-            console.log('Auto-saved user data for form:', formId);
+            debugInfo('AutoSave', 'Auto-saved user data for form:', formId);
         } catch (error) {
-            console.error('Error auto-saving user data:', error);
+            debugError('AutoSave', 'Error auto-saving user data:', error);
         }
     }
     
@@ -162,9 +164,9 @@ export class AutoSave {
             };
             
             localStorage.setItem(this.userProgressKey + '_' + formId, JSON.stringify(progressData));
-            console.log('Saved user progress:', progressData);
+            debugInfo('AutoSave', 'Saved user progress:', progressData);
         } catch (error) {
-            console.error('Error saving user progress:', error);
+            debugError('AutoSave', 'Error saving user progress:', error);
         }
     }
     
@@ -351,7 +353,7 @@ export class AutoSave {
                     this.clearUserData(formId);
                 }
             } catch (error) {
-                console.error('Error parsing saved user data:', error);
+                debugError('AutoSave', 'Error parsing saved user data:', error);
                 this.clearUserData(formId);
             }
         }
@@ -359,7 +361,7 @@ export class AutoSave {
     
     offerUserDataRestoration(data) {
         // Seamlessly restore user data without popup
-        console.log('Auto-restoring form progress from:', new Date(data.timestamp).toLocaleString());
+        debugInfo('AutoSave', 'Auto-restoring form progress from:', new Date(data.timestamp).toLocaleString());
         this.restoreUserData(data);
     }
     restoreUserData(data) {
@@ -381,10 +383,10 @@ export class AutoSave {
             this.restoreRepeatInstances(data.formData);
             
             // Silently restore without showing indicator to user
-            console.log('Form progress restored silently');
-            console.log('Restored user data from auto-save');
+            debugInfo('AutoSave', 'Form progress restored silently');
+            debugInfo('AutoSave', 'Restored user data from auto-save');
         } catch (error) {
-            console.error('Error restoring user data:', error);
+            debugError('AutoSave', 'Error restoring user data:', error);
             this.showAutoSaveIndicator('Restore failed', 'error');
         }
     }
@@ -397,7 +399,7 @@ export class AutoSave {
                 const multiPage = window.AppModules.multiPage;
                 
                 if (multiPage) {
-                    console.log(`Restoring ${value.length} repeat instances for page ${pageId}`);
+                    debugInfo('AutoSave', `Restoring ${value.length} repeat instances for page ${pageId}`);
                     
                     // Create additional instances if needed (delay to ensure DOM is ready)
                     if (value.length > 1) {
@@ -431,7 +433,7 @@ export class AutoSave {
                 this.setFieldValue(fullFieldName, fieldValue);
             });
         });
-        console.log(`Populated ${instancesData.length} repeat instances for page ${pageId}`);
+        debugInfo('AutoSave', `Populated ${instancesData.length} repeat instances for page ${pageId}`);
     }
     
     setFieldValue(fieldName, value) {

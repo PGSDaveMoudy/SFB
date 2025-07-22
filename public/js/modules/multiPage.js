@@ -1,5 +1,7 @@
 // MultiPage Module - Handles multi-page form logic and navigation
 
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 export class MultiPage {
     constructor() {
         this.currentPageIndex = 0;
@@ -10,7 +12,7 @@ export class MultiPage {
     }
     
     async initialize() {
-        console.log('Initializing MultiPage module...');
+        debugInfo('MultiPage', 'Initializing MultiPage module...');
         this.setupEventListeners();
     }
     
@@ -508,7 +510,7 @@ export class MultiPage {
         
         this.renderRepeatInstances(pageId);
         
-        console.log(`Added repeat instance ${newInstanceIndex} for page ${pageId}`);
+        debugInfo('MultiPage', `Added repeat instance ${newInstanceIndex} for page ${pageId}`);
     }
     
     removeRepeatInstance(pageId, instanceIndex) {
@@ -532,7 +534,7 @@ export class MultiPage {
             
             this.renderRepeatInstances(pageId);
             
-            console.log(`Removed repeat instance ${instanceIndex} for page ${pageId}`);
+            debugInfo('MultiPage', `Removed repeat instance ${instanceIndex} for page ${pageId}`);
         }
     }
     
@@ -727,7 +729,7 @@ export class MultiPage {
         const formElement = document.querySelector('#publicForm') || document.querySelector('form');
 
         if (!formElement) {
-            console.error("Could not find form element to collect data from.");
+            debugError('MultiPage', "Could not find form element to collect data from.");
             return {};
         }
 
@@ -747,7 +749,7 @@ export class MultiPage {
                         allData[instanceKey] = instances;
                     }
                 } catch (e) {
-                    console.error(`Error parsing repeating page data for ${pageId}:`, e);
+                    debugError('MultiPage', `Error parsing repeating page data for ${pageId}:`, e);
                 }
             } else {
                 // Standard field
@@ -781,7 +783,7 @@ export class MultiPage {
     }
     
     showSubmitButton() {
-        console.log('🔄 NAVIGATION: Showing submit button (legacy method)');
+        debugInfo('MultiPage', '🔄 NAVIGATION: Showing submit button (legacy method)');
         const submitBtn = document.querySelector('#submit-btn');
         if (submitBtn) {
             submitBtn.style.display = 'block';
@@ -794,7 +796,7 @@ export class MultiPage {
     }
     
     submitForm() {
-        console.log('🔄 NAVIGATION: Form submission triggered');
+        debugInfo('MultiPage', '🔄 NAVIGATION: Form submission triggered');
         
         // Validate current page before submission
         if (!this.validateCurrentPage()) {

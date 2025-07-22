@@ -1,5 +1,7 @@
 // Signature Module - Handles e-signature functionality with legal compliance
 
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 export class Signature {
     constructor() {
         this.signaturePads = new Map();
@@ -8,7 +10,7 @@ export class Signature {
     }
     
     async initialize() {
-        console.log('Initializing Signature module...');
+        debugInfo('Signature', 'Initializing Signature module...');
         this.setupEventListeners();
     }
     
@@ -30,7 +32,7 @@ export class Signature {
     initializeSignaturePad(fieldId, canvasId, config = {}) {
         const canvas = document.getElementById(canvasId);
         if (!canvas) {
-            console.error('Canvas not found:', canvasId);
+            debugError('Signature', 'Canvas not found:', canvasId);
             return;
         }
         
@@ -71,10 +73,10 @@ export class Signature {
                 data.metadata = metadata;
             }
         }).catch(error => {
-            console.warn('Could not generate signature metadata:', error);
+            debugWarn('Signature', 'Could not generate signature metadata:', error);
         });
         
-        console.log('Initialized signature pad:', fieldId);
+        debugInfo('Signature', 'Initialized signature pad:', fieldId);
     }
     
     setupCanvas(canvas, config) {
@@ -205,7 +207,7 @@ export class Signature {
                 data.metadata = metadata;
             }
         }).catch(error => {
-            console.warn('Could not generate signature metadata:', error);
+            debugWarn('Signature', 'Could not generate signature metadata:', error);
         });
         
         // Clear hidden input
@@ -217,7 +219,7 @@ export class Signature {
         // Clear audit trail
         this.auditTrails.delete(fieldId);
         
-        console.log('Cleared signature:', fieldId);
+        debugInfo('Signature', 'Cleared signature:', fieldId);
     }
     
     async startAuditTrail(fieldId) {
@@ -272,7 +274,7 @@ export class Signature {
         // Trigger validation
         this.validateSignature(fieldId);
         
-        console.log('Finalized signature:', fieldId);
+        debugInfo('Signature', 'Finalized signature:', fieldId);
     }
     
     async generateSignatureMetadata() {
@@ -336,7 +338,7 @@ export class Signature {
                 };
             }
         } catch (error) {
-            console.log('Geolocation not available or denied:', error.message);
+            debugInfo('Signature', 'Geolocation not available or denied:', error.message);
             metadata.geoLocation = { 
                 error: error.message,
                 consentGiven: false

@@ -1,5 +1,7 @@
 // FormStorage Module - Handles form save/load functionality
 
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 export class FormStorage {
     constructor() {
         this.forms = new Map();
@@ -8,7 +10,7 @@ export class FormStorage {
     }
     
     async initialize() {
-        console.log('Initializing FormStorage module...');
+        debugInfo('FormStorage', 'Initializing FormStorage module...');
         this.setupEventListeners();
         await this.loadAllForms();
     }
@@ -38,9 +40,9 @@ export class FormStorage {
                 this.forms.set(form.id, form);
             });
             
-            console.log(`Loaded ${forms.length} forms`);
+            debugInfo('FormStorage', `Loaded ${forms.length} forms`);
         } catch (error) {
-            console.error('Error loading forms:', error);
+            debugError('FormStorage', 'Error loading forms:', error);
         }
     }
     
@@ -74,18 +76,18 @@ export class FormStorage {
             
             const result = await response.json();
             
-            console.log('🔍 Save form response:', result);
-            console.log('🔍 Result success:', result.success);
-            console.log('🔍 Result formId:', result.formId);
-            console.log('🔍 Result form:', result.form);
+            debugInfo('FormStorage', '🔍 Save form response:', result);
+            debugInfo('FormStorage', '🔍 Result success:', result.success);
+            debugInfo('FormStorage', '🔍 Result formId:', result.formId);
+            debugInfo('FormStorage', '🔍 Result form:', result.form);
             
             if (result.success) {
                 // Ensure form has the correct ID
                 if (result.form && result.formId) {
                     result.form.id = result.formId;
-                    console.log('✅ Set form.id to:', result.form.id);
+                    debugInfo('FormStorage', '✅ Set form.id to:', result.form.id);
                 } else {
-                    console.error('❌ Missing formId or form in response:', { formId: result.formId, form: result.form });
+                    debugError('FormStorage', '❌ Missing formId or form in response:', { formId: result.formId, form: result.form });
                 }
                 
                 // Update local cache
@@ -97,19 +99,19 @@ export class FormStorage {
                 if (formBuilder) {
                     formBuilder.currentForm.id = result.formId;
                     window.AppState.currentForm = result.form;
-                    console.log('✅ Updated formBuilder.currentForm.id to:', formBuilder.currentForm.id);
+                    debugInfo('FormStorage', '✅ Updated formBuilder.currentForm.id to:', formBuilder.currentForm.id);
                 }
                 
                 this.showSaveStatus('Saved successfully!', 'success');
                 
-                console.log('Form saved:', result.formId);
-                console.log('🔍 Returning form with id:', result.form?.id);
+                debugInfo('FormStorage', 'Form saved:', result.formId);
+                debugInfo('FormStorage', '🔍 Returning form with id:', result.form?.id);
                 return result.form;
             } else {
                 throw new Error(result.error || 'Save failed');
             }
         } catch (error) {
-            console.error('Error saving form:', error);
+            debugError('FormStorage', 'Error saving form:', error);
             this.showSaveStatus('Save failed', 'error');
             alert(`Failed to save form: ${error.message}`);
             return null;
@@ -138,10 +140,10 @@ export class FormStorage {
                 window.AppState.currentForm = form;
             }
             
-            console.log('Form loaded:', formId);
+            debugInfo('FormStorage', 'Form loaded:', formId);
             return form;
         } catch (error) {
-            console.error('Error loading form:', error);
+            debugError('FormStorage', 'Error loading form:', error);
             alert(`Failed to load form: ${error.message}`);
             return null;
         }
@@ -196,13 +198,13 @@ export class FormStorage {
                     }
                 }
                 
-                console.log('Form deleted:', formId);
+                debugInfo('FormStorage', 'Form deleted:', formId);
                 return true;
             } else {
                 throw new Error('Delete failed');
             }
         } catch (error) {
-            console.error('Error deleting form:', error);
+            debugError('FormStorage', 'Error deleting form:', error);
             alert(`Failed to delete form: ${error.message}`);
             return false;
         }
@@ -224,13 +226,13 @@ export class FormStorage {
                 // Update local cache
                 this.forms.set(formId, result.form);
                 
-                console.log('Form published:', result.publicUrl);
+                debugInfo('FormStorage', 'Form published:', result.publicUrl);
                 return result;
             } else {
                 throw new Error(result.error || 'Publish failed');
             }
         } catch (error) {
-            console.error('Error publishing form:', error);
+            debugError('FormStorage', 'Error publishing form:', error);
             alert(`Failed to publish form: ${error.message}`);
             return null;
         }
@@ -256,13 +258,13 @@ export class FormStorage {
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
                 
-                console.log('Form exported successfully');
+                debugInfo('FormStorage', 'Form exported successfully');
                 return true;
             } else {
                 throw new Error('Export failed');
             }
         } catch (error) {
-            console.error('Error exporting form:', error);
+            debugError('FormStorage', 'Error exporting form:', error);
             alert(`Failed to export form: ${error.message}`);
             return false;
         }
@@ -301,16 +303,16 @@ export class FormStorage {
                     }
                 } else {
                     errorCount++;
-                    console.error(`Failed to delete form ${formId}: ${response.status}`);
+                    debugError('FormStorage', `Failed to delete form ${formId}: ${response.status}`);
                 }
             } catch (error) {
                 errorCount++;
-                console.error(`Error deleting form ${formId}:`, error);
+                debugError('FormStorage', `Error deleting form ${formId}:`, error);
             }
         }
         
         if (successCount > 0) {
-            console.log(`Successfully deleted ${successCount} form(s)`);
+            debugInfo('FormStorage', `Successfully deleted ${successCount} form(s)`);
         }
         
         if (errorCount > 0) {
@@ -805,7 +807,7 @@ export class FormStorage {
             
             return await this.saveForm(formData);
         } catch (error) {
-            console.error('Error importing form:', error);
+            debugError('FormStorage', 'Error importing form:', error);
             alert(`Failed to import form: ${error.message}`);
             return null;
         }
@@ -821,7 +823,7 @@ export class FormStorage {
                 try {
                     const response = await fetch(`/api/forms/${form.id}/submissions`);
                     if (!response.ok) {
-                        console.warn(`Failed to fetch submissions for form ${form.id}: ${response.statusText}`);
+                        debugWarn('FormStorage', `Failed to fetch submissions for form ${form.id}: ${response.statusText}`);
                         continue; // Skip to next form if submissions can't be fetched
                     }
                     const submissions = await response.json();
@@ -829,7 +831,7 @@ export class FormStorage {
                     submissions.forEach(s => s.formName = form.name || 'Untitled Form');
                     allSubmissions = allSubmissions.concat(submissions);
                 } catch (error) {
-                    console.error(`Error fetching submissions for form ${form.id}:`, error);
+                    debugError('FormStorage', `Error fetching submissions for form ${form.id}:`, error);
                 }
             }
 
@@ -845,7 +847,7 @@ export class FormStorage {
             this.showSaveStatus('All submissions exported successfully!', 'success');
 
         } catch (error) {
-            console.error('Error exporting all submissions:', error);
+            debugError('FormStorage', 'Error exporting all submissions:', error);
             this.showSaveStatus(`Failed to export all submissions: ${error.message}`, 'error');
         }
     }
@@ -968,9 +970,9 @@ export class FormStorage {
         
         try {
             await this.saveForm();
-            console.log('Auto-saved form');
+            debugInfo('FormStorage', 'Auto-saved form');
         } catch (error) {
-            console.error('Auto-save failed:', error);
+            debugError('FormStorage', 'Auto-save failed:', error);
         }
     }
     
@@ -996,7 +998,7 @@ export class FormStorage {
             
             this.showSubmissionsModal(form, submissions, analytics);
         } catch (error) {
-            console.error('Error fetching submissions:', error);
+            debugError('FormStorage', 'Error fetching submissions:', error);
             alert(`Failed to load submissions: ${error.message}`);
         }
     }
@@ -1162,7 +1164,7 @@ export class FormStorage {
                 this.downloadCSV(submissions, `${form.name}_submissions.csv`);
             }
         } catch (error) {
-            console.error('Error exporting submissions:', error);
+            debugError('FormStorage', 'Error exporting submissions:', error);
             alert(`Failed to export submissions: ${error.message}`);
         }
     }

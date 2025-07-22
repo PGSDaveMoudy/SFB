@@ -13,6 +13,8 @@ import { MultiPage } from './modules/multiPage.js';
 import { FlowLogic } from './modules/flowLogic.js';
 import { Mobile } from './modules/mobile.js';
 
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 // Global state management
 window.AppState = {
     salesforceConnected: false,
@@ -41,7 +43,7 @@ const modules = {
 
 // Application initialization
 async function initializeApp() {
-    console.log('Initializing Salesforce Form Builder...');
+    debugInfo('Main', 'Initializing Salesforce Form Builder...');
     
     // Check for connection status in URL params
     const urlParams = new URLSearchParams(window.location.search);
@@ -105,7 +107,7 @@ async function initializeApp() {
         window.history.replaceState({}, document.title, window.location.pathname);
     }
     
-    console.log('Application initialized successfully');
+    debugInfo('Main', 'Application initialized successfully');
 }
 
 // Global event listeners
@@ -142,7 +144,7 @@ window.closeIntroModal = function(showTutorial = false) {
     document.getElementById('introModal').style.display = 'none';
     if (showTutorial) {
         // Could add tutorial highlights here in the future
-        console.log('Tutorial mode enabled');
+        debugInfo('Main', 'Tutorial mode enabled');
     }
 };
 
@@ -176,21 +178,21 @@ window.saveForm = async function() {
 window.publishForm = async function() {
     try {
         // First save the form
-        console.log('🚀 Starting form publish process...');
+        debugInfo('Main', '🚀 Starting form publish process...');
         const savedForm = await modules.formStorage.saveForm();
         
-        console.log('🔍 Saved form result:', savedForm);
-        console.log('🔍 Saved form ID:', savedForm?.id);
+        debugInfo('Main', '🔍 Saved form result:', savedForm);
+        debugInfo('Main', '🔍 Saved form ID:', savedForm?.id);
         
         if (!savedForm || !savedForm.id) {
-            console.error('❌ No valid form ID found');
+            debugError('Main', '❌ No valid form ID found');
             alert('Please save the form first before publishing.');
             return;
         }
         
         // Store the form ID for later use
         window.pendingPublishFormId = savedForm.id;
-        console.log('✅ Set pendingPublishFormId to:', window.pendingPublishFormId);
+        debugInfo('Main', '✅ Set pendingPublishFormId to:', window.pendingPublishFormId);
         
         // Show publish settings modal
         document.getElementById('publishSettingsModal').style.display = 'block';
@@ -203,7 +205,7 @@ window.publishForm = async function() {
         document.getElementById('publishEndDate').value = formatDateTimeLocal(thirtyDaysLater);
         
     } catch (error) {
-        console.error('Error preparing form for publishing:', error);
+        debugError('Main', 'Error preparing form for publishing:', error);
         alert('Failed to prepare form for publishing. Please try again.');
     }
 };
@@ -363,7 +365,7 @@ async function loadAvailableOrgs() {
             populateOrgSelector();
         }
     } catch (error) {
-        console.error('Error loading orgs:', error);
+        debugError('Main', 'Error loading orgs:', error);
     }
 }
 
@@ -383,7 +385,7 @@ async function checkCurrentOrgConnection() {
             window.AppState.userInfo = null;
         }
     } catch (error) {
-        console.error('Error checking current org:', error);
+        debugError('Main', 'Error checking current org:', error);
     }
 }
 
@@ -454,7 +456,7 @@ async function connectToSelectedOrg() {
             alert('Failed to generate authorization URL. Please try again.');
         }
     } catch (error) {
-        console.error('Error connecting to org:', error);
+        debugError('Main', 'Error connecting to org:', error);
         alert('Failed to connect to organization. Please try again.');
     }
 }
@@ -482,7 +484,7 @@ async function disconnectFromOrg() {
             alert('Failed to disconnect. Please try again.');
         }
     } catch (error) {
-        console.error('Error disconnecting:', error);
+        debugError('Main', 'Error disconnecting:', error);
         alert('Failed to disconnect. Please try again.');
     }
 }
@@ -702,7 +704,7 @@ window.confirmPublish = async function() {
         
         // Store the form ID before closing modal (since closeModal sets it to null)
         const formIdToPublish = window.pendingPublishFormId;
-        console.log('🔍 Form ID to publish:', formIdToPublish);
+        debugInfo('Main', '🔍 Form ID to publish:', formIdToPublish);
         
         // Close settings modal
         closePublishSettingsModal();
@@ -717,7 +719,7 @@ window.confirmPublish = async function() {
         }
         
     } catch (error) {
-        console.error('Error publishing form:', error);
+        debugError('Main', 'Error publishing form:', error);
         alert('Failed to publish form. Please try again.');
     }
 };
@@ -824,7 +826,7 @@ window.bulkDeleteSelectedForms = async function() {
         // Refresh forms list
         await modules.formStorage.showMyForms();
     } catch (error) {
-        console.error('Error during bulk delete:', error);
+        debugError('Main', 'Error during bulk delete:', error);
         alert('Failed to delete some forms. Please try again.');
     }
 };

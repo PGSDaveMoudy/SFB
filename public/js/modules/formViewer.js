@@ -1,5 +1,7 @@
 // FormViewer Module - Handles public form display and submission
 
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 export class FormViewer {
     constructor() {
         this.formId = null;
@@ -9,7 +11,7 @@ export class FormViewer {
     }
     
     async initialize() {
-        console.log('Initializing FormViewer module...');
+        debugInfo('FormViewer', 'Initializing FormViewer module...');
         
         // Extract form ID from URL
         this.formId = this.extractFormId();
@@ -56,7 +58,7 @@ export class FormViewer {
             // Render the form first, then setup conditional logic
             await this.renderForm();
         } catch (error) {
-            console.error('Error loading form:', error);
+            debugError('FormViewer'('Error loading form:', error);
             this.showError('Failed to load form');
         }
     }
@@ -88,7 +90,7 @@ export class FormViewer {
             detail: { formId: this.formId, formData: this.formData }
         }));
         
-        console.log('Form rendered successfully');
+        debugInfo('FormViewer', 'Form rendered successfully');
     }
     
     generateFormHTML() {
@@ -129,7 +131,7 @@ export class FormViewer {
                     </div>
                     
                     ${page.repeatConfig?.enabled ? (() => {
-                        console.log(`Rendering repeat controls for page ${page.id}`);
+                        debugInfo('FormViewer', `Rendering repeat controls for page ${page.id}`);
                         return this.renderRepeatControls(page);
                     })() : ''}
                 </div>
@@ -358,17 +360,17 @@ export class FormViewer {
             
             // Sync current page index between form viewer and multiPage module
             multiPage.currentPageIndex = this.currentPage;
-            console.log(`🔄 FORM VIEWER: Synced multiPage currentPageIndex to ${this.currentPage}`);
+            debugInfo('FormViewer', `🔄 FORM VIEWER: Synced multiPage currentPageIndex to ${this.currentPage}`);
         }
         
         // Initialize conditional logic AFTER other modules
         const conditionalLogic = window.AppModules?.conditionalLogic;
         if (conditionalLogic) {
-            console.log('🔄 FORM VIEWER: Initializing conditional logic module');
+            debugInfo('FormViewer', '🔄 FORM VIEWER: Initializing conditional logic module');
             conditionalLogic.initializePreview();
             
             // Setup conditional logic configuration
-            console.log('🔄 FORM VIEWER: Setting up conditional logic configuration');
+            debugInfo('FormViewer', '🔄 FORM VIEWER: Setting up conditional logic configuration');
             conditionalLogic.setupConditionalLogic();
         }
         
@@ -388,7 +390,7 @@ export class FormViewer {
             setTimeout(() => {
                 autoSave.checkRestorationNeeded();
             }, 100);
-            console.log('Auto-save enabled for form viewer');
+            debugInfo('FormViewer', 'Auto-save enabled for form viewer');
         }
     }
     
@@ -434,28 +436,28 @@ export class FormViewer {
         
         // Check if current page is a Get Records query page - we need to process it
         if (currentPageData && currentPageData.actionType === 'get') {
-            console.log(`📊 Processing Get Records page ${this.currentPage} before navigation`);
+            debugInfo('FormViewer', `📊 Processing Get Records page ${this.currentPage} before navigation`);
             await this.processGetRecordsPage(currentPageData);
         }
         
         // Check if current page is a repeat page with unsaved data
-        console.log(`nextPage: Checking page ${this.currentPage}, repeat enabled: ${currentPageData?.repeatConfig?.enabled}`);
+        debugInfo('FormViewer', `nextPage: Checking page ${this.currentPage}, repeat enabled: ${currentPageData?.repeatConfig?.enabled}`);
         if (currentPageData && currentPageData.repeatConfig?.enabled) {
             // Check if there's any data in the current form fields
             const currentData = this.collectCurrentPageData(currentPageData.id);
-            console.log('Current page data:', currentData);
+            debugInfo('FormViewer', 'Current page data:', currentData);
             if (Object.keys(currentData).length > 0) {
                 // There's unsaved data - collect it before moving on
-                console.log('✅ Collecting unsaved repeat data before navigation');
+                debugInfo('FormViewer', '✅ Collecting unsaved repeat data before navigation');
                 this.addToCollectedData(currentPageData.id, currentData);
                 this.clearPageFields(currentPageData.id);
                 this.updateCollectedItemsDisplay(currentPageData.id);
                 
                 // Log the collected data to verify it was saved
                 const collectedData = this.getCollectedData(currentPageData.id);
-                console.log(`Total collected data for page ${currentPageData.id}:`, collectedData);
+                debugInfo('FormViewer', `Total collected data for page ${currentPageData.id}:`, collectedData);
             } else {
-                console.log('❌ No unsaved data found on repeat page');
+                debugInfo('FormViewer', '❌ No unsaved data found on repeat page');
             }
         }
         
@@ -506,16 +508,16 @@ export class FormViewer {
     }
     
     updateNavigationButtons() {
-        console.log('🔄 FORM VIEWER: Updating navigation buttons with conditional logic support');
+        debugInfo('FormViewer', '🔄 FORM VIEWER: Updating navigation buttons with conditional logic support');
         
         // Delegate to multiPage module which has conditional logic support
         const multiPage = window.AppModules.multiPage;
         if (multiPage) {
-            console.log('🔄 FORM VIEWER: Using multiPage module for navigation button updates');
+            debugInfo('FormViewer', '🔄 FORM VIEWER: Using multiPage module for navigation button updates');
             multiPage.updateNavigationButtons();
         } else {
             // Fallback to simple logic if multiPage not available
-            console.warn('🔄 FORM VIEWER: multiPage module not available, using fallback navigation logic');
+            debugWarn('FormViewer'('🔄 FORM VIEWER: multiPage module not available, using fallback navigation logic');
             const prevBtn = document.getElementById('prevPageBtn');
             const nextBtn = document.getElementById('nextPageBtn');
             const submitBtn = document.getElementById('submitBtn');
@@ -537,11 +539,11 @@ export class FormViewer {
     }
     
     handleAddRepeatInstance(pageId) {
-        console.log('Adding repeat instance for page:', pageId);
+        debugInfo('FormViewer', 'Adding repeat instance for page:', pageId);
         
         const page = this.formData.pages.find(p => p.id === pageId);
         if (!page || !page.repeatConfig?.enabled) {
-            console.log('Page not found or repeat not enabled');
+            debugInfo('FormViewer', 'Page not found or repeat not enabled');
             return;
         }
         
@@ -577,7 +579,7 @@ export class FormViewer {
     }
     
     handleRemoveRepeatInstance(pageId, instanceIndex) {
-        console.log('Removing repeat instance:', instanceIndex, 'for page:', pageId);
+        debugInfo('FormViewer', 'Removing repeat instance:', instanceIndex, 'for page:', pageId);
         
         const page = this.formData.pages.find(p => p.id === pageId);
         if (!page || !page.repeatConfig?.enabled) return;
@@ -627,9 +629,9 @@ export class FormViewer {
         const data = {};
         const fields = pageElement.querySelectorAll('.page-fields input, .page-fields select, .page-fields textarea');
         
-        console.log(`Collecting data for page ${pageId} with ${page.fields.length} form fields and ${fields.length} DOM fields`);
-        console.log('Form field definitions:', page.fields.map(f => ({ id: f.id, label: f.label, salesforceField: f.salesforceField })));
-        console.log('DOM field names:', Array.from(fields).map(f => f.name).filter(Boolean));
+        debugInfo('FormViewer', `Collecting data for page ${pageId} with ${page.fields.length} form fields and ${fields.length} DOM fields`);
+        debugInfo('FormViewer', 'Form field definitions:', page.fields.map(f => ({ id: f.id, label: f.label, salesforceField: f.salesforceField })));
+        debugInfo('FormViewer', 'DOM field names:', Array.from(fields).map(f => f.name).filter(Boolean));
         
         fields.forEach(domField => {
             if (domField.name && domField.value !== '') {
@@ -643,11 +645,11 @@ export class FormViewer {
                     // Use the form field ID as the key (this is what the server expects)
                     const fieldValue = this.getFieldValue(domField);
                     data[formField.id] = fieldValue;
-                    console.log(`Mapped DOM field ${domField.name} → form field ${formField.id} (SF: ${formField.salesforceField}): ${fieldValue}`);
+                    debugInfo('FormViewer', `Mapped DOM field ${domField.name} → form field ${formField.id} (SF: ${formField.salesforceField}): ${fieldValue}`);
                 } else {
                     // Fallback: use the DOM field name if no form field found
                     data[domField.name] = this.getFieldValue(domField);
-                    console.log(`No form field mapping found for DOM field ${domField.name}, using as-is: ${data[domField.name]}`);
+                    debugInfo('FormViewer', `No form field mapping found for DOM field ${domField.name}, using as-is: ${data[domField.name]}`);
                 }
             }
         });
@@ -656,11 +658,11 @@ export class FormViewer {
         const signatureModule = window.AppModules?.signature;
         if (signatureModule) {
             const signatures = signatureModule.getAllSignatureData();
-            console.log('Adding signature data:', signatures);
+            debugInfo('FormViewer', 'Adding signature data:', signatures);
             Object.assign(data, signatures);
         }
         
-        console.log(`Final collected data for page ${pageId}:`, data);
+        debugInfo('FormViewer', `Final collected data for page ${pageId}:`, data);
         return data;
     }
     
@@ -813,29 +815,29 @@ export class FormViewer {
     initializeRepeatPages() {
         // No complex initialization needed with the new approach
         // The repeat controls are already rendered with the page
-        console.log('=== INITIALIZING REPEAT PAGES ===');
+        debugInfo('FormViewer', '=== INITIALIZING REPEAT PAGES ===');
         
         this.formData.pages.forEach(page => {
             if (page.repeatConfig?.enabled) {
-                console.log(`Checking repeat page: ${page.id} (${page.name})`);
+                debugInfo('FormViewer', `Checking repeat page: ${page.id} (${page.name})`);
                 
                 const pageElement = document.querySelector(`[data-page-id="${page.id}"]`);
                 const addButton = pageElement?.querySelector('.add-repeat-btn');
                 const hiddenField = document.getElementById(`collected-data-${page.id}`);
                 
-                console.log(`Page element found: ${!!pageElement}`);
-                console.log(`Add button found: ${!!addButton}`);
-                console.log(`Hidden field found: ${!!hiddenField}`);
+                debugInfo('FormViewer', `Page element found: ${!!pageElement}`);
+                debugInfo('FormViewer', `Add button found: ${!!addButton}`);
+                debugInfo('FormViewer', `Hidden field found: ${!!hiddenField}`);
                 
                 if (!addButton) {
-                    console.error(`❌ Add Another button NOT FOUND for repeat page ${page.id}`);
+                    debugError('FormViewer'(`❌ Add Another button NOT FOUND for repeat page ${page.id}`);
                 } else {
-                    console.log(`✅ Add Another button found for page ${page.id}`);
+                    debugInfo('FormViewer', `✅ Add Another button found for page ${page.id}`);
                 }
             }
         });
         
-        console.log('Repeat pages initialization complete');
+        debugInfo('FormViewer', 'Repeat pages initialization complete');
     }
     
     validateCurrentPage() {
@@ -915,12 +917,12 @@ export class FormViewer {
             if (response.success) {
                 // Update global variables with any variables returned from server
                 if (response.variables && window.FormVariables) {
-                    console.log('📨 FORM SUBMISSION: Received variables from server:', Object.keys(response.variables));
+                    debugInfo('FormViewer', '📨 FORM SUBMISSION: Received variables from server:', Object.keys(response.variables));
                     window.FormVariables.setMultiple(response.variables);
                     
                     // Force refresh all DataTables to display the new data
                     setTimeout(() => {
-                        console.log('🔄 FORM SUBMISSION: Refreshing DataTables after receiving variables');
+                        debugInfo('FormViewer', '🔄 FORM SUBMISSION: Refreshing DataTables after receiving variables');
                         if (window.AppModules?.fieldTypes) {
                             window.AppModules.fieldTypes.refreshAllDataTables();
                         }
@@ -940,7 +942,7 @@ export class FormViewer {
                 throw new Error(response.error || 'Submission failed');
             }
         } catch (error) {
-            console.error('Form submission error:', error);
+            debugError('FormViewer'('Form submission error:', error);
             this.showSubmissionError(error.message);
         }
     }
@@ -969,30 +971,30 @@ export class FormViewer {
         const data = {};
         const files = [];
 
-        console.log('=== Starting Form Data Collection (v8) ===');
+        debugInfo('FormViewer', '=== Starting Form Data Collection (v8) ===');
 
         this.formData.pages.forEach(page => {
-            console.log(`Processing page ${page.id} (${page.name}), repeat enabled: ${page.repeatConfig?.enabled}`);
+            debugInfo('FormViewer', `Processing page ${page.id} (${page.name}), repeat enabled: ${page.repeatConfig?.enabled}`);
             if (page.repeatConfig?.enabled) {
                 // For repeating pages, get data ONLY from the hidden input
                 const collectedDataInput = document.getElementById(`collected-data-${page.id}`);
-                console.log(`Hidden input field for page ${page.id}:`, collectedDataInput);
-                console.log(`Hidden input value:`, collectedDataInput?.value);
+                debugInfo('FormViewer', `Hidden input field for page ${page.id}:`, collectedDataInput);
+                debugInfo('FormViewer', `Hidden input value:`, collectedDataInput?.value);
                 if (collectedDataInput && collectedDataInput.value) {
                     try {
                         const instances = JSON.parse(collectedDataInput.value);
                         if (instances && instances.length > 0) {
                             data[`page_${page.id}_instances`] = instances;
-                            console.log(`✅ Collected ${instances.length} instances for page_${page.id}_instances from hidden field`);
-                            console.log('Instance data:', instances);
+                            debugInfo('FormViewer', `✅ Collected ${instances.length} instances for page_${page.id}_instances from hidden field`);
+                            debugInfo('FormViewer', 'Instance data:', instances);
                         } else {
-                            console.log(`❌ No instances found in hidden field for page ${page.id}`);
+                            debugInfo('FormViewer', `❌ No instances found in hidden field for page ${page.id}`);
                         }
                     } catch (e) {
-                        console.error(`Could not parse collected data for ${page.id}`, e);
+                        debugError('FormViewer'(`Could not parse collected data for ${page.id}`, e);
                     }
                 } else {
-                    console.log(`❌ No hidden input found or empty value for page ${page.id}`);
+                    debugInfo('FormViewer', `❌ No hidden input found or empty value for page ${page.id}`);
                 }
             } else {
                 // For standard pages, collect data directly from fields
@@ -1021,14 +1023,14 @@ export class FormViewer {
         const signatureModule = window.AppModules?.signature;
         if (signatureModule) {
             const signatures = signatureModule.getAllSignatureData();
-            console.log('Adding signature data:', signatures);
+            debugInfo('FormViewer', 'Adding signature data:', signatures);
             Object.assign(data, signatures);
         }
         
-        console.log('--- Final Submission Data (from formViewer.js) ---');
-        console.log('Data object:', JSON.stringify(data, null, 2));
-        console.log(`Files: ${files.length}`);
-        files.forEach(file => console.log(`  - File: ${file.key}, Name: ${file.file.name}, Size: ${file.file.size}`));
+        debugInfo('FormViewer', '--- Final Submission Data (from formViewer.js) ---');
+        debugInfo('FormViewer', 'Data object:', JSON.stringify(data, null, 2));
+        debugInfo('FormViewer', `Files: ${files.length}`);
+        files.forEach(file => debugInfo('FormViewer', `  - File: ${file.key}, Name: ${file.file.name}, Size: ${file.file.size}`));
         
         return { data, files };
     }
@@ -1036,9 +1038,9 @@ export class FormViewer {
     async submitFormData(formResult) {
         const { data, files } = formResult;
 
-        console.log('--- Submitting Form Data (from formViewer.js) ---');
-        console.log('Payload Data:', JSON.stringify(data, null, 2));
-        console.log('Payload Files:', files.map(f => f.file.name));
+        debugInfo('FormViewer', '--- Submitting Form Data (from formViewer.js) ---');
+        debugInfo('FormViewer', 'Payload Data:', JSON.stringify(data, null, 2));
+        debugInfo('FormViewer', 'Payload Files:', files.map(f => f.file.name));
 
         // Check if we have files to upload
         const hasFiles = files && files.length > 0;
@@ -1047,8 +1049,8 @@ export class FormViewer {
             // Use FormData for multipart submission
             const formData = new FormData();
 
-            console.log('Creating multipart submission with files:', files.length);
-            console.log('Regular data to submit:', data);
+            debugInfo('FormViewer', 'Creating multipart submission with files:', files.length);
+            debugInfo('FormViewer', 'Regular data to submit:', data);
 
             // Add regular form data as JSON string
             formData.append('formData', JSON.stringify(data));
@@ -1063,14 +1065,14 @@ export class FormViewer {
 
             // Add files with proper field names
             files.forEach(({ key, file }) => {
-                console.log('Adding file to FormData:', key, file.name, file.size);
+                debugInfo('FormViewer', 'Adding file to FormData:', key, file.name, file.size);
                 formData.append(key, file);
             });
 
             // Debug: Log all FormData entries
-            console.log('Final FormData entries:');
+            debugInfo('FormViewer', 'Final FormData entries:');
             for (const [key, value] of formData.entries()) {
-                console.log('FormData entry:', key, typeof value, value instanceof File ? `File: ${value.name}` : value);
+                debugInfo('FormViewer', 'FormData entry:', key, typeof value, value instanceof File ? `File: ${value.name}` : value);
             }
 
             // Submit as multipart/form-data (don't set Content-Type header, let browser set it)
@@ -1081,7 +1083,7 @@ export class FormViewer {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error(`Server responded with status ${response.status}:`, errorText);
+                debugError('FormViewer'(`Server responded with status ${response.status}:`, errorText);
                 throw new Error(`Submission failed: ${response.statusText || 'Server Error'}. Details: ${errorText.substring(0, 100)}...`);
             }
             
@@ -1106,7 +1108,7 @@ export class FormViewer {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error(`Server responded with status ${response.status}:`, errorText);
+                debugError('FormViewer'(`Server responded with status ${response.status}:`, errorText);
                 throw new Error(`Submission failed: ${response.statusText || 'Server Error'}. Details: ${errorText.substring(0, 100)}...`);
             }
             
@@ -1168,11 +1170,11 @@ export class FormViewer {
     }
     
     setupConditionalLogicListeners() {
-        console.log('🔄 FORM VIEWER: Setting up conditional logic field listeners');
+        debugInfo('FormViewer', '🔄 FORM VIEWER: Setting up conditional logic field listeners');
         
         const conditionalLogic = window.AppModules.conditionalLogic;
         if (!conditionalLogic) {
-            console.warn('ConditionalLogic module not available');
+            debugWarn('FormViewer'('ConditionalLogic module not available');
             return;
         }
         
@@ -1184,21 +1186,21 @@ export class FormViewer {
             
             events.forEach(eventType => {
                 field.addEventListener(eventType, () => {
-                    console.log('🔄 FIELD CHANGE: Field changed:', field.name || field.id, 'Value:', field.value);
+                    debugInfo('FormViewer', '🔄 FIELD CHANGE: Field changed:', field.name || field.id, 'Value:', field.value);
                     conditionalLogic.handleFieldChange(field);
                 });
             });
         });
         
         // Initial evaluation of all conditions
-        console.log('🔄 FORM VIEWER: Performing initial conditional logic evaluation');
+        debugInfo('FormViewer', '🔄 FORM VIEWER: Performing initial conditional logic evaluation');
         conditionalLogic.evaluateAllConditions();
         
-        console.log('🔄 FORM VIEWER: Conditional logic listeners setup complete');
+        debugInfo('FormViewer', '🔄 FORM VIEWER: Conditional logic listeners setup complete');
     }
     
     async processGetRecordsPage(page) {
-        console.log(`📊 Processing Get Records for page ${page.id} (${page.name})`);
+        debugInfo('FormViewer', `📊 Processing Get Records for page ${page.id} (${page.name})`);
         
         try {
             // Collect current form data to get any filter variables
@@ -1231,11 +1233,11 @@ export class FormViewer {
             
             // Update global variables with any new variables from the query
             if (result.variables && window.FormVariables) {
-                console.log('📨 [GET RECORDS DEBUG] Received variables from server:', Object.keys(result.variables));
+                debugInfo('FormViewer', '📨 [GET RECORDS DEBUG] Received variables from server:', Object.keys(result.variables));
                 
                 // Enhanced variable logging
                 Object.entries(result.variables).forEach(([key, value]) => {
-                    console.log(`📨 [GET RECORDS DEBUG] Variable "${key}":`, {
+                    debugInfo('FormViewer', `📨 [GET RECORDS DEBUG] Variable "${key}":`, {
                         type: typeof value,
                         isString: typeof value === 'string',
                         length: typeof value === 'string' ? value.length : 'N/A',
@@ -1247,40 +1249,40 @@ export class FormViewer {
                 
                 // Log current variables before setting new ones
                 const currentVariables = window.FormVariables.getAll();
-                console.log('📊 [GET RECORDS DEBUG] Variables before update:', Object.keys(currentVariables));
+                debugInfo('FormViewer', '📊 [GET RECORDS DEBUG] Variables before update:', Object.keys(currentVariables));
                 
                 // Set the new variables
                 window.FormVariables.setMultiple(result.variables);
                 
                 // Log variables after setting
                 const updatedVariables = window.FormVariables.getAll();
-                console.log('📊 [GET RECORDS DEBUG] Variables after update:', Object.keys(updatedVariables));
-                console.log('📊 [GET RECORDS DEBUG] New variables added:', 
+                debugInfo('FormViewer', '📊 [GET RECORDS DEBUG] Variables after update:', Object.keys(updatedVariables));
+                debugInfo('FormViewer', '📊 [GET RECORDS DEBUG] New variables added:', 
                     Object.keys(result.variables).filter(key => !currentVariables.hasOwnProperty(key))
                 );
                 
                 // Force refresh all DataTables to display the new data
                 setTimeout(() => {
-                    console.log('🔄 [GET RECORDS DEBUG] Refreshing DataTables after receiving variables');
-                    console.log('🔄 [GET RECORDS DEBUG] Available fieldTypes module:', !!window.AppModules?.fieldTypes);
+                    debugInfo('FormViewer', '🔄 [GET RECORDS DEBUG] Refreshing DataTables after receiving variables');
+                    debugInfo('FormViewer', '🔄 [GET RECORDS DEBUG] Available fieldTypes module:', !!window.AppModules?.fieldTypes);
                     
                     if (window.AppModules?.fieldTypes) {
-                        console.log('🔄 [GET RECORDS DEBUG] Calling refreshAllDataTables...');
+                        debugInfo('FormViewer', '🔄 [GET RECORDS DEBUG] Calling refreshAllDataTables...');
                         window.AppModules.fieldTypes.refreshAllDataTables();
                     } else {
-                        console.error('❌ [GET RECORDS DEBUG] fieldTypes module not available!');
+                        debugError('FormViewer'('❌ [GET RECORDS DEBUG] fieldTypes module not available!');
                     }
                 }, 100);
                 
                 // Additional debugging - trigger manual DataTable refresh after longer delay
                 setTimeout(() => {
-                    console.log('🕐 [GET RECORDS DEBUG] Secondary DataTable refresh attempt...');
+                    debugInfo('FormViewer', '🕐 [GET RECORDS DEBUG] Secondary DataTable refresh attempt...');
                     const dataTables = document.querySelectorAll('.datatable-field');
-                    console.log(`🔍 [GET RECORDS DEBUG] Found ${dataTables.length} DataTable elements`);
+                    debugInfo('FormViewer', `🔍 [GET RECORDS DEBUG] Found ${dataTables.length} DataTable elements`);
                     
                     dataTables.forEach((table, index) => {
                         const fieldId = table.dataset.fieldId;
-                        console.log(`🔄 [GET RECORDS DEBUG] DataTable ${index + 1}/${dataTables.length}:`, {
+                        debugInfo('FormViewer', `🔄 [GET RECORDS DEBUG] DataTable ${index + 1}/${dataTables.length}:`, {
                             fieldId: fieldId,
                             hasFieldId: !!fieldId,
                             element: table
@@ -1289,24 +1291,24 @@ export class FormViewer {
                         if (fieldId && window.AppModules?.fieldTypes) {
                             const field = window.AppModules.fieldTypes.findFieldById(fieldId);
                             if (field) {
-                                console.log(`🔄 [GET RECORDS DEBUG] Manually refreshing DataTable ${fieldId}`);
+                                debugInfo('FormViewer', `🔄 [GET RECORDS DEBUG] Manually refreshing DataTable ${fieldId}`);
                                 window.AppModules.fieldTypes.refreshDataTable(field);
                             }
                         }
                     });
                 }, 500);
             } else {
-                console.warn('⚠️ [GET RECORDS DEBUG] No variables received or FormVariables not available:', {
+                debugWarn('FormViewer'('⚠️ [GET RECORDS DEBUG] No variables received or FormVariables not available:', {
                     hasVariables: !!result.variables,
                     variableCount: result.variables ? Object.keys(result.variables).length : 0,
                     hasFormVariables: !!window.FormVariables
                 });
             }
             
-            console.log(`✅ Successfully processed Get Records page ${page.id}`);
+            debugInfo('FormViewer', `✅ Successfully processed Get Records page ${page.id}`);
             
         } catch (error) {
-            console.error(`❌ Error processing Get Records page ${page.id}:`, error);
+            debugError('FormViewer'(`❌ Error processing Get Records page ${page.id}:`, error);
             // Don't block navigation on error, but log it
         }
     }

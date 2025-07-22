@@ -1,5 +1,7 @@
 // SalesforceConnector Module - Handles all Salesforce API interactions
 
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 export class SalesforceConnector {
     constructor() {
         this.baseUrl = '';
@@ -15,7 +17,7 @@ export class SalesforceConnector {
             
             // Check if session expired
             if (response.status === 401 && errorData.sessionExpired) {
-                console.log('Session expired, clearing connection state');
+                debugInfo('SalesforceConnector', 'Session expired, clearing connection state');
                 window.AppState.salesforceConnected = false;
                 window.AppState.userInfo = null;
                 
@@ -35,7 +37,7 @@ export class SalesforceConnector {
     }
     
     async initialize() {
-        console.log('Initializing SalesforceConnector module...');
+        debugInfo('SalesforceConnector', 'Initializing SalesforceConnector module...');
         
         // Check connection status on load
         await this.checkConnectionStatus();
@@ -56,10 +58,10 @@ export class SalesforceConnector {
         // Check connection every 5 minutes
         this.connectionCheckInterval = setInterval(async () => {
             if (window.AppState.salesforceConnected) {
-                console.log('Performing periodic connection check...');
+                debugInfo('SalesforceConnector', 'Performing periodic connection check...');
                 const stillConnected = await this.checkConnectionStatus();
                 if (!stillConnected) {
-                    console.log('Connection lost during periodic check');
+                    debugInfo('SalesforceConnector', 'Connection lost during periodic check');
                     this.updateConnectionUI();
                 }
             }
@@ -83,7 +85,7 @@ export class SalesforceConnector {
             
             return data.connected;
         } catch (error) {
-            console.error('Error checking Salesforce connection:', error);
+            debugError('SalesforceConnector', 'Error checking Salesforce connection:', error);
             window.AppState.salesforceConnected = false;
             return false;
         }
@@ -94,7 +96,7 @@ export class SalesforceConnector {
         const statusEl = document.getElementById('connectionStatus');
         if (!statusEl) {
             // We're likely in the form viewer, skip UI updates
-            console.log('💡 SalesforceConnector: Connection UI elements not found, skipping UI update (likely in form viewer)');
+            debugInfo('SalesforceConnector', '💡 Connection UI elements not found, skipping UI update (likely in form viewer)');
             return;
         }
         
@@ -164,7 +166,7 @@ export class SalesforceConnector {
                 window.location.href = data.authUrl;
             }
         } catch (error) {
-            console.error('Error initiating OAuth:', error);
+            debugError('SalesforceConnector', 'Error initiating OAuth:', error);
             alert('Failed to connect to Salesforce. Please try again.');
         }
     }
@@ -198,7 +200,7 @@ export class SalesforceConnector {
                 throw new Error(data.error || 'Connection failed');
             }
         } catch (error) {
-            console.error('Error connecting with username/password:', error);
+            debugError('SalesforceConnector', 'Error connecting with username/password:', error);
             alert(`Failed to connect: ${error.message}`);
         }
     }
@@ -206,9 +208,9 @@ export class SalesforceConnector {
     async loadObjects() {
         try {
             this.objects = await this.getObjects();
-            console.log(`Loaded ${this.objects.length} Salesforce objects`);
+            debugInfo('SalesforceConnector', `Loaded ${this.objects.length} Salesforce objects`);
         } catch (error) {
-            console.error('Error loading Salesforce objects:', error);
+            debugError('SalesforceConnector', 'Error loading Salesforce objects:', error);
         }
     }
     
@@ -226,7 +228,7 @@ export class SalesforceConnector {
             
             return await response.json();
         } catch (error) {
-            console.error('Error fetching Salesforce objects:', error);
+            debugError('SalesforceConnector', 'Error fetching Salesforce objects:', error);
             return [];
         }
     }
@@ -255,7 +257,7 @@ export class SalesforceConnector {
             
             return fields;
         } catch (error) {
-            console.error(`Error fetching fields for ${objectName}:`, error);
+            debugError('SalesforceConnector', `Error fetching fields for ${objectName}:`, error);
             return [];
         }
     }
@@ -289,7 +291,7 @@ export class SalesforceConnector {
             
             return values;
         } catch (error) {
-            console.error(`Error fetching picklist values for ${objectName}.${fieldName}:`, error);
+            debugError('SalesforceConnector', `Error fetching picklist values for ${objectName}.${fieldName}:`, error);
             return [];
         }
     }
@@ -328,7 +330,7 @@ export class SalesforceConnector {
             
             return await response.json();
         } catch (error) {
-            console.error(`Error searching ${objectName} records:`, error);
+            debugError('SalesforceConnector', `Error searching ${objectName} records:`, error);
             return [];
         }
     }
@@ -355,7 +357,7 @@ export class SalesforceConnector {
             
             return await response.json();
         } catch (error) {
-            console.error(`Error creating ${objectName} record:`, error);
+            debugError('SalesforceConnector', `Error creating ${objectName} record:`, error);
             throw error;
         }
     }
@@ -382,7 +384,7 @@ export class SalesforceConnector {
             
             return await response.json();
         } catch (error) {
-            console.error(`Error updating ${objectName} record:`, error);
+            debugError('SalesforceConnector', `Error updating ${objectName} record:`, error);
             throw error;
         }
     }
@@ -409,7 +411,7 @@ export class SalesforceConnector {
             
             return await response.json();
         } catch (error) {
-            console.error('Error executing SOQL query:', error);
+            debugError('SalesforceConnector', 'Error executing SOQL query:', error);
             throw error;
         }
     }
@@ -432,7 +434,7 @@ export class SalesforceConnector {
                 credentials: 'same-origin'
             });
         } catch (error) {
-            console.error('Error during logout:', error);
+            debugError('SalesforceConnector', 'Error during logout:', error);
         }
         
         window.AppState.salesforceConnected = false;

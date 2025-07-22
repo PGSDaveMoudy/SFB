@@ -1,5 +1,7 @@
 // FieldTypes Module - Defines and handles different field types
 
+const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SFBDebug;
+
 export class FieldTypes {
     constructor() {
         this.quillInstances = new Map();
@@ -11,7 +13,7 @@ export class FieldTypes {
     }
     
     async initialize() {
-        console.log('Initializing FieldTypes module...');
+        debugInfo("FieldTypes", 'Initializing FieldTypes module...');
         this.setupEventListeners();
         this.setupDisplayFieldVariableWatching();
     }
@@ -439,7 +441,7 @@ export class FieldTypes {
         
         // Initialize login variables to false when field is first rendered
         if (window.FormVariables) {
-            console.log(`🔐 LOGIN: Initializing login variables for field ${field.id}`);
+            debugInfo("FieldTypes", `🔐 LOGIN: Initializing login variables for field ${field.id}`);
             
             const initialVariables = {
                 'isLoggedIn': 'false',
@@ -577,11 +579,11 @@ export class FieldTypes {
     }
     
     setupLookupField(input) {
-        console.log('Setting up lookup field:', input.id);
+        debugInfo("FieldTypes", 'Setting up lookup field:', input.id);
         const fieldContainer = input.closest('.lookup-field');
         
         if (!fieldContainer) {
-            console.error('Lookup field container not found for input:', input.id);
+            debugError("FieldTypes", 'Lookup field container not found for input:', input.id);
             return;
         }
         
@@ -590,7 +592,7 @@ export class FieldTypes {
         const selectedDiv = fieldContainer.querySelector('.lookup-selected');
         
         if (!hiddenInput || !resultsDiv || !selectedDiv) {
-            console.error('Lookup field elements not found:', { hiddenInput: !!hiddenInput, resultsDiv: !!resultsDiv, selectedDiv: !!selectedDiv });
+            debugError("FieldTypes", 'Lookup field elements not found:', { hiddenInput: !!hiddenInput, resultsDiv: !!resultsDiv, selectedDiv: !!selectedDiv });
             return;
         }
         
@@ -598,7 +600,7 @@ export class FieldTypes {
         
         input.addEventListener('input', (e) => {
             const query = e.target.value.trim();
-            console.log('Lookup input changed:', query);
+            debugInfo("FieldTypes", 'Lookup input changed:', query);
             
             clearTimeout(debounceTimer);
             
@@ -608,7 +610,7 @@ export class FieldTypes {
             }
             
             debounceTimer = setTimeout(async () => {
-                console.log('Performing lookup search for:', query);
+                debugInfo("FieldTypes", 'Performing lookup search for:', query);
                 await this.performLookupSearch(input, query, resultsDiv, hiddenInput, selectedDiv);
             }, 300);
         });
@@ -628,7 +630,7 @@ export class FieldTypes {
     }
     
     async performLookupSearch(input, query, resultsDiv, hiddenInput, selectedDiv) {
-        console.log('performLookupSearch called with query:', query);
+        debugInfo("FieldTypes", 'performLookupSearch called with query:', query);
         const objectName = input.dataset.lookupObject;
         const displayField = input.dataset.displayField || 'Name';
         const searchField = input.dataset.searchField || 'Name';
@@ -639,26 +641,26 @@ export class FieldTypes {
             const filtersData = input.dataset.lookupFilters;
             if (filtersData) {
                 filters = JSON.parse(decodeURIComponent(filtersData));
-                console.log('Parsed lookup filters:', filters);
+                debugInfo("FieldTypes", 'Parsed lookup filters:', filters);
             }
         } catch (e) {
-            console.warn('Error parsing lookup filters:', e);
+            debugWarn("FieldTypes", 'Error parsing lookup filters:', e);
         }
         
         if (!objectName || !window.AppState.salesforceConnected) {
-            console.log('Lookup search aborted: objectName or Salesforce not connected');
+            debugInfo("FieldTypes", 'Lookup search aborted: objectName or Salesforce not connected');
             return;
         }
         
         try {
             const salesforce = window.AppModules.salesforce;
-            console.log(`Calling salesforce.searchRecords for ${objectName} with query ${query}`);
+            debugInfo("FieldTypes", `Calling salesforce.searchRecords for ${objectName} with query ${query}`);
             const results = await salesforce.searchRecords(objectName, query, displayField, searchField, filters, maxResults);
-            console.log('Salesforce search results:', results);
+            debugInfo("FieldTypes", 'Salesforce search results:', results);
             
             this.displayLookupResults(results, resultsDiv, hiddenInput, selectedDiv, input);
         } catch (error) {
-            console.error('Lookup search error:', error);
+            debugError("FieldTypes", 'Lookup search error:', error);
         }
     }
     
@@ -719,7 +721,7 @@ export class FieldTypes {
         
         if (!variableName) return;
         
-        console.log(`🔗 LOOKUP: Storing record ID "${recordId}" as variable "${variableName}"`);
+        debugInfo("FieldTypes", `🔗 LOOKUP: Storing record ID "${recordId}" as variable "${variableName}"`);
         
         // Store in global variable system
         if (window.FormVariables) {
@@ -745,12 +747,12 @@ export class FieldTypes {
             currentPage.variables = new Map([[variableName, recordId]]);
         }
         
-        console.log(`✅ LOOKUP: Variable "${variableName}" set successfully`);
+        debugInfo("FieldTypes", `✅ LOOKUP: Variable "${variableName}" set successfully`);
         
         // Trigger conditional logic re-evaluation
         if (window.AppModules?.conditionalLogic) {
             setTimeout(() => {
-                console.log('🔄 LOOKUP: Triggering conditional logic re-evaluation...');
+                debugInfo("FieldTypes", '🔄 LOOKUP: Triggering conditional logic re-evaluation...');
                 window.AppModules.conditionalLogic.evaluateAllConditions();
             }, 100);
         }
@@ -771,7 +773,7 @@ export class FieldTypes {
     
     initializeRichTextEditor(fieldId, editorId, initialContent = '') {
         if (typeof Quill === 'undefined') {
-            console.warn('Quill is not loaded, skipping rich text editor initialization');
+            debugWarn("FieldTypes", 'Quill is not loaded, skipping rich text editor initialization');
             return;
         }
         
@@ -857,7 +859,7 @@ export class FieldTypes {
                 setVariables = JSON.parse(decodeURIComponent(variablesData));
             }
         } catch (e) {
-            console.warn('Error parsing login field variables:', e);
+            debugWarn("FieldTypes", 'Error parsing login field variables:', e);
         }
         
         // Handle email input changes for real-time validation
@@ -909,10 +911,10 @@ export class FieldTypes {
         `;
         
         try {
-            console.log('Starting login email lookup for:', email);
+            debugInfo("FieldTypes", 'Starting login email lookup for:', email);
             const flowLogic = window.AppModules.flowLogic;
             if (!flowLogic) {
-                console.error('FlowLogic module not available');
+                debugError("FieldTypes", 'FlowLogic module not available');
                 this.showLoginMessage(fieldId, 'System error. You can still continue.', 'warning');
                 this.handleBasicLogin(fieldId, email, setVariables);
                 return;
@@ -920,17 +922,17 @@ export class FieldTypes {
             
             // Use the existing flow logic to handle email lookup
             const result = await flowLogic.performEmailLookup(email);
-            console.log('Lookup result:', result);
+            debugInfo("FieldTypes", 'Lookup result:', result);
             
             if (result.found && result.contact) {
-                console.log('Contact found, showing OTP verification');
+                debugInfo("FieldTypes", 'Contact found, showing OTP verification');
                 
                 // Clear the loading message first
                 statusDiv.innerHTML = '';
                 
                 // Set variables to indicate contact exists (no registration needed)
                 if (window.FormVariables) {
-                    console.log('🔐 LOGIN: Contact found - Setting existing user variables');
+                    debugInfo("FieldTypes", '🔐 LOGIN: Contact found - Setting existing user variables');
                     window.FormVariables.set('needsRegistration', 'false');
                     window.FormVariables.set('isNewUser', 'false');
                     window.FormVariables.set('contactExists', 'true');
@@ -950,13 +952,13 @@ export class FieldTypes {
                 // DO NOT set login variables here - they should only be set after OTP verification
                 this.showLoginOTPVerification(fieldId, email, result.contact, statusDiv);
             } else {
-                console.log('No contact found, proceeding with new account flow');
+                debugInfo("FieldTypes", 'No contact found, proceeding with new account flow');
                 // No contact found - set basic variables and registration flag
                 this.setLoginVariables(fieldId, setVariables, { Email: email });
                 
                 // Set variables to indicate user needs to register (new user)
                 if (window.FormVariables) {
-                    console.log('🔐 LOGIN: No contact found - Setting registration variables');
+                    debugInfo("FieldTypes", '🔐 LOGIN: No contact found - Setting registration variables');
                     window.FormVariables.set('needsRegistration', 'true');
                     window.FormVariables.set('isNewUser', 'true');
                     window.FormVariables.set('contactExists', 'false');
@@ -975,7 +977,7 @@ export class FieldTypes {
                 this.showLoginMessage(fieldId, 'Welcome! You can proceed to create your account.', 'success');
             }
         } catch (error) {
-            console.error('Login lookup error:', error);
+            debugError("FieldTypes", 'Login lookup error:', error);
             this.showLoginMessage(fieldId, 'Lookup failed. You can still continue.', 'warning');
             this.handleBasicLogin(fieldId, email, setVariables);
         }
@@ -988,7 +990,7 @@ export class FieldTypes {
     }
     
     showLoginOTPVerification(fieldId, email, contact, statusDiv) {
-        console.log('🔐 LOGIN: showLoginOTPVerification called with:', {
+        debugInfo("FieldTypes", '🔐 LOGIN: showLoginOTPVerification called with:', {
             fieldId,
             email,
             contactName: contact?.Name,
@@ -1035,10 +1037,10 @@ export class FieldTypes {
             </div>
         `;
         
-        console.log('🔐 LOGIN: Setting statusDiv.innerHTML with OTP HTML');
+        debugInfo("FieldTypes", '🔐 LOGIN: Setting statusDiv.innerHTML with OTP HTML');
         statusDiv.innerHTML = otpHTML;
         
-        console.log('🔐 LOGIN: After setting innerHTML, statusDiv content:', statusDiv.innerHTML.substring(0, 100) + '...');
+        debugInfo("FieldTypes", '🔐 LOGIN: After setting innerHTML, statusDiv content:', statusDiv.innerHTML.substring(0, 100) + '...');
         
         // Set up event listeners
         const sendOtpBtn = statusDiv.querySelector('.send-otp-btn');
@@ -1047,7 +1049,7 @@ export class FieldTypes {
         const otpInput = statusDiv.querySelector('.otp-input');
         const otpInputSection = statusDiv.querySelector('.otp-input-section');
         
-        console.log('🔐 LOGIN: Event listener setup - found elements:', {
+        debugInfo("FieldTypes", '🔐 LOGIN: Event listener setup - found elements:', {
             sendOtpBtn: !!sendOtpBtn,
             verifyOtpBtn: !!verifyOtpBtn,
             resendOtpBtn: !!resendOtpBtn,
@@ -1057,19 +1059,19 @@ export class FieldTypes {
         
         // Send OTP
         sendOtpBtn.addEventListener('click', async () => {
-            console.log('🔐 LOGIN: Send OTP button clicked');
+            debugInfo("FieldTypes", '🔐 LOGIN: Send OTP button clicked');
             await this.sendLoginOTP(fieldId, email, contact, statusDiv);
         });
         
         // Verify OTP
         verifyOtpBtn.addEventListener('click', async () => {
-            console.log('🔐 LOGIN: Verify OTP button clicked');
+            debugInfo("FieldTypes", '🔐 LOGIN: Verify OTP button clicked');
             await this.verifyLoginOTP(fieldId, email, contact, statusDiv);
         });
         
         // Resend OTP
         resendOtpBtn.addEventListener('click', async () => {
-            console.log('🔐 LOGIN: Resend OTP button clicked');
+            debugInfo("FieldTypes", '🔐 LOGIN: Resend OTP button clicked');
             await this.sendLoginOTP(fieldId, email, contact, statusDiv);
         });
         
@@ -1146,7 +1148,7 @@ export class FieldTypes {
             
             // Set variable in GLOBAL store (this is the primary source now)
             if (window.FormVariables) {
-                console.log(`🔐 LOGIN: Setting global variable "${varName}" = "${finalValue}"`);
+                debugInfo("FieldTypes", `🔐 LOGIN: Setting global variable "${varName}" = "${finalValue}"`);
                 window.FormVariables.set(varName, finalValue);
             }
             
@@ -1160,15 +1162,15 @@ export class FieldTypes {
         // Set common login variables for easy conditional logic
         if (window.FormVariables) {
             if (isLoginComplete) {
-                console.log(`🔐 LOGIN: Login complete - Setting global variable "isLoggedIn" = "true"`);
+                debugInfo("FieldTypes", `🔐 LOGIN: Login complete - Setting global variable "isLoggedIn" = "true"`);
                 window.FormVariables.set('isLoggedIn', 'true');
-                console.log(`🔐 LOGIN: Login complete - Setting global variable "loggedIn" = "true"`);
+                debugInfo("FieldTypes", `🔐 LOGIN: Login complete - Setting global variable "loggedIn" = "true"`);
                 window.FormVariables.set('loggedIn', 'true');
             } else {
-                console.log(`🔐 LOGIN: Contact found, but login not complete until OTP verified`);
-                console.log(`🔐 LOGIN: Setting global variable "isLoggedIn" = "false"`);
+                debugInfo("FieldTypes", `🔐 LOGIN: Contact found, but login not complete until OTP verified`);
+                debugInfo("FieldTypes", `🔐 LOGIN: Setting global variable "isLoggedIn" = "false"`);
                 window.FormVariables.set('isLoggedIn', 'false');
-                console.log(`🔐 LOGIN: Setting global variable "loggedIn" = "false"`);
+                debugInfo("FieldTypes", `🔐 LOGIN: Setting global variable "loggedIn" = "false"`);
                 window.FormVariables.set('loggedIn', 'false');
             }
         }
@@ -1176,7 +1178,7 @@ export class FieldTypes {
         // Trigger conditional logic evaluation after setting variables
         const conditionalLogic = window.AppModules.conditionalLogic;
         if (conditionalLogic) {
-            console.log('🔐 LOGIN: Triggering conditional logic re-evaluation');
+            debugInfo("FieldTypes", '🔐 LOGIN: Triggering conditional logic re-evaluation');
             // Evaluate all conditions to handle any page visibility changes
             conditionalLogic.evaluateAllConditions();
         }
@@ -1278,39 +1280,39 @@ export class FieldTypes {
             try {
                 // Perform contact lookup first
                 const contactLookupResult = await this.performContactLookup(email);
-                console.log('📧 EMAIL-VERIFY: Contact lookup result:', contactLookupResult);
+                debugInfo("FieldTypes", '📧 EMAIL-VERIFY: Contact lookup result:', contactLookupResult);
                 
                 if (contactLookupResult.found && contactLookupResult.contact) {
                     // Contact found - proceed with OTP
-                    console.log('📧 EMAIL-VERIFY: Contact found, proceeding with OTP verification');
+                    debugInfo("FieldTypes", '📧 EMAIL-VERIFY: Contact found, proceeding with OTP verification');
                     await this.sendOTPToContact(fieldId, email, contactLookupResult.contact);
                 } else {
                     // Contact not found
-                    console.log('📧 EMAIL-VERIFY: Contact not found');
+                    debugInfo("FieldTypes", '📧 EMAIL-VERIFY: Contact not found');
                     if (requireExistingContact) {
                         // Require existing contact - show error and don't send OTP
                         this.showVerifyMessage(fieldId, contactNotFoundMessage, 'error');
                         return;
                     } else {
                         // Allow new email - proceed with OTP but no contact data
-                        console.log('📧 EMAIL-VERIFY: Contact not found but allowing new email verification');
+                        debugInfo("FieldTypes", '📧 EMAIL-VERIFY: Contact not found but allowing new email verification');
                         await this.sendOTPToEmail(fieldId, email, null);
                     }
                 }
             } catch (error) {
-                console.error('📧 EMAIL-VERIFY: Contact lookup error:', error);
+                debugError("FieldTypes", '📧 EMAIL-VERIFY: Contact lookup error:', error);
                 if (requireExistingContact) {
                     this.showVerifyMessage(fieldId, 'Unable to verify account. Please try again.', 'error');
                     return;
                 } else {
                     // Fallback to basic email verification
-                    console.log('📧 EMAIL-VERIFY: Falling back to basic email verification');
+                    debugInfo("FieldTypes", '📧 EMAIL-VERIFY: Falling back to basic email verification');
                     await this.sendOTPToEmail(fieldId, email, null);
                 }
             }
         } else {
             // Basic email verification without contact lookup
-            console.log('📧 EMAIL-VERIFY: Basic email verification (no contact lookup)');
+            debugInfo("FieldTypes", '📧 EMAIL-VERIFY: Basic email verification (no contact lookup)');
             await this.sendOTPToEmail(fieldId, email, null);
         }
     }
@@ -1326,13 +1328,13 @@ export class FieldTypes {
             const result = await flowLogic.performEmailLookup(email);
             return result;
         } catch (error) {
-            console.error('📧 EMAIL-VERIFY: Contact lookup failed:', error);
+            debugError("FieldTypes", '📧 EMAIL-VERIFY: Contact lookup failed:', error);
             throw error;
         }
     }
     
     async sendOTPToContact(fieldId, email, contact) {
-        console.log('📧 EMAIL-VERIFY: Sending OTP to existing contact:', contact.Name);
+        debugInfo("FieldTypes", '📧 EMAIL-VERIFY: Sending OTP to existing contact:', contact.Name);
         
         const statusDiv = document.getElementById(`${fieldId}_status`);
         statusDiv.innerHTML = `
@@ -1357,13 +1359,13 @@ export class FieldTypes {
             
             await this.showOTPVerificationInterface(fieldId, email, result.sessionId, contact, statusMessage, statusType);
         } catch (error) {
-            console.error('📧 EMAIL-VERIFY: Failed to send OTP to contact:', error);
+            debugError("FieldTypes", '📧 EMAIL-VERIFY: Failed to send OTP to contact:', error);
             this.showVerifyMessage(fieldId, 'Failed to send verification code. Please try again.', 'error');
         }
     }
     
     async sendOTPToEmail(fieldId, email, contact = null) {
-        console.log('📧 EMAIL-VERIFY: Sending OTP to email:', email);
+        debugInfo("FieldTypes", '📧 EMAIL-VERIFY: Sending OTP to email:', email);
         
         const statusDiv = document.getElementById(`${fieldId}_status`);
         statusDiv.innerHTML = `
@@ -1390,7 +1392,7 @@ export class FieldTypes {
             
             await this.showOTPVerificationInterface(fieldId, email, result.sessionId, contact, statusMessage, statusType);
         } catch (error) {
-            console.error('📧 EMAIL-VERIFY: Failed to send OTP:', error);
+            debugError("FieldTypes", '📧 EMAIL-VERIFY: Failed to send OTP:', error);
             this.showVerifyMessage(fieldId, 'Failed to send verification code. Please try again.', 'error');
         }
     }
@@ -1532,7 +1534,7 @@ export class FieldTypes {
             if (result.success || result.verified) {
                 // Get contact data from cache if available
                 const contact = this.contactLookupCache?.get(email) || null;
-                console.log('📧 EMAIL-VERIFY: OTP verification successful, contact data:', contact);
+                debugInfo("FieldTypes", '📧 EMAIL-VERIFY: OTP verification successful, contact data:', contact);
                 
                 // Verification successful
                 this.handleVerificationSuccess(fieldId, email, contact);
@@ -1540,7 +1542,7 @@ export class FieldTypes {
                 this.showOTPError(fieldId, result.message || 'Invalid verification code. Please try again.');
             }
         } catch (error) {
-            console.error('📧 EMAIL-VERIFY: OTP verification error:', error);
+            debugError("FieldTypes", '📧 EMAIL-VERIFY: OTP verification error:', error);
             this.showOTPError(fieldId, 'Verification failed. Please try again.');
         }
     }
@@ -1583,7 +1585,7 @@ export class FieldTypes {
         const flowLogic = window.AppModules.flowLogic;
         if (!flowLogic) return;
         
-        console.log('📧 EMAIL-VERIFY: Setting verification variables for field:', fieldId, 'Contact data:', contact);
+        debugInfo("FieldTypes", '📧 EMAIL-VERIFY: Setting verification variables for field:', fieldId, 'Contact data:', contact);
         
         // Create data object for template processing
         const templateData = {
@@ -1609,7 +1611,7 @@ export class FieldTypes {
                 });
             }
             
-            console.log(`📧 EMAIL-VERIFY: Setting variable "${varName}" = "${finalValue}"`);
+            debugInfo("FieldTypes", `📧 EMAIL-VERIFY: Setting variable "${varName}" = "${finalValue}"`);
             
             // Set variable in GLOBAL store (primary source)
             if (window.FormVariables) {
@@ -1627,7 +1629,7 @@ export class FieldTypes {
         
         // Set additional contact-specific variables if contact data is available
         if (contact) {
-            console.log('📧 EMAIL-VERIFY: Setting contact-specific variables');
+            debugInfo("FieldTypes", '📧 EMAIL-VERIFY: Setting contact-specific variables');
             
             // Set common contact variables
             const contactVariables = {
@@ -1664,21 +1666,21 @@ export class FieldTypes {
             timestamp: new Date().toISOString()
         });
         
-        console.log('📧 EMAIL-VERIFY: All verification variables set successfully');
+        debugInfo("FieldTypes", '📧 EMAIL-VERIFY: All verification variables set successfully');
     }
     
     findFieldById(fieldId) {
-        console.log('🔍 [FIELD DEBUG] Looking for field:', fieldId);
+        debugInfo("FieldTypes", '🔍 [FIELD DEBUG] Looking for field:', fieldId);
         
         // Try form viewer first (for public forms)
         if (window.AppModules?.formViewer?.formData?.pages) {
-            console.log('🔍 [FIELD DEBUG] Checking form viewer data...');
+            debugInfo("FieldTypes", '🔍 [FIELD DEBUG] Checking form viewer data...');
             const pages = window.AppModules.formViewer.formData.pages;
             for (const page of pages) {
                 if (page.fields) {
                     const field = page.fields.find(f => f.id === fieldId);
                     if (field) {
-                        console.log('✅ [FIELD DEBUG] Found field in form viewer:', field.type);
+                        debugInfo("FieldTypes", '✅ [FIELD DEBUG] Found field in form viewer:', field.type);
                         return field;
                     }
                 }
@@ -1687,21 +1689,21 @@ export class FieldTypes {
         
         // Try form builder (for design time)
         if (window.AppModules?.formBuilder?.currentForm?.pages) {
-            console.log('🔍 [FIELD DEBUG] Checking form builder data...');
+            debugInfo("FieldTypes", '🔍 [FIELD DEBUG] Checking form builder data...');
             const pages = window.AppModules.formBuilder.currentForm.pages;
             for (const page of pages) {
                 if (page.fields) {
                     const field = page.fields.find(f => f.id === fieldId);
                     if (field) {
-                        console.log('✅ [FIELD DEBUG] Found field in form builder:', field.type);
+                        debugInfo("FieldTypes", '✅ [FIELD DEBUG] Found field in form builder:', field.type);
                         return field;
                     }
                 }
             }
         }
         
-        console.warn('⚠️ [FIELD DEBUG] Field not found anywhere:', fieldId);
-        console.log('🔍 [FIELD DEBUG] Available modules:', {
+        debugWarn("FieldTypes", '⚠️ [FIELD DEBUG] Field not found anywhere:', fieldId);
+        debugInfo("FieldTypes", '🔍 [FIELD DEBUG] Available modules:', {
             formViewer: !!window.AppModules?.formViewer,
             formBuilder: !!window.AppModules?.formBuilder,
             formViewerData: !!window.AppModules?.formViewer?.formData,
@@ -1778,7 +1780,7 @@ export class FieldTypes {
         });
         
         // Don't store file data in hidden input - let FormData handle the actual files
-        console.log(`Selected ${files.length} file(s) for field ${fieldId}`);
+        debugInfo("FieldTypes", `Selected ${files.length} file(s) for field ${fieldId}`);
     }
     
     handleFileDrop(event, fieldId) {
@@ -1923,7 +1925,7 @@ export class FieldTypes {
             case 'file':
                 // File fields cannot be programmatically set for security reasons
                 // We only store metadata for auto-save purposes
-                console.log('File field value cannot be set programmatically:', fieldId);
+                debugInfo("FieldTypes", 'File field value cannot be set programmatically:', fieldId);
                 break;
             default:
                 field.value = value || '';
@@ -1981,7 +1983,7 @@ export class FieldTypes {
     
     async sendLoginOTP(fieldId, email, contact, statusDiv) {
         try {
-            console.log('🔐 LOGIN: Sending OTP to', email);
+            debugInfo("FieldTypes", '🔐 LOGIN: Sending OTP to', email);
             
             // Show loading state
             const sendBtn = statusDiv.querySelector('.send-otp-btn');
@@ -2016,11 +2018,11 @@ export class FieldTypes {
             }
             
             const result = await response.json();
-            console.log('🔐 LOGIN: OTP send result:', result);
+            debugInfo("FieldTypes", '🔐 LOGIN: OTP send result:', result);
             
             // Store OTP session info for verification
             if (result.sessionId) {
-                console.log('🔐 LOGIN: Storing session ID for verification:', result.sessionId);
+                debugInfo("FieldTypes", '🔐 LOGIN: Storing session ID for verification:', result.sessionId);
                 this.pendingOTPs.set(email, {
                     sessionId: result.sessionId,
                     expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
@@ -2045,7 +2047,7 @@ export class FieldTypes {
             const otpInput = statusDiv.querySelector(`#${fieldId}_otp`);
             const verifyBtn = statusDiv.querySelector('.verify-otp-btn');
             
-            console.log('🔐 LOGIN: Looking for OTP elements:', {
+            debugInfo("FieldTypes", '🔐 LOGIN: Looking for OTP elements:', {
                 statusDiv: !!statusDiv,
                 otpInputSection: !!otpInputSection,
                 otpInput: !!otpInput,
@@ -2054,31 +2056,31 @@ export class FieldTypes {
             });
             
             if (otpInputSection) {
-                console.log('🔐 LOGIN: Showing OTP input section');
+                debugInfo("FieldTypes", '🔐 LOGIN: Showing OTP input section');
                 otpInputSection.style.display = 'block';
                 otpInputSection.classList.add('show');
             } else {
-                console.error('🔐 LOGIN: OTP input section not found!');
-                console.log('🔐 LOGIN: statusDiv innerHTML:', statusDiv.innerHTML);
+                debugError("FieldTypes", '🔐 LOGIN: OTP input section not found!');
+                debugInfo("FieldTypes", '🔐 LOGIN: statusDiv innerHTML:', statusDiv.innerHTML);
             }
             
             if (otpInput) {
                 otpInput.disabled = false;
                 otpInput.focus(); // Focus on the input for better UX
-                console.log('🔐 LOGIN: OTP input enabled and focused');
+                debugInfo("FieldTypes", '🔐 LOGIN: OTP input enabled and focused');
             } else {
-                console.error('🔐 LOGIN: OTP input not found! Looking for:', `#${fieldId}_otp`);
+                debugError("FieldTypes", '🔐 LOGIN: OTP input not found! Looking for:', `#${fieldId}_otp`);
             }
             
             if (verifyBtn) {
                 verifyBtn.disabled = false;
-                console.log('🔐 LOGIN: Verify button enabled');
+                debugInfo("FieldTypes", '🔐 LOGIN: Verify button enabled');
             } else {
-                console.error('🔐 LOGIN: Verify button not found!');
+                debugError("FieldTypes", '🔐 LOGIN: Verify button not found!');
             }
             
         } catch (error) {
-            console.error('🔐 LOGIN: Error sending OTP:', error);
+            debugError("FieldTypes", '🔐 LOGIN: Error sending OTP:', error);
             
             // Show error message
             const messageDiv = statusDiv.querySelector('.otp-message p:last-child');
@@ -2103,7 +2105,7 @@ export class FieldTypes {
     
     async verifyLoginOTP(fieldId, email, contact, statusDiv) {
         try {
-            console.log('🔐 LOGIN: Verifying OTP for', email);
+            debugInfo("FieldTypes", '🔐 LOGIN: Verifying OTP for', email);
             
             const otpInput = statusDiv.querySelector(`#${fieldId}_otp`);
             const otp = otpInput?.value?.trim();
@@ -2121,7 +2123,7 @@ export class FieldTypes {
             }
             
             const pendingOTP = this.pendingOTPs?.get(email);
-            console.log('🔐 LOGIN: Pending OTP info:', {
+            debugInfo("FieldTypes", '🔐 LOGIN: Pending OTP info:', {
                 email,
                 hasPendingOTP: !!pendingOTP,
                 sessionId: pendingOTP?.sessionId,
@@ -2134,7 +2136,7 @@ export class FieldTypes {
                 sessionId: pendingOTP?.sessionId || 'login-session'
             };
             
-            console.log('🔐 LOGIN: Sending OTP verification request:', requestData);
+            debugInfo("FieldTypes", '🔐 LOGIN: Sending OTP verification request:', requestData);
             
             const response = await fetch('/api/verify-otp', {
                 method: 'POST',
@@ -2146,12 +2148,12 @@ export class FieldTypes {
             
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('🔐 LOGIN: OTP verification failed with status:', response.status, 'Response:', errorText);
+                debugError("FieldTypes", '🔐 LOGIN: OTP verification failed with status:', response.status, 'Response:', errorText);
                 throw new Error(`OTP verification failed: ${response.status} - ${errorText}`);
             }
             
             const result = await response.json();
-            console.log('🔐 LOGIN: OTP verification result:', result);
+            debugInfo("FieldTypes", '🔐 LOGIN: OTP verification result:', result);
             
             if (result.verified) {
                 // OTP verified successfully
@@ -2161,7 +2163,7 @@ export class FieldTypes {
             }
             
         } catch (error) {
-            console.error('🔐 LOGIN: OTP verification error:', error);
+            debugError("FieldTypes", '🔐 LOGIN: OTP verification error:', error);
             this.showLoginOTPMessage(statusDiv, 'Verification failed. Please try again.', 'error');
         } finally {
             // Reset button state
@@ -2174,7 +2176,7 @@ export class FieldTypes {
     }
     
     handleSuccessfulLoginOTPVerification(fieldId, email, contact, statusDiv) {
-        console.log('🔐 LOGIN: OTP verification successful for', email);
+        debugInfo("FieldTypes", '🔐 LOGIN: OTP verification successful for', email);
         
         // Update UI to show success
         statusDiv.innerHTML = `
@@ -2196,7 +2198,7 @@ export class FieldTypes {
                 [`${fieldId}_loggedIn`]: 'true'
             };
             
-            console.log('🔐 LOGIN: Setting login success variables via batching system:', loginSuccessVariables);
+            debugInfo("FieldTypes", '🔐 LOGIN: Setting login success variables via batching system:', loginSuccessVariables);
             
             if (window.FormVariables.setMultiple) {
                 window.FormVariables.setMultiple(loginSuccessVariables);
@@ -2221,7 +2223,7 @@ export class FieldTypes {
         // Trigger conditional logic evaluation
         const conditionalLogic = window.AppModules.conditionalLogic;
         if (conditionalLogic) {
-            console.log('🔐 LOGIN: Triggering conditional logic re-evaluation');
+            debugInfo("FieldTypes", '🔐 LOGIN: Triggering conditional logic re-evaluation');
             conditionalLogic.evaluateAllConditions();
         }
         
@@ -2291,20 +2293,20 @@ export class FieldTypes {
             return window.AppModules.formViewer.currentFormId;
         }
         
-        console.warn('Could not determine current form ID for Login field');
+        debugWarn("FieldTypes", 'Could not determine current form ID for Login field');
         return null;
     }
 
     renderDataTableField(field) {
         const config = field.dataTableConfig || {};
-        console.log(`🚀 Rendering DataTable field ${field.id} with config:`, config);
+        debugInfo("FieldTypes", `🚀 Rendering DataTable field ${field.id} with config:`, config);
         
         // Set up variable watching for dynamic data updates
         setTimeout(() => {
             this.setupDataTableVariableWatching(field);
             // Also do an initial refresh after a short delay to catch any variables that were set
             setTimeout(() => {
-                console.log(`🔄 Initial refresh for DataTable ${field.id}`);
+                debugInfo("FieldTypes", `🔄 Initial refresh for DataTable ${field.id}`);
                 this.refreshDataTable(field);
             }, 200);
         }, 100);
@@ -2495,9 +2497,9 @@ export class FieldTypes {
 
     getDataTableData(field) {
         const config = field.dataTableConfig || {};
-        console.log('🔍 [DATATABLE DEBUG] getDataTableData called for field:', field.id);
-        console.log('🔍 [DATATABLE DEBUG] Timestamp:', new Date().toISOString());
-        console.log('🔍 [DATATABLE DEBUG] Config:', {
+        debugInfo("FieldTypes", '🔍 [DATATABLE DEBUG] getDataTableData called for field:', field.id);
+        debugInfo("FieldTypes", '🔍 [DATATABLE DEBUG] Timestamp:', new Date().toISOString());
+        debugInfo("FieldTypes", '🔍 [DATATABLE DEBUG] Config:', {
             dataSource: config.dataSource,
             sourceVariable: config.sourceVariable,
             sourcePageId: config.sourcePageId,
@@ -2507,14 +2509,14 @@ export class FieldTypes {
         
         // Check if FormVariables system is available
         if (!window.FormVariables) {
-            console.error('❌ [DATATABLE DEBUG] FormVariables system not available!');
-            console.error('❌ [DATATABLE DEBUG] window.FormVariables is:', window.FormVariables);
+            debugError("FieldTypes", '❌ [DATATABLE DEBUG] FormVariables system not available!');
+            debugError("FieldTypes", '❌ [DATATABLE DEBUG] window.FormVariables is:', window.FormVariables);
             return [];
         }
         
         const allVariables = window.FormVariables.getAll();
-        console.log('🌐 [DATATABLE DEBUG] Total variables available:', Object.keys(allVariables).length);
-        console.log('🌐 [DATATABLE DEBUG] Variable keys:', Object.keys(allVariables));
+        debugInfo("FieldTypes", '🌐 [DATATABLE DEBUG] Total variables available:', Object.keys(allVariables).length);
+        debugInfo("FieldTypes", '🌐 [DATATABLE DEBUG] Variable keys:', Object.keys(allVariables));
         
         // Enhanced variable preview with more details
         const variablePreview = {};
@@ -2533,21 +2535,21 @@ export class FieldTypes {
                 };
             }
         });
-        console.log('🌐 [DATATABLE DEBUG] Variable details:', variablePreview);
+        debugInfo("FieldTypes", '🌐 [DATATABLE DEBUG] Variable details:', variablePreview);
         
         // Try to get data from various sources
         
         // 1. From static configuration
         if (config.staticData && Array.isArray(config.staticData) && config.staticData.length > 0) {
-            console.log('📊 [DATATABLE DEBUG] Using static data:', config.staticData.length, 'records');
-            console.log('📊 [DATATABLE DEBUG] Static data sample:', config.staticData.slice(0, 2));
+            debugInfo("FieldTypes", '📊 [DATATABLE DEBUG] Using static data:', config.staticData.length, 'records');
+            debugInfo("FieldTypes", '📊 [DATATABLE DEBUG] Static data sample:', config.staticData.slice(0, 2));
             return config.staticData;
         }
         
         // 2. From variable (typically populated by Get Records)
         if (config.dataSource === 'variable' && config.sourceVariable) {
             const variableData = allVariables[config.sourceVariable];
-            console.log(`🔍 [DATATABLE DEBUG] Looking for variable "${config.sourceVariable}":`, {
+            debugInfo("FieldTypes", `🔍 [DATATABLE DEBUG] Looking for variable "${config.sourceVariable}":`, {
                 found: !!variableData,
                 type: typeof variableData,
                 isString: typeof variableData === 'string',
@@ -2559,25 +2561,25 @@ export class FieldTypes {
             if (variableData) {
                 try {
                     const parsedData = typeof variableData === 'string' ? JSON.parse(variableData) : variableData;
-                    console.log('📊 [DATATABLE DEBUG] Successfully parsed variable data:', {
+                    debugInfo("FieldTypes", '📊 [DATATABLE DEBUG] Successfully parsed variable data:', {
                         isArray: Array.isArray(parsedData),
                         length: parsedData?.length || 0,
                         sample: Array.isArray(parsedData) ? parsedData.slice(0, 2) : parsedData
                     });
                     return Array.isArray(parsedData) ? parsedData : [];
                 } catch (e) {
-                    console.error('❌ [DATATABLE DEBUG] Failed to parse DataTable variable data:', e);
-                    console.error('❌ [DATATABLE DEBUG] Raw variable data:', variableData);
+                    debugError("FieldTypes", '❌ [DATATABLE DEBUG] Failed to parse DataTable variable data:', e);
+                    debugError("FieldTypes", '❌ [DATATABLE DEBUG] Raw variable data:', variableData);
                     return [];
                 }
             } else {
-                console.warn('⚠️ [DATATABLE DEBUG] Variable not found, checking for similar variables...');
+                debugWarn("FieldTypes", '⚠️ [DATATABLE DEBUG] Variable not found, checking for similar variables...');
                 const similarVariables = Object.keys(allVariables).filter(key => 
                     key.includes(config.sourceVariable) || 
                     config.sourceVariable.includes(key) ||
                     key.includes('QueryResults')
                 );
-                console.log('🔍 [DATATABLE DEBUG] Similar variables found:', similarVariables);
+                debugInfo("FieldTypes", '🔍 [DATATABLE DEBUG] Similar variables found:', similarVariables);
             }
         }
         
@@ -2585,7 +2587,7 @@ export class FieldTypes {
         if (config.dataSource === 'query' && config.sourcePageId) {
             const queryResultsVar = `${config.sourcePageId}_QueryResults`;
             const queryData = allVariables[queryResultsVar];
-            console.log(`🔍 [DATATABLE DEBUG] Looking for query variable "${queryResultsVar}":`, {
+            debugInfo("FieldTypes", `🔍 [DATATABLE DEBUG] Looking for query variable "${queryResultsVar}":`, {
                 found: !!queryData,
                 type: typeof queryData,
                 isString: typeof queryData === 'string',
@@ -2597,25 +2599,25 @@ export class FieldTypes {
             if (queryData) {
                 try {
                     const parsedData = typeof queryData === 'string' ? JSON.parse(queryData) : queryData;
-                    console.log('📊 [DATATABLE DEBUG] Successfully parsed query data:', {
+                    debugInfo("FieldTypes", '📊 [DATATABLE DEBUG] Successfully parsed query data:', {
                         isArray: Array.isArray(parsedData),
                         length: parsedData?.length || 0,
                         sample: Array.isArray(parsedData) ? parsedData.slice(0, 2) : parsedData
                     });
                     return Array.isArray(parsedData) ? parsedData : [];
                 } catch (e) {
-                    console.error('❌ [DATATABLE DEBUG] Failed to parse DataTable query data:', e);
-                    console.error('❌ Raw query data:', queryData);
+                    debugError("FieldTypes", '❌ [DATATABLE DEBUG] Failed to parse DataTable query data:', e);
+                    debugError("FieldTypes", '❌ Raw query data:', queryData);
                     return [];
                 }
             } else {
-                console.warn('⚠️ [DATATABLE DEBUG] Query variable not found, checking for similar variables...');
+                debugWarn("FieldTypes", '⚠️ [DATATABLE DEBUG] Query variable not found, checking for similar variables...');
                 const queryRelatedVariables = Object.keys(allVariables).filter(key => 
                     key.includes(config.sourcePageId) || 
                     key.includes('QueryResults') ||
                     key.includes('QueryCount')
                 );
-                console.log('🔍 [DATATABLE DEBUG] Query-related variables found:', queryRelatedVariables);
+                debugInfo("FieldTypes", '🔍 [DATATABLE DEBUG] Query-related variables found:', queryRelatedVariables);
                 
                 // Try common variations
                 const possibleVariations = [
@@ -2628,17 +2630,17 @@ export class FieldTypes {
                 for (const variation of possibleVariations) {
                     const variationData = allVariables[variation];
                     if (variationData) {
-                        console.log(`🎯 [DATATABLE DEBUG] Found data in variation "${variation}"`);
+                        debugInfo("FieldTypes", `🎯 [DATATABLE DEBUG] Found data in variation "${variation}"`);
                         try {
                             const parsedData = typeof variationData === 'string' ? JSON.parse(variationData) : variationData;
-                            console.log('📊 [DATATABLE DEBUG] Successfully parsed variation data:', {
+                            debugInfo("FieldTypes", '📊 [DATATABLE DEBUG] Successfully parsed variation data:', {
                                 isArray: Array.isArray(parsedData),
                                 length: parsedData?.length || 0,
                                 sample: Array.isArray(parsedData) ? parsedData.slice(0, 2) : parsedData
                             });
                             return Array.isArray(parsedData) ? parsedData : [];
                         } catch (e) {
-                            console.error('❌ [DATATABLE DEBUG] Failed to parse variation data:', e);
+                            debugError("FieldTypes", '❌ [DATATABLE DEBUG] Failed to parse variation data:', e);
                         }
                     }
                 }
@@ -2647,18 +2649,18 @@ export class FieldTypes {
         
         // 4. During design time, show sample data if configured with Get Records
         if (config.dataSource === 'query' && config.sourcePageId && config.columns && config.columns.length > 0) {
-            console.log('🎨 [DATATABLE DEBUG] Design time: generating sample data for preview');
+            debugInfo("FieldTypes", '🎨 [DATATABLE DEBUG] Design time: generating sample data for preview');
             return this.generateSampleDataForPreview(config.columns);
         }
         
         // Final fallback - provide diagnostic info
-        console.error('📭 [DATATABLE DEBUG] NO DATA FOUND for DataTable!');
-        console.error('📭 [DATATABLE DEBUG] Expected data sources:');
-        console.error('   - Static data:', !!(config.staticData && Array.isArray(config.staticData)));
-        console.error('   - Variable source:', config.dataSource === 'variable', config.sourceVariable);
-        console.error('   - Query source:', config.dataSource === 'query', config.sourcePageId);
-        console.error('📭 [DATATABLE DEBUG] Available variables:', Object.keys(allVariables));
-        console.error('📭 [DATATABLE DEBUG] DataTable config:', config);
+        debugError("FieldTypes", '📭 [DATATABLE DEBUG] NO DATA FOUND for DataTable!');
+        debugError("FieldTypes", '📭 [DATATABLE DEBUG] Expected data sources:');
+        debugError("FieldTypes", '   - Static data:', !!(config.staticData && Array.isArray(config.staticData)));
+        debugError("FieldTypes", '   - Variable source:', config.dataSource === 'variable', config.sourceVariable);
+        debugError("FieldTypes", '   - Query source:', config.dataSource === 'query', config.sourcePageId);
+        debugError("FieldTypes", '📭 [DATATABLE DEBUG] Available variables:', Object.keys(allVariables));
+        debugError("FieldTypes", '📭 [DATATABLE DEBUG] DataTable config:', config);
         
         // Return empty array
         return [];
@@ -2666,7 +2668,7 @@ export class FieldTypes {
 
     // Global method to refresh all DataTables on the current page
     refreshAllDataTables() {
-        console.log('🔄 Refreshing all DataTables...');
+        debugInfo("FieldTypes", '🔄 Refreshing all DataTables...');
         const dataTables = document.querySelectorAll('.datatable-field');
         let refreshCount = 0;
         
@@ -2675,14 +2677,14 @@ export class FieldTypes {
             if (fieldId) {
                 const field = this.findFieldById(fieldId);
                 if (field && field.type === 'datatable') {
-                    console.log(`🔄 Refreshing DataTable ${fieldId}...`);
+                    debugInfo("FieldTypes", `🔄 Refreshing DataTable ${fieldId}...`);
                     this.refreshDataTable(field);
                     refreshCount++;
                 }
             }
         });
         
-        console.log(`✅ Refreshed ${refreshCount} DataTables`);
+        debugInfo("FieldTypes", `✅ Refreshed ${refreshCount} DataTables`);
         return refreshCount;
     }
 
@@ -2747,14 +2749,14 @@ export class FieldTypes {
             return;
         }
         
-        console.log(`🔍 Setting up DataTable variable watching for field ${field.id}, watching:`, variablesToWatch);
+        debugInfo("FieldTypes", `🔍 Setting up DataTable variable watching for field ${field.id}, watching:`, variablesToWatch);
         
         // Listen for variable changes
         const handleVariableChange = (event) => {
             const { name, newValue } = event.detail;
             
             if (variablesToWatch.includes(name)) {
-                console.log(`🔄 DataTable ${field.id} detected variable change: ${name} =`, newValue);
+                debugInfo("FieldTypes", `🔄 DataTable ${field.id} detected variable change: ${name} =`, newValue);
                 this.refreshDataTable(field);
             }
         };
@@ -2769,29 +2771,29 @@ export class FieldTypes {
     }
 
     refreshDataTable(field) {
-        console.log(`🔄 Refreshing DataTable ${field.id}...`);
+        debugInfo("FieldTypes", `🔄 Refreshing DataTable ${field.id}...`);
         
         const tbody = document.getElementById(`${field.id}_tbody`);
         if (!tbody) {
-            console.warn(`❌ DataTable tbody not found for field ${field.id}`);
+            debugWarn("FieldTypes", `❌ DataTable tbody not found for field ${field.id}`);
             return;
         }
         
         // Get fresh data
         const data = this.getDataTableData(field);
-        console.log(`📊 DataTable ${field.id} refresh data:`, data?.length || 0, 'records');
+        debugInfo("FieldTypes", `📊 DataTable ${field.id} refresh data:`, data?.length || 0, 'records');
         
         // Re-render table body with new data
         tbody.innerHTML = this.renderDataTableBody(field);
-        console.log(`✅ Refreshed DataTable ${field.id} with new data`);
+        debugInfo("FieldTypes", `✅ Refreshed DataTable ${field.id} with new data`);
         
         // If still no data, set up a delayed retry (for cases where variables are set asynchronously)
         if (!data || data.length === 0) {
-            console.log(`⏰ DataTable ${field.id} has no data, setting up delayed retry...`);
+            debugInfo("FieldTypes", `⏰ DataTable ${field.id} has no data, setting up delayed retry...`);
             setTimeout(() => {
                 const retryData = this.getDataTableData(field);
                 if (retryData && retryData.length > 0) {
-                    console.log(`🔄 DataTable ${field.id} delayed retry found data:`, retryData.length, 'records');
+                    debugInfo("FieldTypes", `🔄 DataTable ${field.id} delayed retry found data:`, retryData.length, 'records');
                     tbody.innerHTML = this.renderDataTableBody(field);
                 }
             }, 500);
@@ -2820,11 +2822,11 @@ export class FieldTypes {
         // Re-render table body
         tbody.innerHTML = this.renderDataTableBody(field);
         
-        console.log('Added new row to DataTable:', fieldId);
+        debugInfo("FieldTypes", 'Added new row to DataTable:', fieldId);
     }
 
     editDataTableRow(fieldId, rowIndex) {
-        console.log(`Edit row ${rowIndex} in table ${fieldId}`);
+        debugInfo("FieldTypes", `Edit row ${rowIndex} in table ${fieldId}`);
         // Future: Could open a modal or enable inline editing
     }
 
@@ -2846,7 +2848,7 @@ export class FieldTypes {
         // Re-render table body
         tbody.innerHTML = this.renderDataTableBody(field);
         
-        console.log(`Deleted row ${rowIndex} from DataTable:`, fieldId);
+        debugInfo("FieldTypes", `Deleted row ${rowIndex} from DataTable:`, fieldId);
     }
 
     updateDataTableCell(fieldId, rowIndex, fieldName, value) {
@@ -2861,11 +2863,11 @@ export class FieldTypes {
         
         config.staticData[rowIndex][fieldName] = value;
         
-        console.log(`Updated cell [${rowIndex}][${fieldName}] = ${value} in table ${fieldId}`);
+        debugInfo("FieldTypes", `Updated cell [${rowIndex}][${fieldName}] = ${value} in table ${fieldId}`);
     }
 
     changeDataTablePage(fieldId, direction) {
-        console.log(`Change page ${direction} for table ${fieldId}`);
+        debugInfo("FieldTypes", `Change page ${direction} for table ${fieldId}`);
         // Future: Implement pagination
     }
 
@@ -2875,7 +2877,7 @@ export class FieldTypes {
         const fullscreenBtn = dataTableElement.querySelector('.datatable-fullscreen-btn');
         
         if (!dataTableElement) {
-            console.error('DataTable element not found for field:', fieldId);
+            debugError("FieldTypes", 'DataTable element not found for field:', fieldId);
             return;
         }
         
@@ -2905,7 +2907,7 @@ export class FieldTypes {
         // Add ESC key listener
         this.addFullscreenKeyListener(fieldId);
         
-        console.log('📊 DataTable entered full screen mode:', fieldId);
+        debugInfo("FieldTypes", '📊 DataTable entered full screen mode:', fieldId);
     }
     
     exitDataTableFullscreen(fieldId) {
@@ -2925,7 +2927,7 @@ export class FieldTypes {
         // Remove ESC key listener
         this.removeFullscreenKeyListener();
         
-        console.log('📊 DataTable exited full screen mode:', fieldId);
+        debugInfo("FieldTypes", '📊 DataTable exited full screen mode:', fieldId);
     }
     
     addFullscreenKeyListener(fieldId) {
@@ -2979,12 +2981,12 @@ export class FieldTypes {
     
     renderColumnsField(field) {
         const config = field.columnsConfig || {};
-        console.log('📋 renderColumnsField called for:', field.id);
-        console.log('📋 Columns config:', config);
+        debugInfo("FieldTypes", '📋 renderColumnsField called for:', field.id);
+        debugInfo("FieldTypes", '📋 Columns config:', config);
         
         // Ensure columns array exists
         if (!config.columns || !Array.isArray(config.columns)) {
-            console.warn('⚠️ No columns array found, creating default columns');
+            debugWarn("FieldTypes", '⚠️ No columns array found, creating default columns');
             config.columns = [
                 { width: '50%', fields: [] },
                 { width: '50%', fields: [] }
@@ -3000,7 +3002,7 @@ export class FieldTypes {
                      gap: ${this.getGapValue(config.columnGap)};">
                     ${config.columns.map((column, index) => {
                         const fields = column.fields || [];
-                        console.log(`📋 Rendering column ${index}:`, {
+                        debugInfo("FieldTypes", `📋 Rendering column ${index}:`, {
                             fieldsCount: fields.length,
                             fields: fields
                         });
@@ -3012,7 +3014,7 @@ export class FieldTypes {
                              style="min-height: 100px; padding: 15px; border: 2px dashed #e0e6ed; border-radius: 8px; background: #f8f9fa; position: relative;">
                             ${fields.length > 0 ? 
                                 fields.map(nestedField => {
-                                    console.log('📝 Rendering nested field:', nestedField.id, nestedField.type);
+                                    debugInfo("FieldTypes", '📝 Rendering nested field:', nestedField.id, nestedField.type);
                                     return `<div style="margin-bottom: 15px;">${this.renderNestedField(nestedField)}</div>`;
                                 }).join('') :
                                 `<div class="empty-column" style="text-align: center; color: #6c757d; padding: 20px; font-style: italic;">
@@ -3028,8 +3030,8 @@ export class FieldTypes {
             </div>
         `;
         
-        console.log('📋 Generated HTML length:', html.length);
-        console.log('📋 HTML preview:', html.substring(0, 200) + '...');
+        debugInfo("FieldTypes", '📋 Generated HTML length:', html.length);
+        debugInfo("FieldTypes", '📋 HTML preview:', html.substring(0, 200) + '...');
         return html;
     }
     
