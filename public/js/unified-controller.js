@@ -213,6 +213,13 @@ class UnifiedExperienceController {
         }
         
         console.log(`🌟 FAB Menu ${this.fabMenuOpen ? 'opened' : 'closed'}`);
+        
+        // If on mobile and menu opened, setup action buttons
+        if (this.fabMenuOpen && window.AppModules && window.AppModules.mobile && window.AppModules.mobile.isMobileDevice()) {
+            setTimeout(() => {
+                window.AppModules.mobile.setupFabActionButtons();
+            }, 100);
+        }
     }
     
     // ==========================================================================

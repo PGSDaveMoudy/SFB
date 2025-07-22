@@ -327,11 +327,165 @@ export class Mobile {
                 element.style.webkitOverflowScrolling = 'touch';
             });
         }
+
+        // Fix + button functionality on mobile
+        this.setupMobileFabButtons();
+    }
+
+    setupMobileFabButtons() {
+        // Enhanced + button functionality for mobile devices
+        // Use a slight delay to ensure buttons are fully rendered
+        setTimeout(() => {
+            const fabButtons = document.querySelectorAll('.main-fab, .unified-fab-main');
+            
+            if (fabButtons.length === 0) {
+                debugWarn('Mobile', 'No FAB buttons found, retrying in 500ms...');
+                // Retry once more if buttons aren't found initially
+                setTimeout(() => this.setupMobileFabButtons(), 500);
+                return;
+            }
+            
+            fabButtons.forEach(button => {
+                // Remove existing event listeners by cloning the button
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
+                
+                debugInfo('Mobile', `Setting up mobile FAB button: ${newButton.className}`);
+                
+                // Add mobile-friendly touch events
+                newButton.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Add visual feedback
+                    newButton.style.transform = 'scale(0.95)';
+                    newButton.style.transition = 'transform 0.1s ease';
+                    
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                    }
+                }, { passive: false });
+
+                newButton.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Remove visual feedback
+                    newButton.style.transform = 'scale(1)';
+                    
+                    // Trigger the appropriate function
+                    if (newButton.classList.contains('main-fab')) {
+                        debugInfo('Mobile', 'Triggering main FAB menu');
+                        if (typeof toggleFabMenu === 'function') {
+                            toggleFabMenu();
+                        } else if (window.modernInterface && typeof window.modernInterface.toggleFabMenu === 'function') {
+                            window.modernInterface.toggleFabMenu();
+                        } else {
+                            debugError('Mobile', 'toggleFabMenu function not found');
+                        }
+                    } else if (newButton.classList.contains('unified-fab-main')) {
+                        debugInfo('Mobile', 'Triggering unified FAB menu');
+                        if (typeof toggleUnifiedFabMenu === 'function') {
+                            toggleUnifiedFabMenu();
+                        } else if (window.unifiedController && typeof window.unifiedController.toggleFabMenu === 'function') {
+                            window.unifiedController.toggleFabMenu();
+                        } else {
+                            debugError('Mobile', 'toggleUnifiedFabMenu function not found');
+                        }
+                    }
+                }, { passive: false });
+
+                // Also handle regular click events for desktop compatibility
+                newButton.addEventListener('click', (e) => {
+                    if (!this.isMobile) {
+                        // Let the original onclick handlers work on desktop
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // On mobile, we handle this through touch events above
+                });
+            });
+            
+            debugInfo('Mobile', `Mobile FAB buttons setup completed for ${fabButtons.length} buttons`);
+            
+            // Also setup touch events for FAB menu actions
+            this.setupFabActionButtons();
+        }, 100);
+    }
+    
+    setupFabActionButtons() {
+        // Setup touch events for FAB action buttons
+        setTimeout(() => {
+            const actionButtons = document.querySelectorAll('.unified-fab-action, .fab-action');
+            
+            actionButtons.forEach(button => {
+                // Clone to remove existing listeners
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
+                
+                // Add touch event handlers
+                newButton.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Visual feedback
+                    newButton.style.transform = 'scale(0.95)';
+                    
+                    if (navigator.vibrate) {
+                        navigator.vibrate(30);
+                    }
+                }, { passive: false });
+                
+                newButton.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Reset visual feedback
+                    newButton.style.transform = 'scale(1)';
+                    
+                    // Get the onclick handler and execute it
+                    const onclickAttr = newButton.getAttribute('onclick');
+                    if (onclickAttr) {
+                        try {
+                            // Execute the onclick function
+                            eval(onclickAttr);
+                            
+                            // Close the FAB menu after action
+                            if (window.unifiedController) {
+                                window.unifiedController.toggleFabMenu();
+                            }
+                        } catch (error) {
+                            debugError('Mobile', `Error executing FAB action: ${error.message}`);
+                        }
+                    }
+                }, { passive: false });
+                
+                // Prevent default click on mobile
+                newButton.addEventListener('click', (e) => {
+                    if (this.isMobile) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+            });
+            
+            debugInfo('Mobile', `FAB action buttons setup completed for ${actionButtons.length} buttons`);
+        }, 200);
     }
 
     // Utility methods for other modules
     isMobileDevice() {
         return this.isMobile;
+    }
+
+    // Public method to reinitialize FAB buttons (useful for dynamic content)
+    reinitializeFabButtons() {
+        if (this.isMobile) {
+            this.setupMobileFabButtons();
+        }
     }
 
     showMobileMessage(message, type = 'info') {

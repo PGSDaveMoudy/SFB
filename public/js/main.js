@@ -96,6 +96,13 @@ async function initializeApp() {
     // Set up global event listeners
     setupGlobalEventListeners();
     
+    // Ensure FAB buttons work on mobile after all modules are loaded
+    if (modules.mobile && modules.mobile.isMobileDevice()) {
+        setTimeout(() => {
+            modules.mobile.reinitializeFabButtons();
+        }, 200);
+    }
+    
     // Initialize org management
     await initializeOrgManagement();
     
