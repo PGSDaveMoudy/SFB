@@ -178,6 +178,19 @@ export class DragDrop {
         this.draggedFieldType = null;
         this.isReordering = true;
         
+        // Check if we're dragging a container field (columns or section)
+        const formBuilder = window.AppModules.formBuilder;
+        if (formBuilder) {
+            const field = formBuilder.findFieldById(this.draggedFieldId);
+            if (field && (field.type === 'columns' || field.type === 'section')) {
+                console.log(`🚫 Preventing drag of container field: ${this.draggedFieldId} (${field.type})`);
+                // Allow dragging container fields, but we'll handle them specially
+                this.isContainerDrag = true;
+            } else {
+                this.isContainerDrag = false;
+            }
+        }
+        
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/field-id', this.draggedFieldId);
         
@@ -233,6 +246,13 @@ export class DragDrop {
         const container = e.currentTarget;
         console.log('🎯 Container drop:', container.classList.toString(), 'Field type:', this.draggedFieldType, 'Field ID:', this.draggedFieldId);
         container.classList.remove('container-drag-over');
+        
+        // Prevent dropping container fields into containers
+        if (this.isContainerDrag) {
+            console.warn('⚠️ Cannot drop container fields into other containers');
+            this.hideContainerDropIndicator(container);
+            return;
+        }
         
         const dropIndex = this.calculateContainerDropIndex(container);
         console.log('📍 Drop index:', dropIndex);
@@ -444,6 +464,9 @@ export class DragDrop {
             this.draggedElement.style.opacity = '';
             this.draggedElement.classList.remove('dragging');
         }
+        
+        // Reset container drag flag
+        this.isContainerDrag = false;
         
         // Clean up canvas state
         const canvas = document.getElementById('formCanvas');

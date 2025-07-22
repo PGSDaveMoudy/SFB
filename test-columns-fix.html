@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Columns Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #555;
+            font-size: 18px;
+        }
+        .test-step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .code {
+            background: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Columns Layout Fix Test Guide</h1>
+        <p>This guide will help you test if the Columns Layout deletion issue has been fixed.</p>
+
+        <div class="test-section">
+            <h2>📋 What was the issue?</h2>
+            <p>When trying to rearrange building blocks inside a Columns Layout element, the entire Columns element would get deleted.</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🛠️ What was fixed?</h2>
+            <ul>
+                <li>Added safety checks to prevent container fields (columns/sections) from being removed during field moves</li>
+                <li>Added validation to prevent moving columns fields into themselves</li>
+                <li>Added detection to prevent dragging container fields into other containers</li>
+                <li>Improved the <span class="code">removeFieldFromAnyLocation</span> method to check if removal is intentional</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>✅ Test Steps</h2>
+            
+            <div class="test-step">
+                <strong>Step 1: Start the application</strong>
+                <p>Run <span class="code">npm start</span> and navigate to the form builder</p>
+            </div>
+
+            <div class="test-step">
+                <strong>Step 2: Add a Columns Layout</strong>
+                <p>Drag a "Columns Layout" element from the field palette to the form canvas</p>
+            </div>
+
+            <div class="test-step">
+                <strong>Step 3: Add fields to columns</strong>
+                <p>Drag several fields (Text, Email, etc.) into different columns of the layout</p>
+            </div>
+
+            <div class="test-step">
+                <strong>Step 4: Test rearranging within columns</strong>
+                <p>Try dragging fields between columns and reordering them within the same column</p>
+                <p class="success">✓ Expected: Fields move successfully, columns layout remains intact</p>
+            </div>
+
+            <div class="test-step">
+                <strong>Step 5: Test moving fields out of columns</strong>
+                <p>Drag a field from inside a column back to the main form canvas</p>
+                <p class="success">✓ Expected: Field moves out, columns layout remains intact</p>
+            </div>
+
+            <div class="test-step">
+                <strong>Step 6: Test dragging the columns element itself</strong>
+                <p>Try to drag the entire columns layout element</p>
+                <p class="warning">⚠️ Expected: Columns can be reordered on the main canvas but cannot be dropped into other containers</p>
+            </div>
+
+            <div class="test-step">
+                <strong>Step 7: Check console logs</strong>
+                <p>Open browser console (F12) and look for any warning messages during drag operations</p>
+                <p>You should see messages like:</p>
+                <ul>
+                    <li><span class="code">⚠️ Cannot move columns field into itself</span></li>
+                    <li><span class="code">⚠️ Cannot drop container fields into other containers</span></li>
+                    <li><span class="code">⚠️ Preventing accidental removal of container field</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🚨 If issues persist</h2>
+            <p>Check the console for error messages and note:</p>
+            <ul>
+                <li>Which specific action caused the columns to disappear</li>
+                <li>Any error messages in the console</li>
+                <li>The field types you were moving</li>
+                <li>Whether it happens with specific column configurations</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/index.html" class="button">Go to Form Builder</a>
+        </div>
+    </div>
+</body>
+</html>

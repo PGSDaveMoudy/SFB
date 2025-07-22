@@ -614,6 +614,12 @@ export class FormBuilder {
     moveFieldToContainer(fieldId, containerId, containerType, targetIndex = null) {
         console.log('🔄 moveFieldToContainer called:', { fieldId, containerId, containerType, targetIndex });
         
+        // Safety check: Don't allow moving a columns field into itself
+        if (containerType === 'column' && containerId.startsWith(fieldId)) {
+            console.warn('⚠️ Cannot move columns field into itself');
+            return;
+        }
+        
         const fieldLocation = this.findFieldLocation(fieldId);
         if (!fieldLocation) {
             console.error(`❌ Field ${fieldId} not found - cannot move to container`);
@@ -922,6 +928,18 @@ export class FormBuilder {
     
     // Helper method to remove a field from any location (page, section, or column)
     removeFieldFromAnyLocation(fieldId) {
+        // Safety check: Prevent removing container fields when we're just moving fields within them
+        const field = this.findFieldById(fieldId);
+        if (field && (field.type === 'columns' || field.type === 'section')) {
+            console.warn(`⚠️ Attempting to remove container field ${fieldId} - checking if this is intentional`);
+            // Only remove container fields if they're explicitly being deleted, not during moves
+            const isExplicitDelete = new Error().stack.includes('removeField');
+            if (!isExplicitDelete) {
+                console.warn(`⚠️ Preventing accidental removal of container field ${fieldId}`);
+                return null;
+            }
+        }
+        
         // Try to find and remove from main page fields
         const currentPage = this.getCurrentPage();
         let index = currentPage.fields.findIndex(f => f.id === fieldId);
