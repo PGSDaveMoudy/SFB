@@ -100,7 +100,7 @@ export class SalesforceConnector {
         
         const statusText = statusEl.querySelector('.status-text');
         const buildingBlocks = document.getElementById('buildingBlocks');
-        const formActions = document.getElementById('formActions');
+        const bottomFooter = document.getElementById('bottomFooter');
         const connectBtn = document.getElementById('connectBtn');
         const connectUsernameBtn = document.getElementById('connectUsernameBtn');
         
@@ -134,7 +134,7 @@ export class SalesforceConnector {
             }
             
             buildingBlocks.style.display = 'block';
-            formActions.style.display = 'block';
+            bottomFooter.style.display = 'block';
         } else {
             statusEl.classList.remove('connected');
             statusEl.classList.add('disconnected');
@@ -150,7 +150,7 @@ export class SalesforceConnector {
             }
             
             buildingBlocks.style.display = 'none';
-            formActions.style.display = 'none';
+            bottomFooter.style.display = 'none';
         }
     }
     

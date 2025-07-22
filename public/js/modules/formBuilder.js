@@ -614,10 +614,15 @@ export class FormBuilder {
     moveFieldToContainer(fieldId, containerId, containerType, targetIndex = null) {
         console.log('🔄 moveFieldToContainer called:', { fieldId, containerId, containerType, targetIndex });
         
-        // Safety check: Don't allow moving a columns field into itself
-        if (containerType === 'column' && containerId.startsWith(fieldId)) {
-            console.warn('⚠️ Cannot move columns field into itself');
-            return;
+        // Safety check: Don't allow moving a columns field into its own columns
+        if (containerType === 'column') {
+            const parts = containerId.split('_');
+            const columnIndex = parseInt(parts.pop());
+            const columnsId = parts.join('_');
+            if (fieldId === columnsId) {
+                console.warn('⚠️ Cannot move columns field into its own columns');
+                return;
+            }
         }
         
         const fieldLocation = this.findFieldLocation(fieldId);
@@ -928,15 +933,17 @@ export class FormBuilder {
     
     // Helper method to remove a field from any location (page, section, or column)
     removeFieldFromAnyLocation(fieldId) {
-        // Safety check: Prevent removing container fields when we're just moving fields within them
+        // Safety check: Prevent removing container fields only when they're being deleted, not moved
         const field = this.findFieldById(fieldId);
         if (field && (field.type === 'columns' || field.type === 'section')) {
-            console.warn(`⚠️ Attempting to remove container field ${fieldId} - checking if this is intentional`);
-            // Only remove container fields if they're explicitly being deleted, not during moves
-            const isExplicitDelete = new Error().stack.includes('removeField');
-            if (!isExplicitDelete) {
-                console.warn(`⚠️ Preventing accidental removal of container field ${fieldId}`);
-                return null;
+            console.log(`🔍 Removing container field ${fieldId} - checking if this is for deletion or move`);
+            // Check if this is an explicit delete operation vs a move operation
+            const stack = new Error().stack;
+            const isExplicitDelete = stack.includes('removeField(') && !stack.includes('moveFieldToContainer');
+            if (isExplicitDelete) {
+                console.log(`✅ Allowing deletion of container field ${fieldId}`);
+            } else {
+                console.log(`🔄 Allowing removal of container field ${fieldId} for move operation`);
             }
         }
         
@@ -3364,7 +3371,7 @@ export class FormBuilder {
         
         // Show form builder UI
         document.getElementById('buildingBlocks').style.display = 'block';
-        document.getElementById('formActions').style.display = 'block';
+        document.getElementById('bottomFooter').style.display = 'block';
         
         this.renderFormCanvas();
         this.markFormDirty();

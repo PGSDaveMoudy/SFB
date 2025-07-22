@@ -123,27 +123,51 @@
     <!-- Mobile Overlay -->
     <div class="mobile-overlay" id="mobileOverlay"></div>
 
+    <!-- Top Header Bar -->
+    <header class="top-header">
+        <div class="header-left">
+            <h1 class="app-title">Salesforce Form Builder</h1>
+            <span class="app-subtitle">Enterprise Edition</span>
+        </div>
+        
+        <div class="header-center">
+            <!-- Connection Status -->
+            <div id="connectionStatus" class="connection-status disconnected">
+                <span class="status-icon">●</span>
+                <span class="status-text">Not Connected</span>
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <div class="header-links">
+                <a href="./developer.html" class="header-link" target="_blank">
+                    🛠️ Developer
+                </a>
+                <a href="./help.html" class="header-link" target="_blank">
+                    ❓ Help
+                </a>
+                <a href="./org-manager.html" class="header-link" target="_blank">
+                    🏢 Org Manager
+                </a>
+            </div>
+            
+            <!-- Salesforce Connection Buttons -->
+            <div class="header-connection">
+                <button id="connectBtn" class="button button-primary button-compact">
+                    Connect OAuth
+                </button>
+                <button id="connectUsernameBtn" class="button button-secondary button-compact">
+                    Username/Password
+                </button>
+            </div>
+        </div>
+    </header>
+
     <!-- Main Container -->
     <div class="container">
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-content">
-                <div class="sidebar-header">
-                    <h1>Form Builder</h1>
-                    <p class="subtitle">Enterprise Edition</p>
-                    <div class="header-links">
-                        <a href="./developer.html" class="header-link" target="_blank">
-                            🛠️ Developer
-                        </a>
-                        <a href="./help.html" class="header-link" target="_blank">
-                            ❓ Help
-                        </a>
-                        <a href="./org-manager.html" class="header-link" target="_blank">
-                            🏢 Org Manager
-                        </a>
-                    </div>
-                </div>
-
             <!-- Organization Selection -->
             <div class="section" id="orgSelection" style="display: none;">
                 <h3>Select Organization</h3>
@@ -172,120 +196,95 @@
                 </div>
             </div>
 
-            <!-- Connection Status -->
-            <div id="connectionStatus" class="connection-status disconnected">
-                <span class="status-icon">●</span>
-                <span class="status-text">Not Connected</span>
-            </div>
-
-            <!-- Salesforce Connection -->
-            <div class="section">
-                <h3>Salesforce Connection</h3>
-                <button id="connectBtn" class="button button-primary">
-                    Connect with OAuth
-                </button>
-                <button id="connectUsernameBtn" class="button button-secondary">
-                    Username/Password
-                </button>
-            </div>
-
             <!-- Building Blocks -->
             <div class="section" id="buildingBlocks" style="display: none;">
                 <h3>Building Blocks</h3>
-                <div class="field-palette">
-                    <div class="field-block" draggable="true" data-field-type="text">
-                        <span class="field-icon">📝</span>
-                        <span>Text Field</span>
+                <div class="section-content">
+                    <div class="field-palette">
+                        <div class="field-block" draggable="true" data-field-type="text">
+                            <span class="field-icon">📝</span>
+                            <span>Text Field</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="email">
+                            <span class="field-icon">✉️</span>
+                            <span>Email</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="phone">
+                            <span class="field-icon">📞</span>
+                            <span>Phone</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="number">
+                            <span class="field-icon">🔢</span>
+                            <span>Number</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="date">
+                            <span class="field-icon">📅</span>
+                            <span>Date</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="select">
+                            <span class="field-icon">📋</span>
+                            <span>Dropdown</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="textarea">
+                            <span class="field-icon">📄</span>
+                            <span>Text Area</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="checkbox">
+                            <span class="field-icon">✅</span>
+                            <span>Checkbox</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="radio">
+                            <span class="field-icon">⭕</span>
+                            <span>Radio</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="lookup">
+                            <span class="field-icon">🔍</span>
+                            <span>Lookup</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="richtext">
+                            <span class="field-icon">✏️</span>
+                            <span>Rich Text</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="file">
+                            <span class="field-icon">📎</span>
+                            <span>File Upload</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="signature">
+                            <span class="field-icon">✍️</span>
+                            <span>E-Signature</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="display">
+                            <span class="field-icon">ℹ️</span>
+                            <span>Display Text</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="login">
+                            <span class="field-icon">🔐</span>
+                            <span>Login</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="email-verify">
+                            <span class="field-icon">📧</span>
+                            <span>Verify Email</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="datatable">
+                            <span class="field-icon">📊</span>
+                            <span>Data Table</span>
+                        </div>
                     </div>
-                    <div class="field-block" draggable="true" data-field-type="email">
-                        <span class="field-icon">✉️</span>
-                        <span>Email</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="phone">
-                        <span class="field-icon">📞</span>
-                        <span>Phone</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="number">
-                        <span class="field-icon">🔢</span>
-                        <span>Number</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="date">
-                        <span class="field-icon">📅</span>
-                        <span>Date</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="select">
-                        <span class="field-icon">📋</span>
-                        <span>Dropdown</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="textarea">
-                        <span class="field-icon">📄</span>
-                        <span>Text Area</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="checkbox">
-                        <span class="field-icon">✅</span>
-                        <span>Checkbox</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="radio">
-                        <span class="field-icon">⭕</span>
-                        <span>Radio</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="lookup">
-                        <span class="field-icon">🔍</span>
-                        <span>Lookup</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="richtext">
-                        <span class="field-icon">✏️</span>
-                        <span>Rich Text</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="file">
-                        <span class="field-icon">📎</span>
-                        <span>File Upload</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="signature">
-                        <span class="field-icon">✍️</span>
-                        <span>E-Signature</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="display">
-                        <span class="field-icon">ℹ️</span>
-                        <span>Display Text</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="login">
-                        <span class="field-icon">🔐</span>
-                        <span>Login</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="email-verify">
-                        <span class="field-icon">📧</span>
-                        <span>Verify Email</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="datatable">
-                        <span class="field-icon">📊</span>
-                        <span>Data Table</span>
-                    </div>
-                </div>
-                
-                <h3 style="margin-top: var(--space-4);">Layout Elements</h3>
-                <div class="field-palette">
-                    <div class="field-block" draggable="true" data-field-type="section">
-                        <span class="field-icon">📦</span>
-                        <span>Section</span>
-                    </div>
-                    <div class="field-block" draggable="true" data-field-type="columns">
-                        <span class="field-icon">📐</span>
-                        <span>Columns</span>
+                    
+                    <h4 style="margin-top: var(--space-4);">Layout Elements</h4>
+                    <div class="field-palette">
+                        <div class="field-block" draggable="true" data-field-type="section">
+                            <span class="field-icon">📦</span>
+                            <span>Section</span>
+                        </div>
+                        <div class="field-block" draggable="true" data-field-type="columns">
+                            <span class="field-icon">📐</span>
+                            <span>Columns</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Form Actions -->
-            <div class="section" id="formActions" style="display: none;">
-                <button class="button button-primary" onclick="newForm()">✨ New Form</button>
-                <button class="button button-primary" onclick="saveForm()">💾 Save Draft</button>
-                <button class="button button-primary" onclick="publishForm()">🚀 Publish Form</button>
-                <button class="button button-secondary" onclick="showMyForms()">📋 My Forms</button>
-                <button class="button button-secondary" onclick="previewForm()">👁️ Preview</button>
-                <button class="button button-secondary" onclick="showVariablesManager()">🔧 Variables</button>
-                <button class="button button-secondary" onclick="addNewPage()">➕ Add Page</button>
-            </div>
             </div>
         </aside>
 
@@ -862,6 +861,40 @@
         
         console.log('🌐 Global Variable System initialized (Form Builder)');
     </script>
+
+    <!-- Bottom Footer Bar -->
+    <footer class="bottom-footer" id="bottomFooter" style="display: none;">
+        <div class="footer-actions">
+            <button class="footer-btn button-primary" onclick="newForm()" title="New Form">
+                <span class="btn-icon">✨</span>
+                <span class="btn-text">New Form</span>
+            </button>
+            <button class="footer-btn button-primary" onclick="saveForm()" title="Save Draft">
+                <span class="btn-icon">💾</span>
+                <span class="btn-text">Save Draft</span>
+            </button>
+            <button class="footer-btn button-primary" onclick="publishForm()" title="Publish Form">
+                <span class="btn-icon">🚀</span>
+                <span class="btn-text">Publish</span>
+            </button>
+            <button class="footer-btn button-secondary" onclick="showMyForms()" title="My Forms">
+                <span class="btn-icon">📋</span>
+                <span class="btn-text">My Forms</span>
+            </button>
+            <button class="footer-btn button-secondary" onclick="previewForm()" title="Preview">
+                <span class="btn-icon">👁️</span>
+                <span class="btn-text">Preview</span>
+            </button>
+            <button class="footer-btn button-secondary" onclick="showVariablesManager()" title="Variables">
+                <span class="btn-icon">🔧</span>
+                <span class="btn-text">Variables</span>
+            </button>
+            <button class="footer-btn button-secondary" onclick="addNewPage()" title="Add Page">
+                <span class="btn-icon">➕</span>
+                <span class="btn-text">Add Page</span>
+            </button>
+        </div>
+    </footer>
 
     <!-- Load JavaScript Modules -->
     <script type="module" src="js/main.js"></script>

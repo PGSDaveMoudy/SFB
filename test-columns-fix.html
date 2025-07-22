@@ -76,21 +76,32 @@
 </head>
 <body>
     <div class="test-container">
-        <h1>🔧 Columns Layout Fix Test Guide</h1>
-        <p>This guide will help you test if the Columns Layout deletion issue has been fixed.</p>
+        <h1>🔧 UI Improvements Test Guide</h1>
+        <p>This guide will help you test both the Columns Layout fix and UI scrolling improvements.</p>
 
         <div class="test-section">
-            <h2>📋 What was the issue?</h2>
-            <p>When trying to rearrange building blocks inside a Columns Layout element, the entire Columns element would get deleted.</p>
+            <h2>📋 What were the issues?</h2>
+            <p><strong>Issue 1:</strong> When trying to rearrange building blocks inside a Columns Layout element, the entire Columns element would get deleted.</p>
+            <p><strong>Issue 2:</strong> Excessive scrolling required in the form builder due to large spacing and non-collapsible sections.</p>
         </div>
 
         <div class="test-section">
             <h2>🛠️ What was fixed?</h2>
+            <h3>Columns Layout Fixes:</h3>
             <ul>
                 <li>Added safety checks to prevent container fields (columns/sections) from being removed during field moves</li>
                 <li>Added validation to prevent moving columns fields into themselves</li>
                 <li>Added detection to prevent dragging container fields into other containers</li>
                 <li>Improved the <span class="code">removeFieldFromAnyLocation</span> method to check if removal is intentional</li>
+            </ul>
+            
+            <h3>UI Scrolling Improvements:</h3>
+            <ul>
+                <li>Reduced spacing between sections and elements</li>
+                <li>Made field blocks more compact</li>
+                <li>Added collapsible sections with click-to-toggle functionality</li>
+                <li>Reduced padding and margins throughout the interface</li>
+                <li>Persistent collapsed state saved to localStorage</li>
             </ul>
         </div>
 
@@ -101,6 +112,8 @@
                 <strong>Step 1: Start the application</strong>
                 <p>Run <span class="code">npm start</span> and navigate to the form builder</p>
             </div>
+
+            <h3>🔧 Columns Layout Testing:</h3>
 
             <div class="test-step">
                 <strong>Step 2: Add a Columns Layout</strong>
@@ -124,14 +137,22 @@
                 <p class="success">✓ Expected: Field moves out, columns layout remains intact</p>
             </div>
 
+            <h3>📱 UI Scrolling Testing:</h3>
+
             <div class="test-step">
-                <strong>Step 6: Test dragging the columns element itself</strong>
-                <p>Try to drag the entire columns layout element</p>
-                <p class="warning">⚠️ Expected: Columns can be reordered on the main canvas but cannot be dropped into other containers</p>
+                <strong>Step 6: Test collapsible sections</strong>
+                <p>Click on section headers (like "Building Blocks", "Form Actions") to collapse/expand them</p>
+                <p class="success">✓ Expected: Sections collapse and expand smoothly, state persists after refresh</p>
             </div>
 
             <div class="test-step">
-                <strong>Step 7: Check console logs</strong>
+                <strong>Step 7: Check reduced scrolling</strong>
+                <p>Notice the more compact interface with reduced spacing between elements</p>
+                <p class="success">✓ Expected: Less scrolling required to access all features</p>
+            </div>
+
+            <div class="test-step">
+                <strong>Step 8: Check console logs</strong>
                 <p>Open browser console (F12) and look for any warning messages during drag operations</p>
                 <p>You should see messages like:</p>
                 <ul>

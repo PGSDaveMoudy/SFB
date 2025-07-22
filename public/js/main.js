@@ -548,7 +548,7 @@ function hideConnectedSections() {
 // Update connection status display
 function updateConnectionStatus() {
     const status = document.getElementById('connectionStatus');
-    const formActions = document.getElementById('formActions');
+    const bottomFooter = document.getElementById('bottomFooter');
     const buildingBlocks = document.getElementById('buildingBlocks');
     
     if (!status) return;
@@ -558,14 +558,14 @@ function updateConnectionStatus() {
         status.querySelector('.status-text').textContent = 'Connected';
         
         // Show form building interface
-        if (formActions) formActions.style.display = 'block';
+        if (bottomFooter) bottomFooter.style.display = 'block';
         if (buildingBlocks) buildingBlocks.style.display = 'block';
     } else {
         status.className = 'connection-status disconnected';
         status.querySelector('.status-text').textContent = 'Not Connected';
         
         // Hide form building interface
-        if (formActions) formActions.style.display = 'none';
+        if (bottomFooter) bottomFooter.style.display = 'none';
         if (buildingBlocks) buildingBlocks.style.display = 'none';
     }
 }
@@ -829,9 +829,77 @@ window.bulkDeleteSelectedForms = async function() {
     }
 };
 
+// Collapsible sections functionality
+function initializeCollapsibleSections() {
+    // Add click handlers to all section headers
+    document.addEventListener('click', function(e) {
+        const sectionHeader = e.target.closest('.section h3');
+        if (!sectionHeader) return;
+        
+        const section = sectionHeader.closest('.section');
+        if (!section) return;
+        
+        // Toggle collapsed state
+        section.classList.toggle('collapsed');
+        
+        // Save collapsed state to localStorage
+        const sectionId = getSectionId(section);
+        if (sectionId) {
+            const collapsedSections = JSON.parse(localStorage.getItem('collapsedSections') || '[]');
+            if (section.classList.contains('collapsed')) {
+                if (!collapsedSections.includes(sectionId)) {
+                    collapsedSections.push(sectionId);
+                }
+            } else {
+                const index = collapsedSections.indexOf(sectionId);
+                if (index > -1) {
+                    collapsedSections.splice(index, 1);
+                }
+            }
+            localStorage.setItem('collapsedSections', JSON.stringify(collapsedSections));
+        }
+    });
+    
+    // Restore collapsed states from localStorage
+    function restoreCollapsedStates() {
+        const collapsedSections = JSON.parse(localStorage.getItem('collapsedSections') || '[]');
+        collapsedSections.forEach(sectionId => {
+            const section = document.querySelector(`[data-section-id="${sectionId}"]`);
+            if (section) {
+                section.classList.add('collapsed');
+            }
+        });
+    }
+    
+    // Helper function to get section ID
+    function getSectionId(section) {
+        // Try to get from data attribute first
+        if (section.dataset.sectionId) {
+            return section.dataset.sectionId;
+        }
+        
+        // Generate ID from section header text
+        const header = section.querySelector('h3');
+        if (header) {
+            const text = header.textContent.trim().replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+            section.dataset.sectionId = text;
+            return text;
+        }
+        
+        return null;
+    }
+    
+    // Initial setup
+    setTimeout(restoreCollapsedStates, 100);
+}
+
 // Initialize app when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeApp();
+        initializeCollapsibleSections();
+    });
 } else {
     initializeApp();
+    initializeCollapsibleSections();
 }
