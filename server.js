@@ -70,11 +70,7 @@ app.use(helmet({
             upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : false,
         },
     },
-    hsts: {
-        maxAge: 31536000,
-        includeSubDomains: true,
-        preload: true
-    },
+    hsts: false, // Let Nginx handle HSTS to avoid duplication
     xssFilter: true,
     noSniff: true,
     frameguard: { action: 'sameorigin' },
