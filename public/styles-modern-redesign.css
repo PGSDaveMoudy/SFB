@@ -983,6 +983,456 @@ button:disabled {
 }
 
 /* ==========================================================================
+   MAGICAL POPUP SYSTEM - CONTEXTUAL FLOATING BUBBLES
+   ========================================================================== */
+
+/* Base Popup/Bubble System */
+.magic-popup {
+    position: fixed;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-2xl);
+    backdrop-filter: blur(20px);
+    z-index: var(--z-toast);
+    font-family: var(--font-sans);
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+    transition: all var(--transition-normal);
+    pointer-events: none;
+    max-width: 90vw;
+}
+
+[data-theme="dark"] .magic-popup {
+    background: var(--dark-bg-secondary);
+    border-color: var(--gray-700);
+    color: var(--dark-text-primary);
+}
+
+.magic-popup.show {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: all;
+}
+
+/* Success Bubble */
+.magic-popup.success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    border-color: var(--secondary-400);
+    color: var(--secondary-700);
+}
+
+/* Error Bubble */
+.magic-popup.error {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+    border-color: var(--accent-red);
+    color: #dc2626;
+}
+
+/* Info Bubble */
+.magic-popup.info {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+    border-color: var(--accent-blue);
+    color: #2563eb;
+}
+
+/* Warning Bubble */
+.magic-popup.warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+    border-color: var(--accent-orange);
+    color: #d97706;
+}
+
+/* Toast Notifications (Top Right) */
+.magic-toast {
+    top: 100px;
+    right: var(--space-6);
+    padding: var(--space-4) var(--space-5);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    animation: slideInFromRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.magic-toast.auto-dismiss {
+    animation: slideInFromRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+               slideOutToRight 0.3s ease-out 2.5s forwards;
+}
+
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(100%) scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutToRight {
+    to {
+        transform: translateX(100%) scale(0.9);
+        opacity: 0;
+    }
+}
+
+/* Connection Status Popup */
+.connection-popup {
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--space-3) var(--space-5);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-weight: 600;
+    font-size: var(--text-sm);
+}
+
+.connection-popup.connected {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+    border-color: var(--secondary-400);
+}
+
+.connection-popup.connecting {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+    border-color: var(--accent-orange);
+}
+
+.connection-popup .status-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: currentColor;
+    animation: pulse 2s infinite;
+}
+
+/* Save Status Floating Bubble */
+.save-bubble {
+    bottom: 120px;
+    right: var(--space-6);
+    padding: var(--space-2) var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+[data-theme="dark"] .save-bubble {
+    background: rgba(30, 41, 59, 0.95) !important;
+}
+
+.save-bubble.saving {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1)) !important;
+    border-color: var(--accent-orange);
+    color: #d97706;
+}
+
+.save-bubble.saved {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1)) !important;
+    border-color: var(--secondary-400);
+    color: var(--secondary-700);
+}
+
+/* Contextual Help Bubble */
+.help-bubble {
+    padding: var(--space-4) var(--space-5);
+    max-width: 280px;
+    font-size: var(--text-sm);
+    line-height: 1.5;
+}
+
+.help-bubble-title {
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+[data-theme="dark"] .help-bubble-title {
+    color: var(--dark-text-primary);
+}
+
+.help-bubble-content {
+    color: var(--gray-600);
+    margin-bottom: var(--space-3);
+}
+
+[data-theme="dark"] .help-bubble-content {
+    color: var(--dark-text-secondary);
+}
+
+.help-bubble-actions {
+    display: flex;
+    gap: var(--space-2);
+    justify-content: flex-end;
+}
+
+.help-bubble-btn {
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    background: white;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.help-bubble-btn:hover {
+    background: var(--gray-100);
+}
+
+.help-bubble-btn.primary {
+    background: var(--primary-500);
+    color: white;
+    border-color: var(--primary-500);
+}
+
+.help-bubble-btn.primary:hover {
+    background: var(--primary-600);
+}
+
+/* Field Quick Actions Popup */
+.field-actions-popup {
+    padding: var(--space-2);
+    display: flex;
+    gap: var(--space-1);
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+[data-theme="dark"] .field-actions-popup {
+    background: rgba(30, 41, 59, 0.98) !important;
+}
+
+.field-action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-sm);
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.field-action-btn:hover {
+    background: var(--gray-100);
+    transform: scale(1.1);
+}
+
+[data-theme="dark"] .field-action-btn:hover {
+    background: var(--gray-700);
+}
+
+.field-action-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gray-900);
+    color: white;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all var(--transition-fast);
+    margin-bottom: var(--space-1);
+}
+
+.field-action-btn:hover::after {
+    opacity: 1;
+}
+
+/* Keyboard Shortcuts Popup */
+.shortcuts-popup {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: var(--space-6);
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+[data-theme="dark"] .shortcuts-popup {
+    background: rgba(30, 41, 59, 0.98) !important;
+}
+
+.shortcuts-title {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.shortcuts-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-2) var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.shortcut-action {
+    font-size: var(--text-sm);
+    color: var(--gray-700);
+}
+
+[data-theme="dark"] .shortcut-action {
+    color: var(--dark-text-secondary);
+}
+
+.shortcut-keys {
+    display: flex;
+    gap: var(--space-1);
+    font-size: var(--text-xs);
+}
+
+.shortcut-key {
+    padding: var(--space-1) var(--space-2);
+    background: var(--gray-100);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-family: var(--font-mono);
+}
+
+[data-theme="dark"] .shortcut-key {
+    background: var(--gray-700);
+    border-color: var(--gray-600);
+    color: var(--dark-text-primary);
+}
+
+/* Page Navigation Bubble */
+.page-nav-bubble {
+    bottom: var(--space-6);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+[data-theme="dark"] .page-nav-bubble {
+    background: rgba(30, 41, 59, 0.95) !important;
+}
+
+.page-nav-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-full);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: var(--text-sm);
+}
+
+.page-nav-btn:hover {
+    background: var(--primary-500);
+    color: white;
+    border-color: var(--primary-500);
+    transform: scale(1.1);
+}
+
+.page-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-nav-info {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+[data-theme="dark"] .page-nav-info {
+    color: var(--dark-text-primary);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .magic-toast {
+        right: var(--space-4);
+        left: var(--space-4);
+        top: 80px;
+        max-width: calc(100vw - var(--space-8));
+    }
+    
+    .connection-popup {
+        left: var(--space-4);
+        right: var(--space-4);
+        transform: none;
+        max-width: calc(100vw - var(--space-8));
+    }
+    
+    .help-bubble {
+        max-width: calc(100vw - var(--space-8));
+        left: var(--space-4) !important;
+        right: var(--space-4) !important;
+        transform: none !important;
+    }
+    
+    .shortcuts-popup {
+        left: var(--space-4);
+        right: var(--space-4);
+        top: 50%;
+        transform: translateY(-50%);
+        max-width: calc(100vw - var(--space-8));
+    }
+    
+    .page-nav-bubble {
+        left: var(--space-4);
+        right: var(--space-4);
+        transform: none;
+        justify-content: center;
+    }
+    
+    .save-bubble {
+        bottom: var(--space-4);
+        right: var(--space-4);
+    }
+}
+
+/* Floating Background Blur Effect */
+.popup-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(2px);
+    z-index: calc(var(--z-modal) - 1);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    pointer-events: none;
+}
+
+.popup-backdrop.show {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ==========================================================================
    PRINT STYLES
    ========================================================================== */
 
