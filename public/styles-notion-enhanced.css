@@ -319,7 +319,7 @@ body {
     border-right: 1px solid var(--notion-gray-200);
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: calc(100vh - 120px); /* Account for header (60px) + footer (60px) */
     overflow: hidden;
     position: relative;
 }
@@ -339,10 +339,12 @@ body {
 
 .sidebar-content {
     flex: 1;
-    overflow-y: auto;
-    padding: var(--space-4);
+    overflow-y: hidden; /* Remove scrolling */
+    padding: var(--space-3);
     scrollbar-width: thin;
     scrollbar-color: var(--notion-gray-300) transparent;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar-header {
@@ -398,6 +400,21 @@ body {
 
 .section {
     margin-bottom: var(--space-compact-section);
+}
+
+/* Make building blocks section take available space */
+#buildingBlocks {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#buildingBlocks .section-content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .section h3 {
@@ -594,19 +611,47 @@ body {
    ========================================================================== */
 
 .field-palette {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-1);
+    flex: 1;
+    align-content: start;
+    overflow: hidden;
+}
+
+/* Special layout for the main field palette (first one) */
+#buildingBlocks .field-palette:first-of-type {
+    flex: 1;
+    max-height: none;
+}
+
+/* Responsive adjustments for field palette */
+@media (max-width: 768px) {
+    .field-palette {
+        grid-template-columns: 1fr;
+        gap: var(--space-1);
+    }
+    
+    .field-block {
+        padding: var(--space-2);
+        font-size: var(--text-xs);
+    }
+    
+    .field-block .field-icon {
+        width: 18px;
+        height: 18px;
+        font-size: var(--text-sm);
+    }
 }
 
 .field-block {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
     background: var(--notion-white);
     border: 1px solid var(--notion-gray-200);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     cursor: grab;
     user-select: none;
     font-weight: 500;
@@ -615,6 +660,7 @@ body {
     position: relative;
     overflow: hidden;
     box-shadow: var(--shadow-sm);
+    font-size: var(--text-sm);
 }
 
 .field-block::before {
@@ -647,17 +693,18 @@ body {
 }
 
 .field-block .field-icon {
-    font-size: var(--text-lg);
-    width: 24px;
-    height: 24px;
+    font-size: var(--text-base);
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--make-purple-100);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     transition: all var(--duration-fast) var(--ease-spring);
     position: relative;
     z-index: 1;
+    flex-shrink: 0;
 }
 
 .field-block:hover .field-icon {
@@ -666,10 +713,13 @@ body {
 }
 
 .field-block span:last-child {
-    font-size: var(--text-base);
-    font-weight: 600;
+    font-size: var(--text-xs);
+    font-weight: 500;
     position: relative;
     z-index: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ==========================================================================
@@ -1088,7 +1138,7 @@ body {
     border-left: 1px solid var(--notion-gray-200);
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: calc(100vh - 120px); /* Account for header (60px) + footer (60px) */
     overflow: hidden;
     position: relative;
 }
