@@ -672,8 +672,37 @@
     </div>
 
     <!-- Rich Text Editor -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <link href="vendors/quill/quill.snow.css" rel="stylesheet">
+    <script src="vendors/quill/quill.js"></script>
+
+    <!-- Global Error Handling -->
+    <script>
+        // Add global error handling for debugging
+        window.addEventListener('error', function(e) {
+            console.error('🚨 Global JavaScript Error:', e.error, e.filename, e.lineno);
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('🚨 Unhandled Promise Rejection:', e.reason);
+        });
+        
+        // Override fetch to add debugging
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            console.log('🌐 Fetch request:', args[0], args[1]);
+            return originalFetch.apply(this, args)
+                .then(response => {
+                    if (!response.ok) {
+                        console.error('🚨 Fetch error:', response.status, response.statusText, 'for URL:', args[0]);
+                    }
+                    return response;
+                })
+                .catch(error => {
+                    console.error('🚨 Fetch network error:', error, 'for URL:', args[0]);
+                    throw error;
+                });
+        };
+    </script>
 
     <!-- Global Variable Manager -->
     <script>

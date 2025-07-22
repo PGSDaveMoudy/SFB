@@ -550,11 +550,13 @@ export class FlowLogic {
         const path = window.location.pathname;
         const formMatch = path.match(/\/form\/([^\/]+)/);
         if (formMatch) {
+            console.log('📧 Form ID from URL path:', formMatch[1]);
             return formMatch[1];
         }
         
         // 2. From global app state (form builder)
         if (window.AppModules?.formBuilder?.currentForm?.id) {
+            console.log('📧 Form ID from form builder:', window.AppModules.formBuilder.currentForm.id);
             return window.AppModules.formBuilder.currentForm.id;
         }
         
@@ -562,15 +564,17 @@ export class FlowLogic {
         const urlParams = new URLSearchParams(window.location.search);
         const formIdFromQuery = urlParams.get('formId');
         if (formIdFromQuery) {
+            console.log('📧 Form ID from query params:', formIdFromQuery);
             return formIdFromQuery;
         }
         
         // 4. From form viewer state
         if (window.AppModules?.formViewer?.currentFormId) {
+            console.log('📧 Form ID from form viewer:', window.AppModules.formViewer.currentFormId);
             return window.AppModules.formViewer.currentFormId;
         }
         
-        console.warn('Could not determine current form ID for email configuration');
+        console.warn('📧 Could not determine current form ID for email configuration - this means custom email settings cannot be loaded');
         return null;
     }
 }

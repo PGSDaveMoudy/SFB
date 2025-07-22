@@ -2842,25 +2842,95 @@ export class FormBuilder {
                 <!-- Appearance Tab -->
                 <div class="property-sub-content" id="form-appearance-tab" style="display: none;">
                     <div class="property-group-compact">
-                        <label>Theme</label>
-                        <select id="form-theme">
-                            <option value="light" ${settings.theme === 'light' || !settings.theme ? 'selected' : ''}>Light</option>
-                            <option value="dark" ${settings.theme === 'dark' ? 'selected' : ''}>Dark</option>
+                        <label>Theme Preset</label>
+                        <select id="form-theme-preset" onchange="window.AppModules.formBuilder.applyFormThemePreset(this.value)">
+                            <option value="">Custom</option>
+                            <option value="modern">Modern</option>
+                            <option value="corporate">Corporate</option>
+                            <option value="playful">Playful</option>
+                            <option value="minimal">Minimal</option>
+                            <option value="dark">Dark Mode</option>
                         </select>
-                        <div class="help-text">Overall theme for published form</div>
+                        <div class="help-text">Apply predefined theme</div>
                     </div>
 
-                    <div class="property-row">
-                        <div class="property-group-compact">
-                            <label>Primary Color</label>
-                            <input type="color" id="form-primary-color-picker" value="${settings.primaryColor || '#8b5cf6'}">
-                            <div class="help-text">Buttons & accents</div>
+                    <div class="property-group-compact">
+                        <label>Colors</label>
+                        <div class="property-row">
+                            <div class="property-group-compact">
+                                <label>Primary</label>
+                                <input type="color" id="form-primary-color-picker" value="${settings.primaryColor || '#8b5cf6'}">
+                                <div class="help-text">Buttons & links</div>
+                            </div>
+                            <div class="property-group-compact">
+                                <label>Background</label>
+                                <input type="color" id="form-bg-color-picker" value="${settings.backgroundColor || '#ffffff'}">
+                                <div class="help-text">Form background</div>
+                            </div>
+                            <div class="property-group-compact">
+                                <label>Text</label>
+                                <input type="color" id="form-text-color-picker" value="${settings.textColor || '#111827'}">
+                                <div class="help-text">Main text</div>
+                            </div>
                         </div>
-                        
-                        <div class="property-group-compact">
-                            <label>Background Color</label>
-                            <input type="color" id="form-bg-color-picker" value="${settings.backgroundColor || '#ffffff'}">
-                            <div class="help-text">Form background</div>
+                    </div>
+
+                    <div class="property-group-compact">
+                        <label>Typography</label>
+                        <div class="property-row">
+                            <div class="property-group-compact">
+                                <label>Font Family</label>
+                                <select id="form-font-family">
+                                    <option value="Inter" ${settings.fontFamily === 'Inter' ? 'selected' : ''}>Inter</option>
+                                    <option value="Arial" ${settings.fontFamily === 'Arial' ? 'selected' : ''}>Arial</option>
+                                    <option value="Helvetica" ${settings.fontFamily === 'Helvetica' ? 'selected' : ''}>Helvetica</option>
+                                    <option value="Georgia" ${settings.fontFamily === 'Georgia' ? 'selected' : ''}>Georgia</option>
+                                    <option value="Times New Roman" ${settings.fontFamily === 'Times New Roman' ? 'selected' : ''}>Times New Roman</option>
+                                    <option value="custom" ${settings.fontFamily === 'custom' ? 'selected' : ''}>Custom</option>
+                                </select>
+                            </div>
+                            <div class="property-group-compact">
+                                <label>Base Font Size</label>
+                                <select id="form-font-size">
+                                    <option value="14px" ${settings.fontSize === '14px' ? 'selected' : ''}>Small (14px)</option>
+                                    <option value="16px" ${settings.fontSize === '16px' || !settings.fontSize ? 'selected' : ''}>Normal (16px)</option>
+                                    <option value="18px" ${settings.fontSize === '18px' ? 'selected' : ''}>Large (18px)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="property-group-compact">
+                        <label>Layout</label>
+                        <div class="property-row">
+                            <div class="property-group-compact">
+                                <label>Max Width</label>
+                                <input type="text" id="form-max-width" value="${settings.maxWidth || '800px'}" placeholder="e.g., 800px, 100%">
+                                <div class="help-text">Form container width</div>
+                            </div>
+                            <div class="property-group-compact">
+                                <label>Padding</label>
+                                <input type="text" id="form-padding" value="${settings.padding || '2rem'}" placeholder="e.g., 2rem, 24px">
+                                <div class="help-text">Internal spacing</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="property-group-compact">
+                        <label>Style Options</label>
+                        <div class="checkbox-list">
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="form-show-progress" ${settings.showProgress ? 'checked' : ''}>
+                                <label for="form-show-progress">Show Progress Bar</label>
+                            </div>
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="form-rounded-corners" ${settings.roundedCorners !== false ? 'checked' : ''}>
+                                <label for="form-rounded-corners">Rounded Corners</label>
+                            </div>
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="form-show-shadows" ${settings.showShadows !== false ? 'checked' : ''}>
+                                <label for="form-show-shadows">Show Shadows</label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2868,8 +2938,98 @@ export class FormBuilder {
                 <!-- Advanced Tab -->
                 <div class="property-sub-content" id="form-advanced-tab" style="display: none;">
                     <div class="property-group-compact">
+                        <label>Email Configuration (OTP)</label>
+                        <div class="checkbox-list">
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="form-use-custom-email" ${settings.useCustomEmail ? 'checked' : ''}
+                                       onchange="window.AppModules.formBuilder.toggleCustomEmail(this.checked)">
+                                <label for="form-use-custom-email">Use Custom SMTP Server</label>
+                            </div>
+                        </div>
+                        <div class="help-text">Configure custom email settings for OTP delivery (defaults to portwoodglobalsolutions.com)</div>
+                    </div>
+
+                    <div id="custom-email-config" style="display: ${settings.useCustomEmail ? 'block' : 'none'}">
+                        <div class="property-group-compact">
+                            <label>Email Provider</label>
+                            <select id="form-email-provider" onchange="window.AppModules.formBuilder.updateEmailProvider(this.value)">
+                                <option value="smtp" ${settings.emailProvider === 'smtp' || !settings.emailProvider ? 'selected' : ''}>Custom SMTP</option>
+                                <option value="gmail" ${settings.emailProvider === 'gmail' ? 'selected' : ''}>Gmail</option>
+                                <option value="sendgrid" ${settings.emailProvider === 'sendgrid' ? 'selected' : ''}>SendGrid</option>
+                            </select>
+                        </div>
+
+                        <div id="smtp-config" style="display: ${settings.emailProvider !== 'gmail' && settings.emailProvider !== 'sendgrid' ? 'block' : 'none'}">
+                            <div class="property-row">
+                                <div class="property-group-compact">
+                                    <label>SMTP Host</label>
+                                    <input type="text" id="form-email-host" value="${settings.emailHost || ''}" placeholder="smtp.yourdomain.com">
+                                </div>
+                                <div class="property-group-compact">
+                                    <label>Port</label>
+                                    <input type="number" id="form-email-port" value="${settings.emailPort || '587'}" placeholder="587">
+                                </div>
+                            </div>
+                            <div class="property-row">
+                                <div class="property-group-compact">
+                                    <label>Username</label>
+                                    <input type="text" id="form-email-user" value="${settings.emailUser || ''}" placeholder="user@yourdomain.com">
+                                </div>
+                                <div class="property-group-compact">
+                                    <label>Password</label>
+                                    <input type="password" id="form-email-pass" value="${settings.emailPass || ''}" placeholder="Your password">
+                                </div>
+                            </div>
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="form-email-secure" ${settings.emailSecure ? 'checked' : ''}>
+                                <label for="form-email-secure">Use SSL/TLS</label>
+                            </div>
+                        </div>
+
+                        <div id="gmail-config" style="display: ${settings.emailProvider === 'gmail' ? 'block' : 'none'}">
+                            <div class="property-group-compact">
+                                <label>Gmail Address</label>
+                                <input type="email" id="form-gmail-user" value="${settings.gmailUser || ''}" placeholder="your-gmail@gmail.com">
+                                <div class="help-text">Your Gmail address</div>
+                            </div>
+                            <div class="property-group-compact">
+                                <label>App Password</label>
+                                <input type="password" id="form-gmail-pass" value="${settings.gmailPass || ''}" placeholder="16-character app password">
+                                <div class="help-text">Generate at <a href="https://myaccount.google.com/apppasswords" target="_blank">Google App Passwords</a></div>
+                            </div>
+                        </div>
+
+                        <div id="sendgrid-config" style="display: ${settings.emailProvider === 'sendgrid' ? 'block' : 'none'}">
+                            <div class="property-group-compact">
+                                <label>SendGrid API Key</label>
+                                <input type="password" id="form-sendgrid-key" value="${settings.sendgridKey || ''}" placeholder="SG.xxxxxxxxxxxxxxxx">
+                                <div class="help-text">Your SendGrid API key</div>
+                            </div>
+                        </div>
+
+                        <div class="property-group-compact">
+                            <label>From Email Address</label>
+                            <input type="email" id="form-email-from" value="${settings.emailFrom || 'noreply@yourdomain.com'}" placeholder="noreply@yourdomain.com">
+                            <div class="help-text">Email address for OTP messages</div>
+                        </div>
+
+                        <div class="property-group-compact">
+                            <label>From Name</label>
+                            <input type="text" id="form-email-from-name" value="${settings.emailFromName || 'Form Builder'}" placeholder="Your Company">
+                            <div class="help-text">Display name for OTP emails</div>
+                        </div>
+
+                        <div class="property-group-compact">
+                            <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.testEmailConfiguration()">
+                                📧 Test Email Configuration
+                            </button>
+                            <div class="help-text">Send a test email to verify settings</div>
+                        </div>
+                    </div>
+
+                    <div class="property-group-compact">
                         <label>Custom CSS</label>
-                        <textarea id="form-custom-css" rows="6" placeholder="/* Custom CSS styles */">${settings.customCSS || ''}</textarea>
+                        <textarea id="form-custom-css" rows="4" placeholder="/* Custom CSS styles */">${settings.customCSS || ''}</textarea>
                         <div class="help-text">Advanced styling overrides</div>
                     </div>
                 </div>
@@ -2884,9 +3044,26 @@ export class FormBuilder {
             { id: 'form-submit-text', event: 'input', handler: (e) => { this.updateFormSetting('submitButtonText', e.target.value); } },
             { id: 'form-success-message', event: 'input', handler: (e) => { this.updateFormSetting('successMessage', e.target.value); } },
             { id: 'form-redirect-url', event: 'input', handler: (e) => { this.updateFormSetting('redirectUrl', e.target.value); } },
-            { id: 'form-theme', event: 'change', handler: (e) => { this.updateFormSetting('theme', e.target.value); } },
             { id: 'form-primary-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('primaryColor', e.target.value); } },
             { id: 'form-bg-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('backgroundColor', e.target.value); } },
+            { id: 'form-text-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('textColor', e.target.value); } },
+            { id: 'form-font-family', event: 'change', handler: (e) => { this.updateFormSetting('fontFamily', e.target.value); } },
+            { id: 'form-font-size', event: 'change', handler: (e) => { this.updateFormSetting('fontSize', e.target.value); } },
+            { id: 'form-max-width', event: 'input', handler: (e) => { this.updateFormSetting('maxWidth', e.target.value); } },
+            { id: 'form-padding', event: 'input', handler: (e) => { this.updateFormSetting('padding', e.target.value); } },
+            { id: 'form-show-progress', event: 'change', handler: (e) => { this.updateFormSetting('showProgress', e.target.checked); } },
+            { id: 'form-rounded-corners', event: 'change', handler: (e) => { this.updateFormSetting('roundedCorners', e.target.checked); } },
+            { id: 'form-show-shadows', event: 'change', handler: (e) => { this.updateFormSetting('showShadows', e.target.checked); } },
+            { id: 'form-email-host', event: 'input', handler: (e) => { this.updateFormSetting('emailHost', e.target.value); } },
+            { id: 'form-email-port', event: 'input', handler: (e) => { this.updateFormSetting('emailPort', e.target.value); } },
+            { id: 'form-email-user', event: 'input', handler: (e) => { this.updateFormSetting('emailUser', e.target.value); } },
+            { id: 'form-email-pass', event: 'input', handler: (e) => { this.updateFormSetting('emailPass', e.target.value); } },
+            { id: 'form-email-secure', event: 'change', handler: (e) => { this.updateFormSetting('emailSecure', e.target.checked); } },
+            { id: 'form-gmail-user', event: 'input', handler: (e) => { this.updateFormSetting('gmailUser', e.target.value); } },
+            { id: 'form-gmail-pass', event: 'input', handler: (e) => { this.updateFormSetting('gmailPass', e.target.value); } },
+            { id: 'form-sendgrid-key', event: 'input', handler: (e) => { this.updateFormSetting('sendgridKey', e.target.value); } },
+            { id: 'form-email-from', event: 'input', handler: (e) => { this.updateFormSetting('emailFrom', e.target.value); } },
+            { id: 'form-email-from-name', event: 'input', handler: (e) => { this.updateFormSetting('emailFromName', e.target.value); } },
             { id: 'form-custom-css', event: 'input', handler: (e) => { this.updateFormSetting('customCSS', e.target.value); } }
         ];
 
@@ -3023,6 +3200,119 @@ export class FormBuilder {
                     </div>
                 `;
                 break;
+
+            case 'datatable':
+                const dataTableConfig = field.dataTableConfig || {};
+                content = `
+                    <div class="property-group-compact">
+                        <label>Table Title</label>
+                        <input type="text" id="prop-dataTableTitle" value="${dataTableConfig.title || ''}"
+                               onchange="window.AppModules.formBuilder.updateDataTableConfig('title', this.value)">
+                        <div class="help-text">Display title for the table</div>
+                    </div>
+                    
+                    <div class="property-group-compact">
+                        <label>Description</label>
+                        <textarea id="prop-dataTableDescription" 
+                                  onchange="window.AppModules.formBuilder.updateDataTableConfig('description', this.value)">${dataTableConfig.description || ''}</textarea>
+                        <div class="help-text">Optional description text</div>
+                    </div>
+                    
+                    <div class="property-group-compact">
+                        <label>Data Source</label>
+                        <select id="prop-dataSource" onchange="window.AppModules.formBuilder.updateDataTableConfig('dataSource', this.value)">
+                            <option value="static" ${dataTableConfig.dataSource === 'static' ? 'selected' : ''}>Static Data (Manual Entry)</option>
+                            <option value="variable" ${dataTableConfig.dataSource === 'variable' ? 'selected' : ''}>From Variable</option>
+                            <option value="query" ${dataTableConfig.dataSource === 'query' ? 'selected' : ''}>Salesforce Query</option>
+                        </select>
+                        <div class="help-text">Choose how to populate table data</div>
+                    </div>
+                    
+                    <div id="variable-source-config" style="display: ${dataTableConfig.dataSource === 'variable' ? 'block' : 'none'}">
+                        <div class="property-group-compact">
+                            <label>Source Variable</label>
+                            <select id="prop-sourceVariable" onchange="window.AppModules.formBuilder.updateDataTableConfig('sourceVariable', this.value)">
+                                <option value="">Select Variable...</option>
+                                ${this.renderVariableOptions(dataTableConfig.sourceVariable)}
+                            </select>
+                            <div class="help-text">Variable containing array data</div>
+                        </div>
+                    </div>
+                    
+                    <div id="query-source-config" style="display: ${dataTableConfig.dataSource === 'query' ? 'block' : 'none'}">
+                        <div class="property-group-compact">
+                            <label>Query Page</label>
+                            <select id="prop-sourcePageId" onchange="window.AppModules.formBuilder.updateDataTableConfig('sourcePageId', this.value)">
+                                <option value="">Select Page...</option>
+                                ${this.renderPageOptions(dataTableConfig.sourcePageId)}
+                            </select>
+                            <div class="help-text">Page with Salesforce query action</div>
+                        </div>
+                        
+                        <div class="property-group-compact">
+                            <label>Auto-Generate Columns</label>
+                            <div class="field-selection-container">
+                                <div id="available-fields-list" class="field-list">
+                                    <div class="field-selection-info">Select fields to create table columns automatically</div>
+                                </div>
+                                <button class="property-button-compact" onclick="window.AppModules.formBuilder.createColumnsFromSelectedFields()">
+                                    🔧 Generate Columns
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="property-group-compact">
+                        <label>Table Columns</label>
+                        <div id="datatable-columns-container">
+                            ${this.renderDataTableColumns(dataTableConfig.columns || [])}
+                        </div>
+                        <button class="property-button-compact" onclick="window.AppModules.formBuilder.addDataTableColumn()">
+                            ➕ Add Column
+                        </button>
+                        <div class="help-text">Define table structure</div>
+                    </div>
+                    
+                    <div class="property-group-compact">
+                        <label>Table Options</label>
+                        <div class="checkbox-list">
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="prop-allowAdd" ${dataTableConfig.allowAdd ? 'checked' : ''}
+                                       onchange="window.AppModules.formBuilder.updateDataTableConfig('allowAdd', this.checked)">
+                                <label for="prop-allowAdd">Allow Add Rows</label>
+                            </div>
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="prop-allowEdit" ${dataTableConfig.allowEdit ? 'checked' : ''}
+                                       onchange="window.AppModules.formBuilder.updateDataTableConfig('allowEdit', this.checked)">
+                                <label for="prop-allowEdit">Allow Edit Rows</label>
+                            </div>
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="prop-allowDelete" ${dataTableConfig.allowDelete ? 'checked' : ''}
+                                       onchange="window.AppModules.formBuilder.updateDataTableConfig('allowDelete', this.checked)">
+                                <label for="prop-allowDelete">Allow Delete Rows</label>
+                            </div>
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="prop-showPagination" ${dataTableConfig.showPagination ? 'checked' : ''}
+                                       onchange="window.AppModules.formBuilder.updateDataTableConfig('showPagination', this.checked)">
+                                <label for="prop-showPagination">Show Pagination</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="pagination-config" style="display: ${dataTableConfig.showPagination ? 'block' : 'none'}">
+                        <div class="property-group-compact">
+                            <label>Page Size</label>
+                            <select id="prop-pageSize" onchange="window.AppModules.formBuilder.updateDataTableConfig('pageSize', parseInt(this.value))">
+                                <option value="5" ${dataTableConfig.pageSize === 5 ? 'selected' : ''}>5 rows</option>
+                                <option value="10" ${dataTableConfig.pageSize === 10 ? 'selected' : ''}>10 rows</option>
+                                <option value="25" ${dataTableConfig.pageSize === 25 ? 'selected' : ''}>25 rows</option>
+                                <option value="50" ${dataTableConfig.pageSize === 50 ? 'selected' : ''}>50 rows</option>
+                            </select>
+                            <div class="help-text">Rows per page</div>
+                        </div>
+                    </div>
+                `;
+                break;
         }
         
         return content || '<div class="property-group-compact"><p>No additional configuration needed for this field type.</p></div>';
@@ -3112,34 +3402,175 @@ export class FormBuilder {
     }
 
     renderFieldStyleTab(field) {
+        if (!field.styling) field.styling = {};
+        const styling = field.styling;
+        
         return `
+            <!-- Style Presets -->
+            <div class="property-group-compact">
+                <label>Style Preset</label>
+                <select id="prop-stylePreset" onchange="window.AppModules.formBuilder.applyFieldStylePreset(this.value)">
+                    <option value="">None (Custom)</option>
+                    <option value="modern" ${styling.preset === 'modern' ? 'selected' : ''}>Modern</option>
+                    <option value="minimal" ${styling.preset === 'minimal' ? 'selected' : ''}>Minimal</option>
+                    <option value="rounded" ${styling.preset === 'rounded' ? 'selected' : ''}>Rounded</option>
+                    <option value="material" ${styling.preset === 'material' ? 'selected' : ''}>Material Design</option>
+                    <option value="bold" ${styling.preset === 'bold' ? 'selected' : ''}>Bold</option>
+                </select>
+                <div class="help-text">Apply predefined styles</div>
+            </div>
+
+            <!-- Layout Options -->
+            <div class="property-group-compact">
+                <label>Layout</label>
+                <div class="property-row">
+                    <div class="property-group-compact">
+                        <label>Width</label>
+                        <select id="prop-width" onchange="window.AppModules.formBuilder.updateFieldStyling('width', this.value)">
+                            <option value="full" ${styling.width === 'full' || !styling.width ? 'selected' : ''}>Full Width</option>
+                            <option value="half" ${styling.width === 'half' ? 'selected' : ''}>Half Width</option>
+                            <option value="third" ${styling.width === 'third' ? 'selected' : ''}>One Third</option>
+                            <option value="quarter" ${styling.width === 'quarter' ? 'selected' : ''}>Quarter</option>
+                            <option value="custom" ${styling.width === 'custom' ? 'selected' : ''}>Custom</option>
+                        </select>
+                    </div>
+                    ${styling.width === 'custom' ? `
+                        <div class="property-group-compact">
+                            <label>Custom Width</label>
+                            <input type="text" value="${styling.customWidth || '100%'}" 
+                                   placeholder="e.g., 300px, 50%"
+                                   onchange="window.AppModules.formBuilder.updateFieldStyling('customWidth', this.value)">
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+
+            <!-- Spacing -->
+            <div class="property-group-compact">
+                <label>Spacing</label>
+                <div class="property-row">
+                    <div class="property-group-compact">
+                        <label>Margin</label>
+                        <input type="text" placeholder="e.g., 10px, 1rem"
+                               value="${styling.margin || ''}"
+                               onchange="window.AppModules.formBuilder.updateFieldStyling('margin', this.value)">
+                    </div>
+                    <div class="property-group-compact">
+                        <label>Padding</label>
+                        <input type="text" placeholder="e.g., 10px, 1rem"
+                               value="${styling.padding || ''}"
+                               onchange="window.AppModules.formBuilder.updateFieldStyling('padding', this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colors -->
+            <div class="property-group-compact">
+                <label>Colors</label>
+                <div class="property-row">
+                    <div class="property-group-compact">
+                        <label>Background</label>
+                        <input type="color" value="${styling.backgroundColor || '#ffffff'}"
+                               onchange="window.AppModules.formBuilder.updateFieldStyling('backgroundColor', this.value)">
+                    </div>
+                    <div class="property-group-compact">
+                        <label>Text Color</label>
+                        <input type="color" value="${styling.color || '#000000'}"
+                               onchange="window.AppModules.formBuilder.updateFieldStyling('color', this.value)">
+                    </div>
+                    <div class="property-group-compact">
+                        <label>Border Color</label>
+                        <input type="color" value="${styling.borderColor || '#e5e7eb'}"
+                               onchange="window.AppModules.formBuilder.updateFieldStyling('borderColor', this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typography -->
+            <div class="property-group-compact">
+                <label>Typography</label>
+                <div class="property-row">
+                    <div class="property-group-compact">
+                        <label>Font Size</label>
+                        <select onchange="window.AppModules.formBuilder.updateFieldStyling('fontSize', this.value)">
+                            <option value="" ${!styling.fontSize ? 'selected' : ''}>Default</option>
+                            <option value="12px" ${styling.fontSize === '12px' ? 'selected' : ''}>Small</option>
+                            <option value="14px" ${styling.fontSize === '14px' ? 'selected' : ''}>Normal</option>
+                            <option value="16px" ${styling.fontSize === '16px' ? 'selected' : ''}>Medium</option>
+                            <option value="18px" ${styling.fontSize === '18px' ? 'selected' : ''}>Large</option>
+                            <option value="custom" ${styling.fontSize === 'custom' ? 'selected' : ''}>Custom</option>
+                        </select>
+                    </div>
+                    <div class="property-group-compact">
+                        <label>Font Weight</label>
+                        <select onchange="window.AppModules.formBuilder.updateFieldStyling('fontWeight', this.value)">
+                            <option value="" ${!styling.fontWeight ? 'selected' : ''}>Default</option>
+                            <option value="300" ${styling.fontWeight === '300' ? 'selected' : ''}>Light</option>
+                            <option value="400" ${styling.fontWeight === '400' ? 'selected' : ''}>Normal</option>
+                            <option value="500" ${styling.fontWeight === '500' ? 'selected' : ''}>Medium</option>
+                            <option value="600" ${styling.fontWeight === '600' ? 'selected' : ''}>Semi-Bold</option>
+                            <option value="700" ${styling.fontWeight === '700' ? 'selected' : ''}>Bold</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Border & Effects -->
+            <div class="property-group-compact">
+                <label>Border & Effects</label>
+                <div class="property-row">
+                    <div class="property-group-compact">
+                        <label>Border Width</label>
+                        <input type="text" placeholder="e.g., 1px, 2px"
+                               value="${styling.borderWidth || ''}"
+                               onchange="window.AppModules.formBuilder.updateFieldStyling('borderWidth', this.value)">
+                    </div>
+                    <div class="property-group-compact">
+                        <label>Border Radius</label>
+                        <input type="text" placeholder="e.g., 4px, 8px"
+                               value="${styling.borderRadius || ''}"
+                               onchange="window.AppModules.formBuilder.updateFieldStyling('borderRadius', this.value)">
+                    </div>
+                </div>
+                <div class="property-group-compact">
+                    <label>Box Shadow</label>
+                    <input type="text" placeholder="e.g., 0 2px 4px rgba(0,0,0,0.1)"
+                           value="${styling.boxShadow || ''}"
+                           onchange="window.AppModules.formBuilder.updateFieldStyling('boxShadow', this.value)">
+                </div>
+            </div>
+
+            <!-- Custom CSS -->
+            <div class="property-group-compact">
+                <label>Custom CSS</label>
+                <textarea id="prop-customCSS" rows="4"
+                          placeholder="/* Custom CSS for this field */\n.field-wrapper { }"
+                          onchange="window.AppModules.formBuilder.updateFieldStyling('customCSS', this.value)">${styling.customCSS || ''}</textarea>
+                <div class="help-text">Write custom CSS rules</div>
+            </div>
+
+            <!-- CSS Classes -->
             <div class="property-group-compact">
                 <label>CSS Classes</label>
                 <input type="text" id="prop-cssClasses" value="${field.cssClasses || ''}"
+                       placeholder="class1 class2"
                        onchange="window.AppModules.formBuilder.updateFieldProperty('cssClasses', this.value)">
-                <div class="help-text">Custom CSS classes</div>
-            </div>
-            
-            <div class="property-row">
-                <div class="property-group-compact">
-                    <label>Width</label>
-                    <select id="prop-width" onchange="window.AppModules.formBuilder.updateFieldProperty('width', this.value)">
-                        <option value="full" ${field.width === 'full' ? 'selected' : ''}>Full Width</option>
-                        <option value="half" ${field.width === 'half' ? 'selected' : ''}>Half Width</option>
-                        <option value="third" ${field.width === 'third' ? 'selected' : ''}>One Third</option>
-                    </select>
-                    <div class="help-text">Field width</div>
-                </div>
+                <div class="help-text">Space-separated class names</div>
             </div>
         `;
     }
 
     updateFormSetting(key, value) {
-        if (!this.currentForm.settings) {
-            this.currentForm.settings = {};
+        try {
+            if (!this.currentForm.settings) {
+                this.currentForm.settings = {};
+            }
+            this.currentForm.settings[key] = value;
+            console.log(`📝 Updated form setting: ${key} =`, value);
+            this.markFormDirty();
+        } catch (error) {
+            console.error('❌ Error updating form setting:', error, { key, value });
         }
-        this.currentForm.settings[key] = value;
-        this.markFormDirty();
     }
 
     updateNavigationConfig(buttonType, property, value) {
@@ -3977,18 +4408,28 @@ export class FormBuilder {
     }
 
     attachPagePropertyListeners(page) {
+        // Helper function to safely add event listeners
+        const addSafeListener = (id, event, handler) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener(event, handler);
+            } else {
+                console.warn(`Element with ID '${id}' not found when attaching listeners`);
+            }
+        };
+
         // Page Name
-        document.getElementById('page-name').addEventListener('input', (e) => {
+        addSafeListener('page-name', 'input', (e) => {
             this.updatePageProperty('name', e.target.value);
         });
 
         // Salesforce Object
-        document.getElementById('page-salesforce-object').addEventListener('change', (e) => {
+        addSafeListener('page-salesforce-object', 'change', (e) => {
             this.updatePageProperty('salesforceObject', e.target.value);
         });
 
         // Action Type
-        document.getElementById('page-action-type').addEventListener('change', (e) => {
+        addSafeListener('page-action-type', 'change', (e) => {
             this.updatePageProperty('actionType', e.target.value);
             // Show/hide appropriate configuration groups based on action type
             const recordIdGroup = document.getElementById('record-id-group');
@@ -4003,40 +4444,31 @@ export class FormBuilder {
             }
         });
 
-        // Page Conditional Visibility Toggle
-        document.getElementById('page-conditional-enabled').addEventListener('change', (e) => {
+        // Page Conditional Visibility Toggle - Note: using the legacy ID since main one might be hidden
+        addSafeListener('page-conditional-enabled-legacy', 'change', (e) => {
             this.togglePageConditionalVisibility(e.target.checked);
         });
 
         // Page Conditional Logic (AND/OR)
-        const pageConditionLogic = document.getElementById('page-condition-logic');
-        if (pageConditionLogic) {
-            pageConditionLogic.addEventListener('change', (e) => {
-                this.updatePageConditionalProperty('logic', e.target.value);
-            });
-        }
+        addSafeListener('page-condition-logic', 'change', (e) => {
+            this.updatePageConditionalProperty('logic', e.target.value);
+        });
 
         // Page Navigation Button Conditional Visibility Toggles
-        document.getElementById('page-next-btn-conditional').addEventListener('change', (e) => {
+        addSafeListener('page-next-btn-conditional', 'change', (e) => {
             this.togglePageNavigationButtonConditionalVisibility('next', e.target.checked);
         });
-        document.getElementById('page-submit-btn-conditional').addEventListener('change', (e) => {
+        addSafeListener('page-submit-btn-conditional', 'change', (e) => {
             this.togglePageNavigationButtonConditionalVisibility('submit', e.target.checked);
         });
 
         // Page Navigation Button Conditional Logic (AND/OR)
-        const pageNextConditionLogic = document.getElementById('page-next-condition-logic');
-        if (pageNextConditionLogic) {
-            pageNextConditionLogic.addEventListener('change', (e) => {
-                this.updatePageNavigationButtonConditionalProperty('next', 'logic', e.target.value);
-            });
-        }
-        const pageSubmitConditionLogic = document.getElementById('page-submit-condition-logic');
-        if (pageSubmitConditionLogic) {
-            pageSubmitConditionLogic.addEventListener('change', (e) => {
-                this.updatePageNavigationButtonConditionalProperty('submit', 'logic', e.target.value);
-            });
-        }
+        addSafeListener('page-next-condition-logic', 'change', (e) => {
+            this.updatePageNavigationButtonConditionalProperty('next', 'logic', e.target.value);
+        });
+        addSafeListener('page-submit-condition-logic', 'change', (e) => {
+            this.updatePageNavigationButtonConditionalProperty('submit', 'logic', e.target.value);
+        });
     }
 
     renderPageConditions(conditions, availableFields, buttonType = null) {
@@ -7209,6 +7641,22 @@ export class FormBuilder {
         return div.innerHTML;
     }
 
+    renderVariableOptions(selectedVariable = '') {
+        const variables = window.GlobalVariables?.getAllVariables() || {};
+        return Object.keys(variables).map(variableName => {
+            const selected = variableName === selectedVariable ? 'selected' : '';
+            return `<option value="${variableName}" ${selected}>${variableName}</option>`;
+        }).join('');
+    }
+
+    renderPageOptions(selectedPageId = '') {
+        const pages = this.currentForm?.pages || [];
+        return pages.map(page => {
+            const selected = page.id === selectedPageId ? 'selected' : '';
+            return `<option value="${page.id}" ${selected}>${page.name || 'Unnamed Page'}</option>`;
+        }).join('');
+    }
+
     // DataTable Configuration Methods
     updateDataTableConfig(property, value) {
         const field = this.selectedField;
@@ -7230,10 +7678,19 @@ export class FormBuilder {
             }
         }
         
+        // Show/hide pagination config based on showPagination
+        if (property === 'showPagination') {
+            const paginationConfig = document.getElementById('pagination-config');
+            if (paginationConfig) {
+                paginationConfig.style.display = value ? 'block' : 'none';
+            }
+        }
+        
         // Refresh properties UI when sourcePageId changes to show field selection
         if (property === 'sourcePageId') {
             setTimeout(() => {
                 this.showFieldProperties();
+                this.loadAvailableFieldsForPage(value);
             }, 100);
         }
         
@@ -7547,6 +8004,318 @@ export class FormBuilder {
                 info.style.color = '';
             }, 3000);
         }
+    }
+
+    updateFieldStyling(property, value) {
+        try {
+            const field = this.selectedField;
+            if (!field) {
+                console.warn('⚠️ No field selected for styling update');
+                return;
+            }
+            
+            if (!field.styling) field.styling = {};
+            field.styling[property] = value;
+            
+            console.log(`🎨 Updated field styling: ${property} =`, value, `for field:`, field.id);
+            
+            // If width changed to custom, refresh properties to show custom width input
+            if (property === 'width' && value === 'custom') {
+                setTimeout(() => this.showFieldProperties(), 100);
+            }
+            
+            this.renderFormCanvas();
+            this.markFormDirty();
+        } catch (error) {
+            console.error('❌ Error updating field styling:', error, { property, value });
+        }
+    }
+
+    applyFormThemePreset(preset) {
+        if (!this.currentForm.settings) {
+            this.currentForm.settings = {};
+        }
+        
+        const themes = {
+            modern: {
+                primaryColor: '#8b5cf6',
+                backgroundColor: '#ffffff',
+                textColor: '#111827',
+                fontFamily: 'Inter',
+                fontSize: '16px',
+                maxWidth: '800px',
+                padding: '2rem',
+                roundedCorners: true,
+                showShadows: true
+            },
+            corporate: {
+                primaryColor: '#1e40af',
+                backgroundColor: '#f9fafb',
+                textColor: '#1f2937',
+                fontFamily: 'Arial',
+                fontSize: '16px',
+                maxWidth: '900px',
+                padding: '2.5rem',
+                roundedCorners: false,
+                showShadows: false
+            },
+            playful: {
+                primaryColor: '#ec4899',
+                backgroundColor: '#fef3c7',
+                textColor: '#7c2d12',
+                fontFamily: 'Georgia',
+                fontSize: '18px',
+                maxWidth: '700px',
+                padding: '3rem',
+                roundedCorners: true,
+                showShadows: true
+            },
+            minimal: {
+                primaryColor: '#000000',
+                backgroundColor: '#ffffff',
+                textColor: '#000000',
+                fontFamily: 'Helvetica',
+                fontSize: '14px',
+                maxWidth: '600px',
+                padding: '1.5rem',
+                roundedCorners: false,
+                showShadows: false
+            },
+            dark: {
+                primaryColor: '#a78bfa',
+                backgroundColor: '#1f2937',
+                textColor: '#f3f4f6',
+                fontFamily: 'Inter',
+                fontSize: '16px',
+                maxWidth: '800px',
+                padding: '2rem',
+                roundedCorners: true,
+                showShadows: true,
+                theme: 'dark'
+            }
+        };
+        
+        if (preset && themes[preset]) {
+            Object.assign(this.currentForm.settings, themes[preset]);
+            this.showFormProperties(); // Refresh to show updated values
+            this.markFormDirty();
+        }
+    }
+
+    applyFieldStylePreset(preset) {
+        const field = this.selectedField;
+        if (!field) return;
+        
+        if (!field.styling) field.styling = {};
+        field.styling.preset = preset;
+        
+        // Apply preset styles
+        const presets = {
+            modern: {
+                borderRadius: '8px',
+                borderWidth: '2px',
+                borderColor: '#e5e7eb',
+                padding: '12px 16px',
+                fontSize: '16px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            },
+            minimal: {
+                borderRadius: '0',
+                borderWidth: '0 0 1px 0',
+                borderColor: '#e5e7eb',
+                padding: '8px 0',
+                fontSize: '14px',
+                boxShadow: 'none'
+            },
+            rounded: {
+                borderRadius: '24px',
+                borderWidth: '1px',
+                borderColor: '#e5e7eb',
+                padding: '12px 20px',
+                fontSize: '14px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+            },
+            material: {
+                borderRadius: '4px',
+                borderWidth: '1px',
+                borderColor: '#e0e0e0',
+                padding: '16px 12px 8px',
+                fontSize: '16px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            },
+            bold: {
+                borderRadius: '4px',
+                borderWidth: '3px',
+                borderColor: '#374151',
+                padding: '14px 18px',
+                fontSize: '16px',
+                fontWeight: '600',
+                boxShadow: 'none'
+            }
+        };
+        
+        if (preset && presets[preset]) {
+            Object.assign(field.styling, presets[preset]);
+            this.showFieldProperties(); // Refresh to show updated values
+        }
+        
+        this.renderFormCanvas();
+        this.markFormDirty();
+    }
+
+    toggleCustomEmail(enabled) {
+        this.updateFormSetting('useCustomEmail', enabled);
+        const customEmailConfig = document.getElementById('custom-email-config');
+        if (customEmailConfig) {
+            customEmailConfig.style.display = enabled ? 'block' : 'none';
+        }
+    }
+
+    updateEmailProvider(provider) {
+        this.updateFormSetting('emailProvider', provider);
+        
+        // Show/hide appropriate config sections
+        const smtpConfig = document.getElementById('smtp-config');
+        const gmailConfig = document.getElementById('gmail-config');
+        const sendgridConfig = document.getElementById('sendgrid-config');
+        
+        if (smtpConfig) smtpConfig.style.display = (provider !== 'gmail' && provider !== 'sendgrid') ? 'block' : 'none';
+        if (gmailConfig) gmailConfig.style.display = provider === 'gmail' ? 'block' : 'none';
+        if (sendgridConfig) sendgridConfig.style.display = provider === 'sendgrid' ? 'block' : 'none';
+    }
+
+    async testEmailConfiguration() {
+        const settings = this.currentForm.settings || {};
+        const formId = this.currentForm.id;
+        
+        console.log('🧪 Testing email configuration:', { settings, formId });
+        
+        if (!settings.useCustomEmail) {
+            alert('Please enable "Use Custom SMTP Server" first');
+            return;
+        }
+        
+        // Collect email configuration based on provider
+        let emailConfig = {
+            provider: settings.emailProvider || 'smtp',
+            fromEmail: settings.emailFrom || 'test@example.com',
+            fromName: settings.emailFromName || 'Test Form'
+        };
+        
+        // Ensure we have required fields
+        if (!emailConfig.fromEmail || emailConfig.fromEmail.trim() === '') {
+            alert('Please enter a valid "From Email Address" first');
+            return;
+        }
+        
+        switch (settings.emailProvider) {
+            case 'gmail':
+                emailConfig.gmailUser = settings.gmailUser;
+                emailConfig.gmailPass = settings.gmailPass;
+                break;
+            case 'sendgrid':
+                emailConfig.sendgridKey = settings.sendgridKey;
+                break;
+            default: // smtp
+                emailConfig.host = settings.emailHost;
+                emailConfig.port = settings.emailPort || 587;
+                emailConfig.user = settings.emailUser;
+                emailConfig.pass = settings.emailPass;
+                emailConfig.secure = settings.emailSecure || false;
+                break;
+        }
+        
+        try {
+            console.log('📤 Sending test email request:', {
+                formId: formId,
+                emailConfig: emailConfig,
+                testEmail: emailConfig.fromEmail
+            });
+            
+            const response = await fetch('/api/test-email-config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    formId: formId,
+                    emailConfig: emailConfig,
+                    testEmail: emailConfig.fromEmail // Send test to same address for safety
+                })
+            });
+            
+            console.log('📥 Response status:', response.status, response.statusText);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ Response error:', errorText);
+                throw new Error(`Server error (${response.status}): ${errorText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('✅ Email configuration test successful! Test email sent.');
+            } else {
+                alert(`❌ Email configuration test failed: ${result.error}`);
+            }
+        } catch (error) {
+            console.error('Error testing email configuration:', error);
+            alert(`❌ Test failed: ${error.message}`);
+        }
+    }
+
+    loadAvailableFieldsForPage(pageId) {
+        const availableFieldsList = document.getElementById('available-fields-list');
+        if (!availableFieldsList || !pageId) return;
+
+        const selectedPage = this.currentForm?.pages?.find(page => page.id === pageId);
+        if (!selectedPage) {
+            availableFieldsList.innerHTML = '<div class="field-selection-info">Selected page not found</div>';
+            return;
+        }
+
+        const salesforceObject = selectedPage.salesforceObject;
+        if (!salesforceObject) {
+            availableFieldsList.innerHTML = '<div class="field-selection-info">Selected page does not have a Salesforce object configured</div>';
+            return;
+        }
+
+        // Show loading state
+        availableFieldsList.innerHTML = '<div class="field-selection-info">⏳ Loading fields from Salesforce...</div>';
+
+        // Load object fields from Salesforce
+        this.loadSalesforceObjectFields(salesforceObject)
+            .then(fields => {
+                if (!fields || fields.length === 0) {
+                    availableFieldsList.innerHTML = '<div class="field-selection-info">No fields found for this object</div>';
+                    return;
+                }
+
+                let fieldsHtml = '<div class="field-selection-info">Select fields to create table columns:</div>';
+                fieldsHtml += '<div class="field-selection-controls">';
+                fieldsHtml += '<button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.selectAllFields()">Select All</button>';
+                fieldsHtml += '</div>';
+                
+                fields.forEach(field => {
+                    fieldsHtml += `
+                        <div class="field-selection-item">
+                            <input type="checkbox" id="field-${field.name}" value="${field.name}" 
+                                   onchange="window.AppModules.formBuilder.toggleFieldSelection(this)">
+                            <label for="field-${field.name}">
+                                <strong>${field.label || field.name}</strong>
+                                <span class="field-type">${field.type}</span>
+                            </label>
+                        </div>
+                    `;
+                });
+
+                availableFieldsList.innerHTML = fieldsHtml;
+            })
+            .catch(error => {
+                console.error('Error loading Salesforce fields:', error);
+                availableFieldsList.innerHTML = '<div class="field-selection-info error">Error loading fields. Please try again.</div>';
+            });
     }
     
     updateSectionConfig(property, value) {

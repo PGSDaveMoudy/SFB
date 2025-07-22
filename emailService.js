@@ -87,11 +87,10 @@ class EmailService {
         }
 
         // Log OTP for debugging
-        console.log(`📧 Preparing OTP email - OTP: ${otp}, Email: ${email}`);
+        console.log(`📧 Preparing OTP email - OTP: ${otp}, Email: ${email}, Custom Settings:`, formEmailSettings ? 'YES' : 'NO');
 
         try {
-            // SYSTEM EMAIL SETTINGS - Always use Portwood Global Solutions for Login/OTP emails
-            // This ensures consistent branding and delivery for authentication emails
+            // SYSTEM EMAIL SETTINGS - Default fallback
             const systemEmailSettings = {
                 fromName: 'Portwood Global Solutions',
                 fromAddress: 'noreply@portwoodglobalsolutions.com',
@@ -102,23 +101,31 @@ class EmailService {
                 replyTo: 'support@portwoodglobalsolutions.com'
             };
 
-            // For Login/OTP emails, ALWAYS use system settings to ensure consistent delivery
-            // Form email settings are ignored for authentication emails for security and branding
-            const fromName = process.env.EMAIL_FROM_NAME || systemEmailSettings.fromName;
-            const fromAddress = process.env.EMAIL_FROM_ADDRESS || systemEmailSettings.fromAddress;
-            const subject = systemEmailSettings.otpSubject;
+            // Use custom email settings if provided, otherwise fall back to system settings
+            let fromName, fromAddress, subject, replyTo;
+            
+            if (formEmailSettings && formEmailSettings.useCustomEmail) {
+                console.log('📧 Using CUSTOM email settings for OTP');
+                fromName = formEmailSettings.fromName || systemEmailSettings.fromName;
+                fromAddress = formEmailSettings.fromAddress || systemEmailSettings.fromAddress;
+                subject = formEmailSettings.otpSubject || 'Your Login Verification Code';
+                replyTo = formEmailSettings.replyTo || formEmailSettings.fromAddress;
+            } else {
+                console.log('📧 Using SYSTEM email settings for OTP');
+                fromName = process.env.EMAIL_FROM_NAME || systemEmailSettings.fromName;
+                fromAddress = process.env.EMAIL_FROM_ADDRESS || systemEmailSettings.fromAddress;
+                subject = systemEmailSettings.otpSubject;
+                replyTo = systemEmailSettings.replyTo;
+            }
             
             const greeting = contactName ? `Hello ${contactName}` : 'Hello';
-            
-            // Log OTP for debugging
-            console.log(`📧 Preparing OTP email - OTP: ${otp}, Email: ${email}`);
             
             const mailOptions = {
                 from: `"${fromName}" <${fromAddress}>`,
                 to: email,
                 subject: subject,
-                html: this.generateOTPEmailHTML(otp, greeting, systemEmailSettings),
-                text: this.generateOTPEmailText(otp, greeting, systemEmailSettings),
+                html: this.generateOTPEmailHTML(otp, greeting, formEmailSettings || systemEmailSettings),
+                text: this.generateOTPEmailText(otp, greeting, formEmailSettings || systemEmailSettings),
                 headers: {
                     'List-Unsubscribe': '<mailto:unsubscribe@portwoodglobalsolutions.com>',
                     'X-Priority': '1',
@@ -128,11 +135,12 @@ class EmailService {
                 }
             };
 
-            // Always use system reply-to for authentication emails
-            mailOptions.replyTo = systemEmailSettings.replyTo;
+            // Use custom or system reply-to
+            mailOptions.replyTo = replyTo;
 
             const info = await this.transporter.sendMail(mailOptions);
-            console.log('🔐 LOGIN/OTP email sent via SYSTEM ROUTING:', info.messageId);
+            const routingType = formEmailSettings && formEmailSettings.useCustomEmail ? 'CUSTOM' : 'SYSTEM';
+            console.log(`🔐 LOGIN/OTP email sent via ${routingType} ROUTING:`, info.messageId);
             console.log(`   From: ${fromName} <${fromAddress}>`);
             console.log(`   To: ${email}`);
             console.log(`   Subject: ${subject}`);

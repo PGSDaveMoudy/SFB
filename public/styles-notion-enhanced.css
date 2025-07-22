@@ -3860,9 +3860,11 @@ select.loading {
         0 10px 10px -5px rgba(0, 0, 0, 0.04),
         0 0 0 1px rgba(139, 92, 246, 0.05);
     border: 1px solid var(--notion-gray-200);
-    max-width: 680px;
+    max-width: 800px;
+    width: 90vw;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+    padding: var(--space-8);
 }
 
 /* Celebration gradient background */
@@ -3914,6 +3916,7 @@ select.loading {
     transition: all var(--duration-normal) var(--ease-spring);
     position: relative;
     overflow: hidden;
+    min-width: 0;
 }
 
 .link-group::before {
@@ -3963,8 +3966,9 @@ select.loading {
 /* Enhanced copy group styling */
 .copy-group {
     display: flex;
+    flex-direction: column;
     gap: var(--space-4);
-    align-items: flex-start;
+    width: 100%;
 }
 
 .copy-group input,
@@ -3979,9 +3983,18 @@ select.loading {
     resize: none;
     line-height: 1.5;
     transition: all var(--duration-normal) var(--ease-out);
-    word-break: break-all;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
     color: var(--notion-gray-800);
     box-shadow: var(--shadow-sm);
+    min-height: 44px;
+}
+
+.copy-group textarea {
+    min-height: 80px;
+    font-size: 0.8125rem;
+    resize: vertical;
 }
 
 .copy-group input:focus,
@@ -4007,7 +4020,9 @@ select.loading {
     padding: var(--space-4) var(--space-5);
     font-weight: 600;
     font-size: 0.875rem;
-    min-width: 120px;
+    width: 100%;
+    max-width: 200px;
+    align-self: flex-end;
     background: var(--gradient-primary);
     color: var(--notion-white);
     border: none;
@@ -4140,18 +4155,28 @@ select.loading {
 @media (max-width: 768px) {
     #publishSuccessModal .modal-content {
         max-width: 95vw;
+        width: 95vw;
         margin: var(--space-4);
         padding: var(--space-6);
     }
     
     .copy-group {
-        flex-direction: column;
         gap: var(--space-3);
     }
     
+    .copy-group input,
+    .copy-group textarea {
+        font-size: 0.8125rem;
+    }
+    
+    .copy-group textarea {
+        min-height: 120px;
+    }
+    
     .copy-group button {
-        min-width: 100%;
-        justify-self: stretch;
+        max-width: 100%;
+        align-self: stretch;
+        padding: var(--space-4);
     }
     
     .modal-actions {
@@ -4161,6 +4186,14 @@ select.loading {
     
     .modal-actions .button {
         min-width: 100%;
+    }
+    
+    .publish-links {
+        margin: var(--space-6) 0;
+    }
+    
+    #publishSuccessModal h2 {
+        font-size: 1.5rem;
     }
 }
 

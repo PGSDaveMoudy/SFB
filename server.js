@@ -55,29 +55,43 @@ const app = express();
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
-            defaultSrc: ["'self'"],
+            defaultSrc: ["'self'", "https:"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.quilljs.com", "https://cdnjs.cloudflare.com"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "'unsafe-hashes'", "https://cdn.quilljs.com", "https://cdnjs.cloudflare.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "data:"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "'unsafe-hashes'", "https://cdn.quilljs.com", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"],
             scriptSrcAttr: ["'unsafe-inline'"],
             imgSrc: ["'self'", "data:", "https:", "blob:"],
-            connectSrc: ["'self'", "https://login.salesforce.com", "https://test.salesforce.com", "*.force.com", "*.salesforce.com"],
-            frameSrc: ["'self'"],
+            connectSrc: ["'self'", "https://login.salesforce.com", "https://test.salesforce.com", "*.force.com", "*.salesforce.com", "wss://*.salesforce.com"],
+            frameSrc: ["'self'", "https://*.salesforce.com"],
+            frameAncestors: ["'self'"],
             objectSrc: ["'none'"],
-            upgradeInsecureRequests: [],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+            upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : false,
         },
     },
     hsts: {
         maxAge: 31536000,
         includeSubDomains: true,
         preload: true
-    }
+    },
+    xssFilter: true,
+    noSniff: true,
+    frameguard: { action: 'sameorigin' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
 }));
 
 app.use(cors({
     origin: process.env.DOMAIN ? `https://${process.env.DOMAIN}` : '*',
     credentials: true
 }));
+
+// Additional security headers
+app.use((req, res, next) => {
+    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+});
 
 // Trust proxy for rate limiting (behind nginx) - configured properly for security
 app.set('trust proxy', 1); // Trust first proxy (nginx)
@@ -97,10 +111,10 @@ app.use(session({
     saveUninitialized: true, // Changed to true to persist sessions
     store: sessionStore,
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+        secure: process.env.NODE_ENV === 'production' || process.env.HTTPS_ENABLED === 'true', // HTTPS only in production or when HTTPS enabled
         httpOnly: true,
         maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year for persistent user tracking
-        sameSite: 'lax'
+        sameSite: 'strict' // Changed from 'lax' to 'strict' for better security
     },
     name: 'sfb_session'
 }));
@@ -1198,6 +1212,137 @@ app.post('/api/save-draft', async (req, res) => {
     }
 });
 
+// Helper function to load form data
+function loadFormData(formId) {
+    try {
+        const db = getFormsDB();
+        return db.forms[formId] || null;
+    } catch (error) {
+        console.error('Error loading form data:', error);
+        return null;
+    }
+}
+
+// Helper function to create custom email service based on form settings
+async function createCustomEmailService(settings) {
+    const nodemailer = require('nodemailer');
+    
+    // Create a custom email service class similar to the main EmailService
+    class CustomEmailService {
+        constructor(settings) {
+            this.transporter = null;
+            this.isConfigured = false;
+            this.settings = settings;
+            this.init();
+        }
+
+        init() {
+            try {
+                let transportConfig = {};
+                
+                switch (this.settings.emailProvider) {
+                    case 'gmail':
+                        if (this.settings.gmailUser && this.settings.gmailPass) {
+                            transportConfig = {
+                                service: 'gmail',
+                                auth: {
+                                    user: this.settings.gmailUser,
+                                    pass: this.settings.gmailPass
+                                }
+                            };
+                            console.log('Custom Gmail email service configured');
+                        }
+                        break;
+                        
+                    case 'sendgrid':
+                        if (this.settings.sendgridKey) {
+                            transportConfig = {
+                                service: 'SendGrid',
+                                auth: {
+                                    user: 'apikey',
+                                    pass: this.settings.sendgridKey
+                                }
+                            };
+                            console.log('Custom SendGrid email service configured');
+                        }
+                        break;
+                        
+                    default: // smtp
+                        if (this.settings.emailHost) {
+                            transportConfig = {
+                                host: this.settings.emailHost,
+                                port: this.settings.emailPort || 587,
+                                secure: this.settings.emailSecure || false,
+                                auth: this.settings.emailUser && this.settings.emailPass ? {
+                                    user: this.settings.emailUser,
+                                    pass: this.settings.emailPass
+                                } : undefined,
+                                tls: {
+                                    rejectUnauthorized: false
+                                }
+                            };
+                            console.log('Custom SMTP email service configured');
+                        }
+                        break;
+                }
+                
+                if (Object.keys(transportConfig).length > 0) {
+                    this.transporter = nodemailer.createTransport(transportConfig);
+                    this.isConfigured = true;
+                }
+                
+            } catch (error) {
+                console.error('Failed to configure custom email service:', error);
+                this.isConfigured = false;
+            }
+        }
+
+        async sendOTP(email, otp, contactName = null, formSettings = null) {
+            if (!this.isConfigured || !this.transporter) {
+                console.warn('Custom email service not configured - falling back to demo mode');
+                return { success: false, demoOtp: otp };
+            }
+
+            try {
+                const fromEmail = this.settings.emailFrom || 'noreply@example.com';
+                const fromName = this.settings.emailFromName || 'Form Builder';
+                
+                const mailOptions = {
+                    from: `${fromName} <${fromEmail}>`,
+                    to: email,
+                    subject: 'Your Verification Code',
+                    html: `
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                            <h2 style="color: #8b5cf6;">Your Verification Code</h2>
+                            ${contactName ? `<p>Hello ${contactName},</p>` : '<p>Hello,</p>'}
+                            <p>Your verification code is:</p>
+                            <div style="background-color: #f3f4f6; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
+                                <span style="font-size: 24px; font-weight: bold; color: #8b5cf6; letter-spacing: 3px;">${otp}</span>
+                            </div>
+                            <p>This code expires in 10 minutes.</p>
+                            <hr style="margin: 30px 0;">
+                            <p style="color: #6b7280; font-size: 14px;">
+                                This email was sent from ${fromName}<br>
+                                Time: ${new Date().toLocaleString()}
+                            </p>
+                        </div>
+                    `
+                };
+
+                await this.transporter.sendMail(mailOptions);
+                console.log(`🔐 Custom OTP email sent to ${email}`);
+                return { success: true };
+                
+            } catch (error) {
+                console.error('Custom email sending failed:', error);
+                return { success: false, demoOtp: otp };
+            }
+        }
+    }
+    
+    return new CustomEmailService(settings);
+}
+
 // Form management routes - Updated for multi-user support
 app.post('/api/save-form', async (req, res) => {
     try {
@@ -1672,6 +1817,7 @@ app.post('/api/contact-lookup', async (req, res) => {
     }
 });
 
+
 // Send OTP for email verification
 app.post('/api/send-otp', async (req, res) => {
     try {
@@ -1700,21 +1846,44 @@ app.post('/api/send-otp', async (req, res) => {
         });
         
         // Get form-specific email settings if formId is provided
+        let customEmailService = null;
         let emailSettings = null;
         if (formId) {
             try {
                 const formData = loadFormData(formId);
-                emailSettings = formData?.settings?.emailSettings;
+                const settings = formData?.settings;
+                if (settings?.useCustomEmail) {
+                    console.log(`📧 Creating CUSTOM EMAIL SERVICE for form ${formId}`);
+                    console.log(`   Provider: ${settings.emailProvider}`);
+                    console.log(`   From: ${settings.fromName} <${settings.fromAddress}>`);
+                    // Create custom email service for this form
+                    customEmailService = await createCustomEmailService(settings);
+                } else {
+                    console.log(`📧 Form ${formId} will use SYSTEM EMAIL SERVICE`);
+                }
+                emailSettings = settings;
             } catch (error) {
                 console.warn(`Could not load form settings for ${formId}:`, error.message);
             }
+        } else {
+            console.log('📧 No formId provided - using SYSTEM EMAIL SERVICE');
         }
         
         // Send OTP via email service with timeout
         console.log(`Sending OTP for ${email}: ${otp} (Session: ${sessionId})`);
+        console.log(`Using ${customEmailService ? 'CUSTOM TRANSPORTER' : 'SYSTEM TRANSPORTER'} email service`);
         
         // Add timeout to prevent 504 errors
-        const emailPromise = emailService.sendOTP(email, otp, null, emailSettings);
+        let emailPromise;
+        
+        if (customEmailService) {
+            // Use custom email service with its own transporter
+            emailPromise = customEmailService.sendOTP(email, otp, null, emailSettings);
+        } else {
+            // Use system email service but pass custom settings for branding/content
+            emailPromise = emailService.sendOTP(email, otp, null, emailSettings);
+        }
+        
         const timeoutPromise = new Promise((_, reject) => 
             setTimeout(() => reject(new Error('Email sending timeout')), 30000)
         );
@@ -1806,6 +1975,109 @@ app.post('/api/verify-otp', async (req, res) => {
 // Test email configuration
 app.post('/api/test-email-config', async (req, res) => {
     try {
+        console.log('📧 Test email config request received:', {
+            body: req.body,
+            hasEmailConfig: !!req.body?.emailConfig,
+            hasTestEmail: !!req.body?.testEmail,
+            hasTestEmailSettings: !!req.body?.testEmailSettings
+        });
+        
+        // Handle new format (emailConfig, testEmail)
+        if (req.body.emailConfig && req.body.testEmail) {
+            const { emailConfig, testEmail } = req.body;
+            
+            if (!emailConfig || !testEmail) {
+                return res.status(400).json({ success: false, error: 'Missing email configuration or test email' });
+            }
+            
+            // Create temporary test email service
+            const nodemailer = require('nodemailer');
+            let testTransporter;
+            
+            switch (emailConfig.provider) {
+                case 'gmail':
+                    if (!emailConfig.gmailUser || !emailConfig.gmailPass) {
+                        return res.status(400).json({ success: false, error: 'Gmail credentials missing' });
+                    }
+                    testTransporter = nodemailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                            user: emailConfig.gmailUser,
+                            pass: emailConfig.gmailPass
+                        }
+                    });
+                    break;
+                    
+                case 'sendgrid':
+                    if (!emailConfig.sendgridKey) {
+                        return res.status(400).json({ success: false, error: 'SendGrid API key missing' });
+                    }
+                    testTransporter = nodemailer.createTransport({
+                        service: 'SendGrid',
+                        auth: {
+                            user: 'apikey',
+                            pass: emailConfig.sendgridKey
+                        }
+                    });
+                    break;
+                    
+                default: // smtp
+                    if (!emailConfig.host) {
+                        return res.status(400).json({ success: false, error: 'SMTP host missing' });
+                    }
+                    testTransporter = nodemailer.createTransport({
+                        host: emailConfig.host,
+                        port: emailConfig.port || 587,
+                        secure: emailConfig.secure || false,
+                        auth: emailConfig.user && emailConfig.pass ? {
+                            user: emailConfig.user,
+                            pass: emailConfig.pass
+                        } : undefined,
+                        tls: {
+                            rejectUnauthorized: false
+                        }
+                    });
+                    break;
+            }
+            
+            // Send test email
+            const mailOptions = {
+                from: `${emailConfig.fromName || 'Form Builder'} <${emailConfig.fromEmail}>`,
+                to: testEmail,
+                subject: 'Email Configuration Test - Salesforce Form Builder',
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #8b5cf6;">Email Configuration Test Successful!</h2>
+                        <p>This is a test email to verify your custom email configuration.</p>
+                        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <h3>Configuration Details:</h3>
+                            <ul>
+                                <li><strong>Provider:</strong> ${emailConfig.provider.toUpperCase()}</li>
+                                <li><strong>From Email:</strong> ${emailConfig.fromEmail}</li>
+                                <li><strong>From Name:</strong> ${emailConfig.fromName}</li>
+                                ${emailConfig.provider === 'smtp' ? `<li><strong>SMTP Host:</strong> ${emailConfig.host}:${emailConfig.port}</li>` : ''}
+                            </ul>
+                        </div>
+                        <p>Your email configuration is working correctly and ready to send OTP emails!</p>
+                        <hr style="margin: 30px 0;">
+                        <p style="color: #6b7280; font-size: 14px;">
+                            This email was sent from Salesforce Form Builder<br>
+                            Time: ${new Date().toLocaleString()}
+                        </p>
+                    </div>
+                `
+            };
+            
+            await testTransporter.sendMail(mailOptions);
+            
+            return res.json({ 
+                success: true, 
+                message: 'Test email sent successfully',
+                provider: emailConfig.provider
+            });
+        }
+        
+        // Handle legacy format (testEmailSettings, fromAddress) - fallback for existing code
         const { testEmailSettings, formId } = req.body;
         
         if (!testEmailSettings || !testEmailSettings.fromAddress) {
