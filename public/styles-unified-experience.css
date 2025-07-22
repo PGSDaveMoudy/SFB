@@ -1,0 +1,1163 @@
+/* ==========================================================================
+   SALESFORCE FORM BUILDER - UNIFIED EXPERIENCE DESIGN SYSTEM
+   Touch-First, Mobile-Inspired, Cross-Device Consistency
+   ========================================================================== */
+
+/* ==========================================================================
+   UNIFIED DESIGN TOKENS & VARIABLES
+   ========================================================================== */
+
+:root {
+    /* Mobile-Inspired Color System - Consistent Across All Devices */
+    --primary-500: #6366f1;
+    --primary-400: #818cf8;
+    --primary-600: #4f46e5;
+    --primary-700: #4338ca;
+    
+    --secondary-500: #10b981;
+    --secondary-400: #34d399;
+    --secondary-600: #059669;
+    
+    --accent-orange: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    
+    /* Unified Neutral Palette */
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+    
+    /* Touch-First Spacing System */
+    --space-0: 0;
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;       /* 16px - Base touch-friendly spacing */
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;     /* 24px - Comfortable touch spacing */
+    --space-8: 2rem;       /* 32px - Large touch spacing */
+    --space-10: 2.5rem;    /* 40px - XL touch spacing */
+    --space-12: 3rem;      /* 48px - XXL touch spacing */
+    
+    /* Fluid Spacing for Responsive Design */
+    --space-fluid-xs: clamp(0.5rem, 1vw, 0.75rem);
+    --space-fluid-sm: clamp(0.75rem, 2vw, 1rem);
+    --space-fluid-md: clamp(1rem, 3vw, 1.5rem);
+    --space-fluid-lg: clamp(1.5rem, 4vw, 2rem);
+    --space-fluid-xl: clamp(2rem, 5vw, 3rem);
+    
+    /* Touch-Optimized Sizing */
+    --touch-target-min: 44px;     /* iOS/Android minimum */
+    --touch-target-comfortable: 48px;
+    --touch-target-generous: 56px;
+    
+    /* Unified Border Radius System */
+    --radius-xs: 0.125rem;   /* 2px */
+    --radius-sm: 0.25rem;    /* 4px */
+    --radius-md: 0.375rem;   /* 6px */
+    --radius-lg: 0.5rem;     /* 8px */
+    --radius-xl: 0.75rem;    /* 12px */
+    --radius-2xl: 1rem;      /* 16px */
+    --radius-3xl: 1.5rem;    /* 24px */
+    --radius-full: 9999px;
+    
+    /* Unified Animation System */
+    --transition-micro: 100ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* Elevation System (Mobile-Inspired) */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --shadow-floating: 0 8px 32px rgba(99, 102, 241, 0.15);
+    
+    /* Z-Index System */
+    --z-base: 0;
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+    --z-toast: 1080;
+    
+    /* Unified Typography Scale */
+    --text-xs: 0.75rem;      /* 12px */
+    --text-sm: 0.875rem;     /* 14px */
+    --text-base: 1rem;       /* 16px */
+    --text-lg: 1.125rem;     /* 18px */
+    --text-xl: 1.25rem;      /* 20px */
+    --text-2xl: 1.5rem;      /* 24px */
+    --text-3xl: 1.875rem;    /* 30px */
+    --text-4xl: 2.25rem;     /* 36px */
+    
+    /* Font Weights */
+    --font-light: 300;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-extrabold: 800;
+}
+
+/* ==========================================================================
+   UNIFIED BASE STYLES - MOBILE-FIRST APPROACH
+   ========================================================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: var(--text-base);
+    font-weight: var(--font-normal);
+    line-height: 1.5;
+    color: var(--gray-900);
+    background-color: var(--gray-50);
+    overflow-x: hidden;
+    
+    /* Touch optimization */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* ==========================================================================
+   UNIFIED LAYOUT SYSTEM - ADAPTIVE TO ALL SCREEN SIZES
+   ========================================================================== */
+
+.unified-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
+    position: relative;
+    background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+}
+
+/* Main Canvas Area - Always Centered, Always Accessible */
+.unified-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-fluid-sm);
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.unified-canvas {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-fluid-md);
+    min-height: 60vh;
+    background: white;
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    margin-bottom: var(--space-6);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Progressive Enhancement for Larger Screens */
+@media (min-width: 768px) {
+    .unified-main {
+        padding: var(--space-6);
+    }
+    
+    .unified-canvas {
+        min-height: 70vh;
+        margin-bottom: var(--space-8);
+    }
+}
+
+@media (min-width: 1024px) {
+    .unified-container {
+        padding: var(--space-4);
+    }
+    
+    .unified-main {
+        max-width: 1200px;
+        padding: var(--space-8);
+    }
+    
+    .unified-canvas {
+        min-height: 75vh;
+        border-radius: var(--radius-3xl);
+        box-shadow: var(--shadow-lg);
+    }
+}
+
+@media (min-width: 1440px) {
+    .unified-main {
+        max-width: 1400px;
+        padding: var(--space-10);
+    }
+    
+    .unified-canvas {
+        min-height: 80vh;
+    }
+}
+
+/* ==========================================================================
+   UNIFIED FLOATING INTERFACE - CONSISTENT ACROSS ALL DEVICES
+   ========================================================================== */
+
+/* Main FAB Container - Always Present, Always Accessible */
+.unified-fab-system {
+    position: fixed;
+    bottom: var(--space-6);
+    right: var(--space-6);
+    z-index: var(--z-fixed);
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: var(--space-4);
+}
+
+/* Primary Action Button */
+.unified-fab-main {
+    width: var(--touch-target-generous);
+    height: var(--touch-target-generous);
+    border-radius: var(--radius-full);
+    border: none;
+    background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
+    color: white;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    cursor: pointer;
+    box-shadow: var(--shadow-floating);
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.unified-fab-main::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.unified-fab-main:hover::before,
+.unified-fab-main:focus::before {
+    opacity: 1;
+}
+
+.unified-fab-main:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: var(--shadow-2xl);
+}
+
+.unified-fab-main:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+/* Secondary Action Buttons */
+.unified-fab-menu {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all var(--transition-normal);
+    pointer-events: none;
+}
+
+.unified-fab-menu.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+}
+
+.unified-fab-action {
+    width: var(--touch-target-comfortable);
+    height: var(--touch-target-comfortable);
+    border-radius: var(--radius-full);
+    border: none;
+    background: white;
+    color: var(--gray-700);
+    font-size: var(--text-base);
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border: 2px solid var(--gray-100);
+}
+
+.unified-fab-action:hover {
+    background: var(--primary-50);
+    color: var(--primary-600);
+    border-color: var(--primary-200);
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Action Tooltips */
+.unified-fab-action::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: calc(100% + var(--space-3));
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--gray-900);
+    color: white;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-fast);
+    pointer-events: none;
+    z-index: var(--z-tooltip);
+}
+
+.unified-fab-action:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%) translateX(-4px);
+}
+
+/* Progressive Enhancement for Larger Screens */
+@media (min-width: 1024px) {
+    .unified-fab-system {
+        bottom: var(--space-8);
+        right: var(--space-8);
+    }
+    
+    .unified-fab-main {
+        width: 64px;
+        height: 64px;
+        font-size: var(--text-xl);
+    }
+    
+    .unified-fab-action {
+        width: 52px;
+        height: 52px;
+    }
+}
+
+/* ==========================================================================
+   UNIFIED PANEL SYSTEM - CONSISTENT BEHAVIOR ALL DEVICES
+   ========================================================================== */
+
+/* Panel Base Styles */
+.unified-panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: min(90vw, 400px);
+    background: white;
+    border-radius: var(--radius-2xl) 0 0 var(--radius-2xl);
+    box-shadow: var(--shadow-2xl);
+    border: 1px solid var(--gray-200);
+    border-right: none;
+    z-index: var(--z-modal);
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Left Panel (Field Palette) */
+.unified-panel-left {
+    left: 0;
+}
+
+/* Right Panel (Properties) */
+.unified-panel-right {
+    right: 0;
+    left: auto;
+    border-radius: 0 var(--radius-2xl) var(--radius-2xl) 0;
+    border-left: none;
+    border-right: 1px solid var(--gray-200);
+    transform: translateX(100%);
+}
+
+/* Panel Active States */
+.unified-panel.active {
+    transform: translateX(0);
+}
+
+/* Panel Headers */
+.unified-panel-header {
+    padding: var(--space-6);
+    background: linear-gradient(135deg, var(--gray-50), white);
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.unified-panel-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.unified-panel-close {
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    border: none;
+    border-radius: var(--radius-full);
+    background: var(--gray-100);
+    color: var(--gray-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.unified-panel-close:hover {
+    background: var(--gray-200);
+    color: var(--gray-800);
+    transform: scale(1.05);
+}
+
+/* Panel Content */
+.unified-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-4);
+    
+    /* Custom scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--gray-300) transparent;
+}
+
+.unified-panel-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.unified-panel-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.unified-panel-content::-webkit-scrollbar-thumb {
+    background: var(--gray-300);
+    border-radius: var(--radius-full);
+}
+
+/* Panel Backdrop */
+.unified-panel-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(2px);
+    z-index: calc(var(--z-modal) - 1);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+}
+
+.unified-panel-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Progressive Enhancement for Desktop */
+@media (min-width: 1200px) {
+    .unified-panel {
+        width: min(35vw, 450px);
+        position: relative;
+        transform: translateX(0);
+        border-radius: var(--radius-2xl);
+        border: 1px solid var(--gray-200);
+        box-shadow: var(--shadow-lg);
+        z-index: var(--z-base);
+    }
+    
+    .unified-panel-right {
+        border: 1px solid var(--gray-200);
+    }
+    
+    .unified-panel-backdrop {
+        display: none;
+    }
+    
+    /* Desktop layout adjustment */
+    .unified-container {
+        display: grid;
+        grid-template-columns: minmax(300px, 400px) 1fr minmax(300px, 400px);
+        grid-template-rows: 1fr;
+        gap: var(--space-6);
+        padding: var(--space-6);
+    }
+    
+    .unified-main {
+        grid-column: 2;
+        max-width: none;
+        padding: 0;
+    }
+    
+    .unified-panel-left {
+        grid-column: 1;
+        position: relative;
+    }
+    
+    .unified-panel-right {
+        grid-column: 3;
+        position: relative;
+    }
+}
+
+/* ==========================================================================
+   UNIFIED COMPONENT SYSTEM - TOUCH-FIRST, SCALABLE
+   ========================================================================== */
+
+/* Unified Button System */
+.unified-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-6);
+    min-height: var(--touch-target-min);
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Button Variants */
+.unified-btn-primary {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.unified-btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.unified-btn-secondary {
+    background: white;
+    color: var(--gray-700);
+    border-color: var(--gray-300);
+    box-shadow: var(--shadow-xs);
+}
+
+.unified-btn-secondary:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+}
+
+.unified-btn-danger {
+    background: linear-gradient(135deg, var(--accent-red), #dc2626);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Unified Input System */
+.unified-input {
+    width: 100%;
+    padding: var(--space-4);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-base);
+    font-family: inherit;
+    background: white;
+    transition: all var(--transition-fast);
+    min-height: var(--touch-target-min);
+}
+
+.unified-input:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Unified Card System */
+.unified-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: all var(--transition-normal);
+}
+
+.unified-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.unified-card-header {
+    padding: var(--space-6);
+    background: linear-gradient(135deg, var(--gray-50), white);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.unified-card-content {
+    padding: var(--space-6);
+}
+
+/* ==========================================================================
+   UNIFIED MODAL SYSTEM - CONSISTENT ACROSS ALL DEVICES
+   ========================================================================== */
+
+.unified-modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+}
+
+.unified-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.unified-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+}
+
+.unified-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: min(90vw, 600px);
+    max-height: min(90vh, 800px);
+    background: white;
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-2xl);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    transform: scale(0.9);
+    transition: transform var(--transition-normal);
+}
+
+.unified-modal.active .unified-modal-content {
+    transform: scale(1);
+}
+
+/* ==========================================================================
+   UNIFIED RESPONSIVE SYSTEM - SMOOTH TRANSITIONS
+   ========================================================================== */
+
+/* Touch Optimization for All Interactive Elements */
+@media (hover: none) and (pointer: coarse) {
+    .unified-btn,
+    .unified-fab-action,
+    .unified-fab-main {
+        min-height: var(--touch-target-generous);
+    }
+    
+    /* Remove hover effects on touch devices */
+    .unified-btn:hover,
+    .unified-card:hover,
+    .unified-fab-action:hover {
+        transform: none;
+    }
+}
+
+/* Keyboard Navigation Enhancement */
+.unified-btn:focus-visible,
+.unified-input:focus-visible,
+.unified-fab-action:focus-visible {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .unified-btn-primary {
+        background: var(--primary-700);
+        border: 2px solid var(--gray-900);
+    }
+    
+    .unified-input {
+        border-width: 3px;
+    }
+}
+
+/* ==========================================================================
+   DARK MODE SUPPORT
+   ========================================================================== */
+
+[data-theme="dark"] {
+    --gray-50: #0f172a;
+    --gray-100: #1e293b;
+    --gray-200: #334155;
+    --gray-300: #475569;
+    --gray-400: #64748b;
+    --gray-500: #94a3b8;
+    --gray-600: #cbd5e1;
+    --gray-700: #e2e8f0;
+    --gray-800: #f1f5f9;
+    --gray-900: #f8fafc;
+}
+
+[data-theme="dark"] body {
+    color: var(--gray-900);
+    background-color: var(--gray-50);
+}
+
+[data-theme="dark"] .unified-canvas {
+    background: var(--gray-100);
+    border-color: var(--gray-300);
+}
+
+[data-theme="dark"] .unified-panel,
+[data-theme="dark"] .unified-modal-content,
+[data-theme="dark"] .unified-card {
+    background: var(--gray-100);
+    border-color: var(--gray-300);
+}
+
+/* ==========================================================================
+   UNIFIED FIELD INTERACTIONS AND VISUAL STATES
+   ========================================================================== */
+
+/* Field Palette Styling */
+.field-palette-unified {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--space-3);
+}
+
+.field-palette-unified .field-block {
+    padding: var(--space-4);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-2);
+    min-height: var(--touch-target-generous);
+    position: relative;
+    overflow: hidden;
+    background: white;
+}
+
+.field-palette-unified .field-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+    transition: left var(--transition-slow);
+}
+
+.field-palette-unified .field-block:hover::before {
+    left: 100%;
+}
+
+.field-palette-unified .field-block:hover {
+    border-color: var(--primary-300);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background: var(--primary-50);
+}
+
+.field-palette-unified .field-block:active {
+    transform: translateY(0px) scale(0.98);
+}
+
+.field-palette-unified .field-icon {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-1);
+}
+
+.field-palette-unified .field-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--gray-700);
+}
+
+/* Drag states */
+.field-palette-unified .field-block.dragging {
+    opacity: 0.5;
+    transform: scale(1.05);
+    z-index: var(--z-modal);
+}
+
+/* Form Canvas Drag States */
+.unified-canvas.drag-over {
+    border: 3px dashed var(--primary-500);
+    background: var(--primary-50);
+}
+
+.unified-canvas.drag-over::after {
+    content: '📋 Drop field here to add it to your form';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--primary-700);
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: var(--radius-2xl);
+}
+
+/* Unified Form Fields */
+.unified-form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-6);
+    min-height: 200px;
+}
+
+.unified-field-wrapper {
+    position: relative;
+    transition: all var(--transition-normal);
+    border-radius: var(--radius-xl);
+    border: 2px solid transparent;
+    padding: var(--space-4);
+    background: white;
+}
+
+.unified-field-wrapper:hover {
+    border-color: var(--gray-300);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.unified-field-wrapper.selected {
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    background: var(--primary-50);
+}
+
+.unified-field-wrapper.selected::after {
+    content: 'Selected';
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    background: var(--primary-500);
+    color: white;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Field Controls */
+.unified-field-controls {
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+}
+
+.unified-field-wrapper:hover .unified-field-controls,
+.unified-field-wrapper.selected .unified-field-controls {
+    opacity: 1;
+}
+
+.unified-field-control {
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--gray-100);
+    color: var(--gray-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    font-size: var(--text-sm);
+}
+
+.unified-field-control:hover {
+    background: var(--primary-100);
+    color: var(--primary-700);
+    transform: scale(1.05);
+}
+
+/* Properties Panel Styling */
+.unified-properties {
+    padding: var(--space-4);
+}
+
+.unified-properties .unified-card {
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+}
+
+.unified-properties .unified-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+/* Enhanced Input Styling for Properties */
+.unified-properties .unified-input:focus {
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Animation for adding fields */
+@keyframes fieldAdded {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.unified-field-wrapper.newly-added {
+    animation: fieldAdded var(--transition-slow) ease-out;
+}
+
+/* Loading states */
+.unified-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.unified-loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Enhanced FAB Styling */
+.unified-fab-main {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.unified-fab-main.active {
+    background: linear-gradient(135deg, var(--accent-red), #dc2626);
+}
+
+/* Tooltip improvements */
+.unified-fab-action::after {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Enhanced empty states */
+.empty-canvas-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+    padding: var(--space-8);
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--radius-2xl);
+    background: var(--gray-50);
+}
+
+/* Panel animation improvements */
+.unified-panel {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.unified-panel.active {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Connection status styling */
+.connection-status {
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+}
+
+.connection-status .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.connection-status .status-indicator.connected {
+    color: var(--secondary-700);
+}
+
+.connection-status .status-indicator.connected .status-dot {
+    background: var(--secondary-500);
+    animation: pulse 2s infinite;
+}
+
+.connection-status .status-indicator.disconnected {
+    color: var(--gray-600);
+}
+
+.connection-status .status-indicator.disconnected .status-dot {
+    background: var(--gray-400);
+}
+
+.connection-status .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+/* Enhanced responsive behavior */
+@media (max-width: 480px) {
+    .field-palette-unified {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2);
+    }
+    
+    .field-palette-unified .field-block {
+        padding: var(--space-3);
+        min-height: 80px;
+    }
+    
+    .field-palette-unified .field-icon {
+        font-size: 1.25rem;
+    }
+    
+    .field-palette-unified .field-label {
+        font-size: var(--text-xs);
+    }
+    
+    .unified-form-fields {
+        gap: var(--space-4);
+        padding: var(--space-4);
+    }
+    
+    .unified-field-wrapper {
+        padding: var(--space-3);
+    }
+}
+
+@media (max-width: 768px) {
+    .unified-properties {
+        padding: var(--space-3);
+    }
+    
+    .unified-fab-system {
+        bottom: var(--space-4);
+        right: var(--space-4);
+    }
+    
+    .unified-fab-main {
+        width: var(--touch-target-comfortable);
+        height: var(--touch-target-comfortable);
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .unified-field-wrapper.selected {
+        border-width: 3px;
+        border-color: var(--primary-700);
+    }
+    
+    .field-palette-unified .field-block:hover {
+        border-color: var(--primary-700);
+        border-width: 3px;
+    }
+}
+
+/* ==========================================================================
+   PRINT STYLES
+   ========================================================================== */
+
+@media print {
+    .unified-fab-system,
+    .unified-panel,
+    .unified-modal {
+        display: none !important;
+    }
+    
+    .unified-canvas {
+        box-shadow: none !important;
+        border: 2px solid #000 !important;
+        border-radius: 0 !important;
+    }
+}

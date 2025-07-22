@@ -1395,6 +1395,203 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2000);
 });
 
+// Org Management Functions
+function showOrgManager() {
+    if (magicalPopups) {
+        const popup = magicalPopups.createPopup('org-manager-popup', 'org-manager');
+        
+        popup.innerHTML = `
+            <div class="org-manager-content">
+                <div class="org-manager-header">
+                    <h2 class="org-manager-title">🏢 Salesforce Organization</h2>
+                    <button class="popup-close" onclick="magicalPopups.removePopup(this.closest('.org-manager-popup'))">×</button>
+                </div>
+                
+                <div class="org-manager-body">
+                    <div class="current-connection">
+                        <div class="connection-status-display">
+                            <div class="status-indicator" id="orgStatusIndicator">
+                                <div class="status-dot"></div>
+                                <span class="status-text">Checking connection...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="org-actions">
+                        <button class="org-action-btn primary" onclick="showConnectOrgPopup()">
+                            <span class="btn-icon">🔗</span>
+                            <span class="btn-text">Connect New Org</span>
+                        </button>
+                        
+                        <button class="org-action-btn secondary" onclick="openOrgManagerPage()">
+                            <span class="btn-icon">⚙️</span>
+                            <span class="btn-text">Manage Organizations</span>
+                        </button>
+                        
+                        <button class="org-action-btn secondary" onclick="showOrgSwitcher()">
+                            <span class="btn-icon">🔄</span>
+                            <span class="btn-text">Switch Organization</span>
+                        </button>
+                        
+                        <button class="org-action-btn danger" onclick="disconnectCurrentOrg()" id="disconnectBtn" style="display: none;">
+                            <span class="btn-icon">🔌</span>
+                            <span class="btn-text">Disconnect</span>
+                        </button>
+                    </div>
+                    
+                    <div class="org-help">
+                        <p class="help-text">
+                            <strong>Need help?</strong> Connect to any Salesforce organization to start building forms. 
+                            You can manage multiple orgs and switch between them anytime.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        magicalPopups.showBackdrop();
+        updateOrgManagerStatus();
+        
+        return popup;
+    }
+}
+
+function showConnectOrgPopup() {
+    if (magicalPopups) {
+        const popup = magicalPopups.createPopup('connect-org-popup', 'connect-org');
+        
+        popup.innerHTML = `
+            <div class="connect-org-content">
+                <div class="connect-org-header">
+                    <h2 class="connect-org-title">🚀 Connect to Salesforce</h2>
+                    <button class="popup-close" onclick="magicalPopups.removePopup(this.closest('.connect-org-popup'))">×</button>
+                </div>
+                
+                <div class="connect-org-body">
+                    <div class="connection-methods">
+                        <div class="method-card primary" onclick="startOAuthConnection()">
+                            <div class="method-icon">🔐</div>
+                            <div class="method-content">
+                                <h3>OAuth (Recommended)</h3>
+                                <p>Secure connection using Salesforce login</p>
+                                <div class="method-badge">Most Secure</div>
+                            </div>
+                            <div class="method-arrow">→</div>
+                        </div>
+                        
+                        <div class="method-card secondary" onclick="openOrgRegistration()">
+                            <div class="method-icon">📝</div>
+                            <div class="method-content">
+                                <h3>Register New Organization</h3>
+                                <p>Set up connection with org details</p>
+                                <div class="method-badge">Full Setup</div>
+                            </div>
+                            <div class="method-arrow">→</div>
+                        </div>
+                    </div>
+                    
+                    <div class="connection-help">
+                        <h4>Connection Guide:</h4>
+                        <ul>
+                            <li><strong>OAuth:</strong> Quick and secure - just login with your Salesforce credentials</li>
+                            <li><strong>Registration:</strong> Full org setup with custom configuration options</li>
+                        </ul>
+                        <p class="help-note">
+                            💡 <strong>Tip:</strong> Use OAuth for fastest setup. You can always register more orgs later.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        magicalPopups.showBackdrop();
+        return popup;
+    }
+}
+
+function startOAuthConnection() {
+    // Close the connect popup
+    magicalPopups?.closeAllPopups();
+    
+    // Show connecting status
+    magicalPopups?.showConnectionStatus('connecting', 'Connecting to Salesforce...');
+    
+    // Use existing OAuth connection function
+    if (window.connectWithOAuth) {
+        window.connectWithOAuth();
+    } else if (window.connectToSalesforce) {
+        window.connectToSalesforce();
+    } else {
+        // Fallback - redirect to OAuth
+        window.location.href = '/oauth/authorize';
+    }
+}
+
+function openOrgManagerPage() {
+    // Close popups and redirect to org manager
+    magicalPopups?.closeAllPopups();
+    magicalPopups?.showToast('Opening Organization Manager...', 'info', { duration: 2000 });
+    window.location.href = '/org-manager.html';
+}
+
+function openOrgRegistration() {
+    // Close popups and redirect to org registration
+    magicalPopups?.closeAllPopups();
+    magicalPopups?.showToast('Opening Registration...', 'info', { duration: 2000 });
+    window.location.href = '/org-manager.html?action=register';
+}
+
+function disconnectCurrentOrg() {
+    if (confirm('Are you sure you want to disconnect from this organization?')) {
+        magicalPopups?.showConnectionStatus('disconnecting', 'Disconnecting...');
+        
+        // Use existing disconnect function
+        if (window.disconnectFromOrg) {
+            window.disconnectFromOrg();
+        } else {
+            // Fallback disconnect
+            fetch('/api/disconnect', { method: 'POST' })
+                .then(() => {
+                    magicalPopups?.showConnectionStatus('disconnected', 'Disconnected');
+                    magicalPopups?.showToast('Disconnected from organization', 'info');
+                    updateOrgManagerStatus();
+                })
+                .catch(error => {
+                    magicalPopups?.showToast('Failed to disconnect', 'error');
+                });
+        }
+        
+        magicalPopups?.closeAllPopups();
+    }
+}
+
+function updateOrgManagerStatus() {
+    const statusIndicator = document.getElementById('orgStatusIndicator');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    
+    if (statusIndicator) {
+        // Check if connected (use existing AppState or connection status)
+        const isConnected = window.AppState?.isConnected || false;
+        const orgName = window.AppState?.currentOrg?.name || 'Unknown Org';
+        
+        if (isConnected) {
+            statusIndicator.className = 'status-indicator connected';
+            statusIndicator.innerHTML = `
+                <div class="status-dot"></div>
+                <span class="status-text">Connected to ${orgName}</span>
+            `;
+            if (disconnectBtn) disconnectBtn.style.display = 'block';
+        } else {
+            statusIndicator.className = 'status-indicator disconnected';
+            statusIndicator.innerHTML = `
+                <div class="status-dot"></div>
+                <span class="status-text">Not Connected</span>
+            `;
+            if (disconnectBtn) disconnectBtn.style.display = 'none';
+        }
+    }
+}
+
 // Export for module usage
 window.ModernInterface = ModernInterface;
 window.MagicalPopupManager = MagicalPopupManager;
