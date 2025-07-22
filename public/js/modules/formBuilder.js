@@ -1716,7 +1716,12 @@ export class FormBuilder {
         
         this.selectedField.setVariablesConfig.enabled = enabled;
         this.updateField(this.selectedField.id, { setVariablesConfig: this.selectedField.setVariablesConfig });
-        this.showFieldProperties(); // Re-render to show/hide variable config
+        
+        // Show/hide variable config without refreshing entire properties panel
+        const variableConfig = document.getElementById('variable-setting-config');
+        if (variableConfig) {
+            variableConfig.style.display = enabled ? 'block' : 'none';
+        }
         this.markFormDirty();
     }
     
@@ -1941,7 +1946,12 @@ export class FormBuilder {
     toggleConditionalVisibility(enabled) {
         if (this.selectedField) {
             this.selectedField.conditionalVisibility.enabled = enabled;
-            this.showFieldProperties(); // Re-render to show/hide conditional config
+            // Show/hide conditional config without refreshing entire properties panel
+            const conditionalConfig = document.getElementById('conditionalConfig');
+            if (conditionalConfig) {
+                conditionalConfig.style.display = enabled ? 'block' : 'none';
+            }
+            this.markFormDirty();
         }
     }
     
@@ -3272,12 +3282,93 @@ export class FormBuilder {
 
                 <!-- Conditions Tab -->
                 <div class="property-sub-content" id="page-conditions-tab" style="display: none;">
-                    ${this.renderPageConditionalVisibilitySection(page, availableFields)}
+                    <div class="property-group-compact">
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="page-conditional-enabled" ${page.conditionalVisibility?.enabled ? 'checked' : ''}
+                                   onchange="window.AppModules.formBuilder.togglePageConditionalVisibilityInline(this.checked)">
+                            <label for="page-conditional-enabled">Conditional Visibility</label>
+                        </div>
+                        <div class="help-text">Show/hide this page based on field values</div>
+                    </div>
+                    
+                    <div id="page-conditional-config" style="display: ${page.conditionalVisibility?.enabled ? 'block' : 'none'}">
+                        <div class="property-group-compact">
+                            <label>Logic Type</label>
+                            <select id="page-conditional-logic" onchange="window.AppModules.formBuilder.updatePageConditionalProperty('logic', this.value)">
+                                <option value="AND" ${page.conditionalVisibility?.logic === 'AND' ? 'selected' : ''}>All conditions must be true (AND)</option>
+                                <option value="OR" ${page.conditionalVisibility?.logic === 'OR' ? 'selected' : ''}>Any condition can be true (OR)</option>
+                            </select>
+                            <div class="help-text">How to combine multiple conditions</div>
+                        </div>
+                        
+                        <div class="property-group-compact">
+                            <label>Conditions</label>
+                            <div id="page-conditions-list" class="conditions-list-compact">
+                                ${this.renderPageConditionsCompact(page.conditionalVisibility?.conditions || [], availableFields)}
+                            </div>
+                            <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.addPageConditionCompact()">
+                                ➕ Add Condition
+                            </button>
+                            <div class="help-text">Conditions that determine when this page shows</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Navigation Tab -->
                 <div class="property-sub-content" id="page-navigation-tab" style="display: none;">
-                    ${this.renderNavigationButtonSection(page, availableFields)}
+                    <div class="property-group-compact">
+                        <label>Next Button</label>
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="next-conditional-enabled" ${page.navigationConfig?.nextButton?.conditionalVisibility?.enabled ? 'checked' : ''}
+                                   onchange="window.AppModules.formBuilder.toggleNavigationConditionalVisibilityInline('nextButton', this.checked)">
+                            <label for="next-conditional-enabled">Conditional Visibility</label>
+                        </div>
+                        <div class="help-text">Control when Next button appears</div>
+                    </div>
+                    
+                    <div id="next-conditional-config" style="display: ${page.navigationConfig?.nextButton?.conditionalVisibility?.enabled ? 'block' : 'none'}">
+                        <div class="property-row">
+                            <div class="property-group-compact">
+                                <label>Show When</label>
+                                <select id="next-condition-field" onchange="window.AppModules.formBuilder.updateNavigationCondition('nextButton', 'field', this.value)">
+                                    <option value="">Select Field...</option>
+                                    ${this.renderFieldOptionsCompact(availableFields, page.navigationConfig?.nextButton?.conditionalVisibility?.field)}
+                                </select>
+                            </div>
+                            <div class="property-group-compact">
+                                <label>Equals</label>
+                                <input type="text" id="next-condition-value" value="${page.navigationConfig?.nextButton?.conditionalVisibility?.value || ''}"
+                                       onchange="window.AppModules.formBuilder.updateNavigationCondition('nextButton', 'value', this.value)">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="property-group-compact">
+                        <label>Submit Button</label>
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="submit-conditional-enabled" ${page.navigationConfig?.submitButton?.conditionalVisibility?.enabled ? 'checked' : ''}
+                                   onchange="window.AppModules.formBuilder.toggleNavigationConditionalVisibilityInline('submitButton', this.checked)">
+                            <label for="submit-conditional-enabled">Conditional Visibility</label>
+                        </div>
+                        <div class="help-text">Control when Submit button appears</div>
+                    </div>
+                    
+                    <div id="submit-conditional-config" style="display: ${page.navigationConfig?.submitButton?.conditionalVisibility?.enabled ? 'block' : 'none'}">
+                        <div class="property-row">
+                            <div class="property-group-compact">
+                                <label>Show When</label>
+                                <select id="submit-condition-field" onchange="window.AppModules.formBuilder.updateNavigationCondition('submitButton', 'field', this.value)">
+                                    <option value="">Select Field...</option>
+                                    ${this.renderFieldOptionsCompact(availableFields, page.navigationConfig?.submitButton?.conditionalVisibility?.field)}
+                                </select>
+                            </div>
+                            <div class="property-group-compact">
+                                <label>Equals</label>
+                                <input type="text" id="submit-condition-value" value="${page.navigationConfig?.submitButton?.conditionalVisibility?.value || ''}"
+                                       onchange="window.AppModules.formBuilder.updateNavigationCondition('submitButton', 'value', this.value)">
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Advanced Tab -->
@@ -4076,6 +4167,137 @@ export class FormBuilder {
         }
         currentPage.conditionalVisibility.enabled = enabled;
         this.showPageProperties();
+        this.markFormDirty();
+    }
+
+    // New inline version that doesn't refresh the properties panel
+    togglePageConditionalVisibilityInline(enabled) {
+        const currentPage = this.getCurrentPage();
+        if (!currentPage.conditionalVisibility) {
+            currentPage.conditionalVisibility = { enabled: false, conditions: [], logic: 'AND' };
+        }
+        currentPage.conditionalVisibility.enabled = enabled;
+        
+        // Show/hide conditional config without refreshing entire properties panel
+        const conditionalConfig = document.getElementById('page-conditional-config');
+        if (conditionalConfig) {
+            conditionalConfig.style.display = enabled ? 'block' : 'none';
+        }
+        this.markFormDirty();
+    }
+
+    // New inline version for navigation conditional visibility
+    toggleNavigationConditionalVisibilityInline(buttonType, enabled) {
+        const currentPage = this.getCurrentPage();
+        if (!currentPage.navigationConfig) {
+            currentPage.navigationConfig = {};
+        }
+        if (!currentPage.navigationConfig[buttonType]) {
+            currentPage.navigationConfig[buttonType] = {
+                conditionalVisibility: {}
+            };
+        }
+        
+        currentPage.navigationConfig[buttonType].conditionalVisibility.enabled = enabled;
+        
+        // Show/hide conditional config without refreshing entire properties panel
+        const conditionalConfig = document.getElementById(`${buttonType.replace('Button', '')}-conditional-config`);
+        if (conditionalConfig) {
+            conditionalConfig.style.display = enabled ? 'block' : 'none';
+        }
+        this.markFormDirty();
+    }
+
+    // Helper functions for compact rendering
+    renderPageConditionsCompact(conditions, availableFields) {
+        if (!conditions || conditions.length === 0) {
+            return '<div class="no-conditions">No conditions set</div>';
+        }
+        
+        return conditions.map((condition, index) => `
+            <div class="condition-item-compact">
+                <div class="property-row">
+                    <div class="property-group-compact">
+                        <select onchange="window.AppModules.formBuilder.updatePageCondition(${index}, 'field', this.value)">
+                            <option value="">Select Field...</option>
+                            ${this.renderFieldOptionsCompact(availableFields, condition.field)}
+                        </select>
+                    </div>
+                    <div class="property-group-compact">
+                        <select onchange="window.AppModules.formBuilder.updatePageCondition(${index}, 'operator', this.value)">
+                            <option value="equals" ${condition.operator === 'equals' ? 'selected' : ''}>Equals</option>
+                            <option value="not_equals" ${condition.operator === 'not_equals' ? 'selected' : ''}>Not Equals</option>
+                            <option value="contains" ${condition.operator === 'contains' ? 'selected' : ''}>Contains</option>
+                        </select>
+                    </div>
+                    <div class="property-group-compact">
+                        <input type="text" value="${condition.value || ''}" placeholder="Value"
+                               onchange="window.AppModules.formBuilder.updatePageCondition(${index}, 'value', this.value)">
+                    </div>
+                    <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.removePageConditionCompact(${index})">×</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    renderFieldOptionsCompact(fields, selectedValue) {
+        return fields.map(field => `
+            <option value="${field.id}" ${field.id === selectedValue ? 'selected' : ''}>${field.label}</option>
+        `).join('');
+    }
+
+    addPageConditionCompact() {
+        const currentPage = this.getCurrentPage();
+        if (!currentPage.conditionalVisibility) {
+            currentPage.conditionalVisibility = { enabled: true, conditions: [], logic: 'AND' };
+        }
+        if (!currentPage.conditionalVisibility.conditions) {
+            currentPage.conditionalVisibility.conditions = [];
+        }
+        
+        currentPage.conditionalVisibility.conditions.push({
+            field: '',
+            operator: 'equals',
+            value: ''
+        });
+        
+        // Re-render just the conditions list
+        const conditionsList = document.getElementById('page-conditions-list');
+        if (conditionsList) {
+            const availableFields = this.getAvailableFieldsForPageConditions(currentPage);
+            conditionsList.innerHTML = this.renderPageConditionsCompact(currentPage.conditionalVisibility.conditions, availableFields);
+        }
+        this.markFormDirty();
+    }
+
+    removePageConditionCompact(index) {
+        const currentPage = this.getCurrentPage();
+        if (!currentPage.conditionalVisibility || !currentPage.conditionalVisibility.conditions) return;
+        
+        currentPage.conditionalVisibility.conditions.splice(index, 1);
+        
+        // Re-render just the conditions list
+        const conditionsList = document.getElementById('page-conditions-list');
+        if (conditionsList) {
+            const availableFields = this.getAvailableFieldsForPageConditions(currentPage);
+            conditionsList.innerHTML = this.renderPageConditionsCompact(currentPage.conditionalVisibility.conditions, availableFields);
+        }
+        this.markFormDirty();
+    }
+
+    updatePageCondition(index, property, value) {
+        const currentPage = this.getCurrentPage();
+        if (!currentPage.conditionalVisibility || !currentPage.conditionalVisibility.conditions || !currentPage.conditionalVisibility.conditions[index]) return;
+        
+        currentPage.conditionalVisibility.conditions[index][property] = value;
+        this.markFormDirty();
+    }
+
+    updateNavigationCondition(buttonType, property, value) {
+        const currentPage = this.getCurrentPage();
+        if (!currentPage.navigationConfig || !currentPage.navigationConfig[buttonType]) return;
+        
+        currentPage.navigationConfig[buttonType].conditionalVisibility[property] = value;
         this.markFormDirty();
     }
 

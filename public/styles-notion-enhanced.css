@@ -1192,6 +1192,7 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     padding: var(--space-4);
+    max-height: calc(100vh - 200px); /* Allow scrolling within tabs */
 }
 
 /* Compact Property Groups */
@@ -1272,6 +1273,50 @@ body {
 .property-button-compact:hover {
     background: var(--notion-gray-50);
     border-color: var(--notion-gray-400);
+}
+
+/* Compact conditions list */
+.conditions-list-compact {
+    border: 1px solid var(--notion-gray-200);
+    border-radius: var(--radius-md);
+    background: var(--notion-gray-25);
+    padding: var(--space-2);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.condition-item-compact {
+    background: var(--notion-white);
+    border: 1px solid var(--notion-gray-200);
+    border-radius: var(--radius-md);
+    padding: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.condition-item-compact:last-child {
+    margin-bottom: 0;
+}
+
+.condition-item-compact .property-row {
+    margin-bottom: 0;
+    align-items: center;
+}
+
+.condition-item-compact .property-group-compact {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.condition-item-compact .property-group-compact:last-child {
+    flex: 0 0 auto;
+    margin-left: var(--space-2);
+}
+
+.no-conditions {
+    text-align: center;
+    color: var(--notion-gray-500);
+    font-style: italic;
+    padding: var(--space-4);
 }
 
 .properties-panel::before {
