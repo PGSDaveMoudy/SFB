@@ -109,21 +109,33 @@ app.use(session({
     cookie: {
         secure: process.env.NODE_ENV === 'production' || process.env.HTTPS_ENABLED === 'true', // HTTPS only in production or when HTTPS enabled
         httpOnly: true,
-        maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year for persistent user tracking
-        sameSite: 'strict' // Changed from 'lax' to 'strict' for better security
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours for better session management
+        sameSite: 'lax' // Less restrictive to allow OAuth redirects
     },
     name: 'sfb_session'
 }));
 
 sessionStore.sync(); // Sync the session store to create the table
 
-// Middleware to ensure persistent user ID
+// Middleware to ensure persistent user ID and session debugging
 app.use((req, res, next) => {
     if (!req.session.userId) {
         // Generate a persistent user ID if not exists
         req.session.userId = 'user_' + crypto.randomBytes(16).toString('hex');
         console.log('Generated new persistent userId:', req.session.userId);
     }
+    
+    // Debug session state for important endpoints
+    if (req.path.includes('/api/orgs') || req.path.includes('/oauth')) {
+        console.log(`Session Debug [${req.method} ${req.path}]:`, {
+            sessionId: req.sessionID,
+            userId: req.session.userId,
+            currentOrgId: req.session.currentOrgId,
+            hasSalesforceConnection: !!req.session.salesforceConnection,
+            hasUserInfo: !!req.session.userInfo
+        });
+    }
+    
     next();
 });
 
@@ -478,6 +490,11 @@ app.get('/oauth/callback', async (req, res) => {
                 
                 // Update org last connected timestamp
                 await DatabaseManager.updateOrgLastConnected(targetOrgId, userInfo.organization_id);
+            } else {
+                // For legacy single-org flow, set currentOrgId based on organization
+                const legacyOrgId = 'legacy-org-' + userInfo.organization_id;
+                req.session.currentOrgId = legacyOrgId;
+                console.log('Setting currentOrgId for legacy org:', legacyOrgId);
             }
             
             // Clear OAuth temporary data
@@ -904,11 +921,21 @@ app.get('/api/orgs/current', async (req, res) => {
     try {
         console.log('API /api/orgs/current called.');
         const conn = getSalesforceConnection(req);
-        const currentOrgId = req.session.currentOrgId;
+        let currentOrgId = req.session.currentOrgId;
         console.log('  conn exists:', !!conn);
         console.log('  currentOrgId:', currentOrgId);
         
+        // Handle legacy org case - if we have connection but no currentOrgId
+        if (conn && !currentOrgId && req.session.userInfo) {
+            console.log('  Legacy org detected, setting currentOrgId');
+            const legacyOrgId = 'legacy-org-' + req.session.userInfo.organization_id;
+            req.session.currentOrgId = legacyOrgId;
+            currentOrgId = legacyOrgId;
+            console.log('  Set legacy currentOrgId:', currentOrgId);
+        }
+        
         if (!conn || !currentOrgId) {
+            console.log('  No connection or currentOrgId, returning disconnected state');
             return res.json({
                 connected: false,
                 org: null
@@ -917,15 +944,28 @@ app.get('/api/orgs/current', async (req, res) => {
 
         const org = await DatabaseManager.getOrgById(currentOrgId);
         
+        // For legacy orgs that might not be in database, create virtual org info
+        let orgInfo = null;
+        if (org) {
+            orgInfo = {
+                id: org.id,
+                name: org.name,
+                environment: org.environment
+            };
+        } else if (currentOrgId.startsWith('legacy-org-') && req.session.userInfo) {
+            orgInfo = {
+                id: currentOrgId,
+                name: req.session.userInfo.display_name + "'s Org",
+                environment: 'legacy'
+            };
+            console.log('  Created virtual org info for legacy connection:', orgInfo);
+        }
+        
         res.json({
             connected: true,
             instanceUrl: conn.instanceUrl,
             userInfo: req.session.userInfo,
-            org: org ? {
-                id: org.id,
-                name: org.name,
-                environment: org.environment
-            } : null
+            org: orgInfo
         });
 
     } catch (error) {
