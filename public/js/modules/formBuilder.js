@@ -2841,37 +2841,75 @@ export class FormBuilder {
 
                 <!-- Appearance Tab -->
                 <div class="property-sub-content" id="form-appearance-tab" style="display: none;">
+                    <!-- Style Presets -->
                     <div class="property-group-compact">
-                        <label>Theme Preset</label>
-                        <select id="form-theme-preset" onchange="window.AppModules.formBuilder.applyFormThemePreset(this.value)">
-                            <option value="">Custom</option>
-                            <option value="modern">Modern</option>
-                            <option value="corporate">Corporate</option>
-                            <option value="playful">Playful</option>
-                            <option value="minimal">Minimal</option>
-                            <option value="dark">Dark Mode</option>
-                        </select>
-                        <div class="help-text">Apply predefined theme</div>
+                        <label>🎨 Quick Style Presets</label>
+                        <div class="style-presets">
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyFormThemePreset('modern')">
+                                ✨ Modern
+                            </button>
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyFormThemePreset('corporate')">
+                                🏢 Corporate
+                            </button>
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyFormThemePreset('playful')">
+                                🎈 Playful
+                            </button>
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyFormThemePreset('minimal')">
+                                📝 Minimal
+                            </button>
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyFormThemePreset('dark')">
+                                🌙 Dark
+                            </button>
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.resetFormStyles()">
+                                🔄 Reset
+                            </button>
+                        </div>
+                        <div class="help-text">Click to apply predefined styles instantly</div>
                     </div>
 
+                    <!-- Color Palette -->
                     <div class="property-group-compact">
-                        <label>Colors</label>
-                        <div class="property-row">
-                            <div class="property-group-compact">
+                        <label>🎨 Color Palette</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker-item">
                                 <label>Primary</label>
-                                <input type="color" id="form-primary-color-picker" value="${settings.primaryColor || '#8b5cf6'}">
-                                <div class="help-text">Buttons & links</div>
+                                <input type="color" class="color-picker" id="form-primary-color-picker" value="${settings.primaryColor || '#8b5cf6'}">
                             </div>
-                            <div class="property-group-compact">
+                            <div class="color-picker-item">
+                                <label>Secondary</label>
+                                <input type="color" class="color-picker" id="form-secondary-color-picker" value="${settings.secondaryColor || '#64748b'}">
+                            </div>
+                            <div class="color-picker-item">
                                 <label>Background</label>
-                                <input type="color" id="form-bg-color-picker" value="${settings.backgroundColor || '#ffffff'}">
-                                <div class="help-text">Form background</div>
+                                <input type="color" class="color-picker" id="form-bg-color-picker" value="${settings.backgroundColor || '#ffffff'}">
                             </div>
-                            <div class="property-group-compact">
+                            <div class="color-picker-item">
                                 <label>Text</label>
-                                <input type="color" id="form-text-color-picker" value="${settings.textColor || '#111827'}">
-                                <div class="help-text">Main text</div>
+                                <input type="color" class="color-picker" id="form-text-color-picker" value="${settings.textColor || '#111827'}">
                             </div>
+                            <div class="color-picker-item">
+                                <label>Border</label>
+                                <input type="color" class="color-picker" id="form-border-color-picker" value="${settings.borderColor || '#e5e7eb'}">
+                            </div>
+                            <div class="color-picker-item">
+                                <label>Accent</label>
+                                <input type="color" class="color-picker" id="form-accent-color-picker" value="${settings.accentColor || '#f59e0b'}">
+                            </div>
+                        </div>
+                        <div class="help-text">Customize form color scheme</div>
+                    </div>
+
+                    <!-- Live Style Preview -->
+                    <div class="style-preview">
+                        <div class="style-preview-title">📱 Live Preview</div>
+                        <div class="style-preview-content" id="form-style-preview">
+                            <div style="margin-bottom: 12px;">
+                                <label style="display: block; margin-bottom: 4px; font-weight: 600;">Sample Field</label>
+                                <input type="text" placeholder="Type here..." style="width: 100%; padding: 8px 12px; border: 1px solid; border-radius: 6px;">
+                            </div>
+                            <button style="padding: 8px 16px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer;">
+                                Submit Button
+                            </button>
                         </div>
                     </div>
 
@@ -3027,10 +3065,62 @@ export class FormBuilder {
                         </div>
                     </div>
 
+                    <!-- Custom CSS Editor -->
                     <div class="property-group-compact">
-                        <label>Custom CSS</label>
-                        <textarea id="form-custom-css" rows="4" placeholder="/* Custom CSS styles */">${settings.customCSS || ''}</textarea>
-                        <div class="help-text">Advanced styling overrides</div>
+                        <label>🎨 Custom CSS Editor</label>
+                        <div class="css-editor-container">
+                            <textarea id="form-custom-css" class="css-editor" rows="8" 
+                                placeholder="/* Custom CSS styles for this form */
+.form-container {
+    /* Form-level styles */
+}
+
+.form-field {
+    /* Field-level styles */
+}
+
+.submit-button {
+    /* Button styles */
+}">${settings.customCSS || ''}</textarea>
+                            <div class="help-text">
+                                Advanced CSS styling. Use classes: .form-container, .form-field, .field-label, .submit-button
+                                <br><strong>Tips:</strong> Changes apply in real-time • Use CSS variables for consistent theming
+                            </div>
+                            <div class="property-row" style="margin-top: var(--space-2);">
+                                <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.formatCustomCSS()">
+                                    ✨ Format CSS
+                                </button>
+                                <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.insertCSSTemplate()">
+                                    📝 Insert Template
+                                </button>
+                                <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.validateCSS()">
+                                    ✅ Validate
+                                </button>
+                                <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.clearCustomCSS()">
+                                    🗑️ Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- CSS Snippets -->
+                    <div class="property-group-compact">
+                        <label>📚 CSS Snippets</label>
+                        <div class="style-presets">
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.insertCSSSnippet('gradient-bg')">
+                                🌈 Gradient Background
+                            </button>
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.insertCSSSnippet('glass-effect')">
+                                💎 Glass Effect
+                            </button>
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.insertCSSSnippet('hover-animations')">
+                                ✨ Hover Effects
+                            </button>
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.insertCSSSnippet('custom-fonts')">
+                                📝 Custom Fonts
+                            </button>
+                        </div>
+                        <div class="help-text">Click to insert common CSS patterns</div>
                     </div>
                 </div>
             </div>
@@ -3044,9 +3134,12 @@ export class FormBuilder {
             { id: 'form-submit-text', event: 'input', handler: (e) => { this.updateFormSetting('submitButtonText', e.target.value); } },
             { id: 'form-success-message', event: 'input', handler: (e) => { this.updateFormSetting('successMessage', e.target.value); } },
             { id: 'form-redirect-url', event: 'input', handler: (e) => { this.updateFormSetting('redirectUrl', e.target.value); } },
-            { id: 'form-primary-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('primaryColor', e.target.value); } },
-            { id: 'form-bg-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('backgroundColor', e.target.value); } },
-            { id: 'form-text-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('textColor', e.target.value); } },
+            { id: 'form-primary-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('primaryColor', e.target.value); this.updateStylePreview(); } },
+            { id: 'form-secondary-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('secondaryColor', e.target.value); this.updateStylePreview(); } },
+            { id: 'form-bg-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('backgroundColor', e.target.value); this.updateStylePreview(); } },
+            { id: 'form-text-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('textColor', e.target.value); this.updateStylePreview(); } },
+            { id: 'form-border-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('borderColor', e.target.value); this.updateStylePreview(); } },
+            { id: 'form-accent-color-picker', event: 'input', handler: (e) => { this.updateFormSetting('accentColor', e.target.value); this.updateStylePreview(); } },
             { id: 'form-font-family', event: 'change', handler: (e) => { this.updateFormSetting('fontFamily', e.target.value); } },
             { id: 'form-font-size', event: 'change', handler: (e) => { this.updateFormSetting('fontSize', e.target.value); } },
             { id: 'form-max-width', event: 'input', handler: (e) => { this.updateFormSetting('maxWidth', e.target.value); } },
@@ -3064,7 +3157,7 @@ export class FormBuilder {
             { id: 'form-sendgrid-key', event: 'input', handler: (e) => { this.updateFormSetting('sendgridKey', e.target.value); } },
             { id: 'form-email-from', event: 'input', handler: (e) => { this.updateFormSetting('emailFrom', e.target.value); } },
             { id: 'form-email-from-name', event: 'input', handler: (e) => { this.updateFormSetting('emailFromName', e.target.value); } },
-            { id: 'form-custom-css', event: 'input', handler: (e) => { this.updateFormSetting('customCSS', e.target.value); } }
+            { id: 'form-custom-css', event: 'input', handler: (e) => { this.updateFormSetting('customCSS', e.target.value); this.updateStylePreview(); } }
         ];
 
         elements.forEach(elConfig => {
@@ -3570,6 +3663,374 @@ export class FormBuilder {
             this.markFormDirty();
         } catch (error) {
             console.error('❌ Error updating form setting:', error, { key, value });
+        }
+    }
+
+    // ==========================================================================
+    // CUSTOM STYLES FUNCTIONALITY
+    // ==========================================================================
+
+    updateStylePreview() {
+        const preview = document.getElementById('form-style-preview');
+        if (!preview) return;
+
+        const settings = this.currentForm.settings || {};
+        const primaryColor = settings.primaryColor || '#8b5cf6';
+        const backgroundColor = settings.backgroundColor || '#ffffff';
+        const textColor = settings.textColor || '#111827';
+        const borderColor = settings.borderColor || '#e5e7eb';
+
+        const sampleInput = preview.querySelector('input');
+        const sampleButton = preview.querySelector('button');
+
+        if (sampleInput) {
+            sampleInput.style.color = textColor;
+            sampleInput.style.backgroundColor = backgroundColor;
+            sampleInput.style.borderColor = borderColor;
+        }
+
+        if (sampleButton) {
+            sampleButton.style.backgroundColor = primaryColor;
+            sampleButton.style.color = '#ffffff';
+        }
+
+        // Update preview container background
+        preview.style.backgroundColor = backgroundColor;
+        preview.style.color = textColor;
+    }
+
+    applyFormThemePreset(theme) {
+        console.log(`🎨 Applying theme preset: ${theme}`);
+        
+        const presets = {
+            modern: {
+                primaryColor: '#8b5cf6',
+                secondaryColor: '#64748b',
+                backgroundColor: '#ffffff',
+                textColor: '#111827',
+                borderColor: '#e5e7eb',
+                accentColor: '#f59e0b',
+                fontFamily: 'Inter',
+                fontSize: '16px',
+                customCSS: `/* Modern Theme */
+.form-container {
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+.form-field {
+    transition: all 0.2s ease;
+}
+.form-field:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+}`
+            },
+            corporate: {
+                primaryColor: '#1f2937',
+                secondaryColor: '#6b7280',
+                backgroundColor: '#f9fafb',
+                textColor: '#111827',
+                borderColor: '#d1d5db',
+                accentColor: '#3b82f6',
+                fontFamily: 'Arial',
+                fontSize: '16px',
+                customCSS: `/* Corporate Theme */
+.form-container {
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+}
+.submit-button {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}`
+            },
+            playful: {
+                primaryColor: '#ec4899',
+                secondaryColor: '#a855f7',
+                backgroundColor: '#fef7ff',
+                textColor: '#581c87',
+                borderColor: '#f3e8ff',
+                accentColor: '#f59e0b',
+                fontFamily: 'Inter',
+                fontSize: '16px',
+                customCSS: `/* Playful Theme */
+.form-container {
+    background: linear-gradient(135deg, #fef7ff 0%, #fff7ed 100%);
+    border-radius: 20px;
+    border: 3px solid #f3e8ff;
+}
+.form-field {
+    border-radius: 12px;
+    border: 2px solid #f3e8ff;
+}
+.submit-button {
+    border-radius: 25px;
+    background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+}`
+            },
+            minimal: {
+                primaryColor: '#000000',
+                secondaryColor: '#6b7280',
+                backgroundColor: '#ffffff',
+                textColor: '#000000',
+                borderColor: '#000000',
+                accentColor: '#6b7280',
+                fontFamily: 'Arial',
+                fontSize: '14px',
+                customCSS: `/* Minimal Theme */
+.form-container {
+    background: #ffffff;
+    border: 1px solid #000000;
+    border-radius: 0;
+}
+.form-field {
+    border: 1px solid #000000;
+    border-radius: 0;
+    background: transparent;
+}
+.submit-button {
+    border: 2px solid #000000;
+    background: #000000;
+    color: #ffffff;
+    border-radius: 0;
+}`
+            },
+            dark: {
+                primaryColor: '#8b5cf6',
+                secondaryColor: '#a855f7',
+                backgroundColor: '#111827',
+                textColor: '#f9fafb',
+                borderColor: '#374151',
+                accentColor: '#fbbf24',
+                fontFamily: 'Inter',
+                fontSize: '16px',
+                customCSS: `/* Dark Theme */
+.form-container {
+    background: #111827;
+    border: 1px solid #374151;
+    color: #f9fafb;
+}
+.form-field {
+    background: #1f2937;
+    color: #f9fafb;
+    border: 1px solid #374151;
+}
+.form-field:focus {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}`
+            }
+        };
+
+        const preset = presets[theme];
+        if (preset) {
+            // Apply all preset values
+            Object.entries(preset).forEach(([key, value]) => {
+                this.updateFormSetting(key, value);
+            });
+
+            // Refresh the form properties to show new values
+            this.showFormProperties();
+            
+            // Update style preview
+            setTimeout(() => this.updateStylePreview(), 100);
+        }
+    }
+
+    resetFormStyles() {
+        console.log('🔄 Resetting form styles to default');
+        
+        const defaultSettings = {
+            primaryColor: '#8b5cf6',
+            secondaryColor: '#64748b',
+            backgroundColor: '#ffffff',
+            textColor: '#111827',
+            borderColor: '#e5e7eb',
+            accentColor: '#f59e0b',
+            fontFamily: 'Inter',
+            fontSize: '16px',
+            customCSS: ''
+        };
+
+        Object.entries(defaultSettings).forEach(([key, value]) => {
+            this.updateFormSetting(key, value);
+        });
+
+        this.showFormProperties();
+        setTimeout(() => this.updateStylePreview(), 100);
+    }
+
+    formatCustomCSS() {
+        const cssEditor = document.getElementById('form-custom-css');
+        if (!cssEditor) return;
+
+        try {
+            // Basic CSS formatting
+            let css = cssEditor.value;
+            css = css.replace(/;\s*}/g, ';\n}');
+            css = css.replace(/{/g, ' {\n    ');
+            css = css.replace(/;(?!\s*})/g, ';\n    ');
+            css = css.replace(/}\s*/g, '}\n\n');
+            css = css.replace(/,\s*/g, ',\n');
+            css = css.trim();
+
+            cssEditor.value = css;
+            this.updateFormSetting('customCSS', css);
+            console.log('✨ CSS formatted successfully');
+        } catch (error) {
+            console.error('❌ Error formatting CSS:', error);
+        }
+    }
+
+    insertCSSTemplate() {
+        const template = `/* Form Container Styling */
+.form-container {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Field Styling */
+.form-field {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s ease;
+}
+
+.form-field:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* Button Styling */
+.submit-button {
+    background: #8b5cf6;
+    color: white;
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.submit-button:hover {
+    background: #7c3aed;
+}`;
+
+        const cssEditor = document.getElementById('form-custom-css');
+        if (cssEditor) {
+            cssEditor.value = template;
+            this.updateFormSetting('customCSS', template);
+            this.updateStylePreview();
+            console.log('📝 CSS template inserted');
+        }
+    }
+
+    validateCSS() {
+        const cssEditor = document.getElementById('form-custom-css');
+        if (!cssEditor) return;
+
+        const css = cssEditor.value;
+        
+        // Basic CSS validation
+        const openBraces = (css.match(/{/g) || []).length;
+        const closeBraces = (css.match(/}/g) || []).length;
+        
+        if (openBraces !== closeBraces) {
+            alert('⚠️ CSS Validation: Mismatched braces detected');
+            return;
+        }
+
+        // Check for common CSS errors
+        const lines = css.split('\n');
+        const errors = [];
+
+        lines.forEach((line, index) => {
+            if (line.includes(':') && !line.includes(';') && !line.includes('{') && line.trim() && !line.includes('/*')) {
+                errors.push(`Line ${index + 1}: Missing semicolon`);
+            }
+        });
+
+        if (errors.length > 0) {
+            alert('⚠️ CSS Validation Issues:\n' + errors.join('\n'));
+        } else {
+            alert('✅ CSS appears to be valid!');
+        }
+
+        console.log('✅ CSS validation completed');
+    }
+
+    clearCustomCSS() {
+        if (confirm('🗑️ Clear all custom CSS? This cannot be undone.')) {
+            const cssEditor = document.getElementById('form-custom-css');
+            if (cssEditor) {
+                cssEditor.value = '';
+                this.updateFormSetting('customCSS', '');
+                this.updateStylePreview();
+                console.log('🗑️ Custom CSS cleared');
+            }
+        }
+    }
+
+    insertCSSSnippet(snippetType) {
+        const snippets = {
+            'gradient-bg': `/* Gradient Background */
+.form-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}`,
+            'glass-effect': `/* Glass Effect */
+.form-container {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}`,
+            'hover-animations': `/* Hover Animations */
+.form-field:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+}`,
+            'custom-fonts': `/* Custom Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+.form-container {
+    font-family: 'Poppins', sans-serif;
+}
+
+.field-label {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}`
+        };
+
+        const snippet = snippets[snippetType];
+        if (snippet) {
+            const cssEditor = document.getElementById('form-custom-css');
+            if (cssEditor) {
+                const currentCSS = cssEditor.value;
+                const newCSS = currentCSS ? currentCSS + '\n\n' + snippet : snippet;
+                cssEditor.value = newCSS;
+                this.updateFormSetting('customCSS', newCSS);
+                this.updateStylePreview();
+                console.log(`📝 CSS snippet "${snippetType}" inserted`);
+            }
         }
     }
 
