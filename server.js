@@ -67,7 +67,7 @@ app.use(helmet({
             objectSrc: ["'none'"],
             baseUri: ["'self'"],
             formAction: ["'self'"],
-            upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : false,
+            upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
         },
     },
     hsts: false, // Let Nginx handle HSTS to avoid duplication
