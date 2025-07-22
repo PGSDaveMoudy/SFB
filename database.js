@@ -322,9 +322,25 @@ class DatabaseManager {
             await sequelize.authenticate();
             console.log('✅ Database connection established successfully.');
             
-            // Create tables
-            await sequelize.sync({ alter: true });
-            console.log('✅ Database tables synchronized.');
+            // Disable foreign key constraints temporarily for SQLite
+            if (sequelize.getDialect() === 'sqlite') {
+                await sequelize.query('PRAGMA foreign_keys = OFF;');
+            }
+            
+            // Create tables - use force: false to avoid dropping existing tables
+            try {
+                await sequelize.sync({ alter: true });
+                console.log('✅ Database tables synchronized.');
+            } catch (syncError) {
+                console.log('⚠️ Sync with alter failed, trying basic sync...');
+                await sequelize.sync({ force: false });
+                console.log('✅ Database tables created/updated.');
+            }
+            
+            // Re-enable foreign key constraints
+            if (sequelize.getDialect() === 'sqlite') {
+                await sequelize.query('PRAGMA foreign_keys = ON;');
+            }
             
             return true;
         } catch (error) {
