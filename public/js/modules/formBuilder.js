@@ -2807,24 +2807,23 @@ export class FormBuilder {
 
                 <!-- Basic Settings Tab -->
                 <div class="property-sub-content" id="form-basic-tab">
-                    <div class="property-group-compact">
-                        <label>Form Name</label>
-                        <input type="text" id="form-name" value="${form.name || ''}" placeholder="Contact Registration">
-                        <div class="help-text">Internal reference name for form management</div>
+                    <div class="property-row">
+                        <div class="property-group-compact">
+                            <label>Form Name</label>
+                            <input type="text" id="form-name" value="${form.name || ''}" placeholder="Contact Registration">
+                            <div class="help-text">Internal reference name</div>
+                        </div>
+                        <div class="property-group-compact">
+                            <label>Submit Button Text</label>
+                            <input type="text" id="form-submit-text" value="${settings.submitButtonText || 'Submit'}" placeholder="Submit">
+                            <div class="help-text">Button text</div>
+                        </div>
                     </div>
                     
                     <div class="property-group-compact">
                         <label>Form Description</label>
                         <textarea id="form-description" rows="2" placeholder="Brief description...">${form.description || ''}</textarea>
                         <div class="help-text">Optional description for documentation</div>
-                    </div>
-
-                    <div class="property-row">
-                        <div class="property-group-compact">
-                            <label>Submit Button Text</label>
-                            <input type="text" id="form-submit-text" value="${settings.submitButtonText || 'Submit'}" placeholder="Submit">
-                            <div class="help-text">Final submission button text</div>
-                        </div>
                     </div>
                     
                     <div class="property-group-compact">
@@ -3293,23 +3292,23 @@ export class FormBuilder {
                     
                     <div id="page-conditional-config" style="display: ${page.conditionalVisibility?.enabled ? 'block' : 'none'}">
                         <div class="property-group-compact">
-                            <label>Logic Type</label>
-                            <select id="page-conditional-logic" onchange="window.AppModules.formBuilder.updatePageConditionalProperty('logic', this.value)">
-                                <option value="AND" ${page.conditionalVisibility?.logic === 'AND' ? 'selected' : ''}>All conditions must be true (AND)</option>
-                                <option value="OR" ${page.conditionalVisibility?.logic === 'OR' ? 'selected' : ''}>Any condition can be true (OR)</option>
-                            </select>
-                            <div class="help-text">How to combine multiple conditions</div>
+                            <label>Logic Expression</label>
+                            <input type="text" id="page-logic-expression" 
+                                   value="${page.conditionalVisibility?.logicExpression || ''}"
+                                   placeholder="(1 AND 2) OR 3"
+                                   onchange="window.AppModules.formBuilder.updatePageConditionalProperty('logicExpression', this.value)">
+                            <div class="help-text">Use numbers for conditions: (1 AND 2) OR 3, or leave blank for simple AND logic</div>
                         </div>
                         
                         <div class="property-group-compact">
                             <label>Conditions</label>
                             <div id="page-conditions-list" class="conditions-list-compact">
-                                ${this.renderPageConditionsCompact(page.conditionalVisibility?.conditions || [], availableFields)}
+                                ${this.renderPageConditionsAdvanced(page.conditionalVisibility?.conditions || [], availableFields)}
                             </div>
                             <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.addPageConditionCompact()">
                                 ➕ Add Condition
                             </button>
-                            <div class="help-text">Conditions that determine when this page shows</div>
+                            <div class="help-text">Each condition gets a number (1, 2, 3...) for use in logic expression</div>
                         </div>
                     </div>
                 </div>
@@ -3380,7 +3379,7 @@ export class FormBuilder {
         `;
     }
 
-    // Helper method for Page Conditional Visibility Section
+    // Helper method for Page Conditional Visibility Section (Legacy - uses unique IDs)
     renderPageConditionalVisibilitySection(page, availableFields) {
         return `
             <div class="property-section">
@@ -3391,7 +3390,7 @@ export class FormBuilder {
                 
                 <div class="property-group">
                     <label class="checkbox-label">
-                        <input type="checkbox" id="page-conditional-enabled" ${page.conditionalVisibility?.enabled ? 'checked' : ''}
+                        <input type="checkbox" id="page-conditional-enabled-legacy" ${page.conditionalVisibility?.enabled ? 'checked' : ''}
                                onchange="window.AppModules.formBuilder.togglePageConditionalVisibility(this.checked)">
                         Enable page conditional visibility
                     </label>
@@ -4208,36 +4207,53 @@ export class FormBuilder {
         this.markFormDirty();
     }
 
-    // Helper functions for compact rendering
-    renderPageConditionsCompact(conditions, availableFields) {
+    // Advanced rendering with numbered conditions and clear labels
+    renderPageConditionsAdvanced(conditions, availableFields) {
         if (!conditions || conditions.length === 0) {
             return '<div class="no-conditions">No conditions set</div>';
         }
         
         return conditions.map((condition, index) => `
             <div class="condition-item-compact">
-                <div class="property-row">
+                <div class="condition-header">
+                    <span class="condition-number">${index + 1}</span>
+                    <label class="condition-label">Condition ${index + 1}</label>
+                    <button type="button" class="property-button-compact remove-condition" onclick="window.AppModules.formBuilder.removePageConditionCompact(${index})">×</button>
+                </div>
+                <div class="condition-controls">
                     <div class="property-group-compact">
+                        <label class="control-label">Field</label>
                         <select onchange="window.AppModules.formBuilder.updatePageCondition(${index}, 'field', this.value)">
-                            <option value="">Select Field...</option>
+                            <option value="">Choose field to check...</option>
                             ${this.renderFieldOptionsCompact(availableFields, condition.field)}
                         </select>
                     </div>
                     <div class="property-group-compact">
+                        <label class="control-label">Operator</label>
                         <select onchange="window.AppModules.formBuilder.updatePageCondition(${index}, 'operator', this.value)">
                             <option value="equals" ${condition.operator === 'equals' ? 'selected' : ''}>Equals</option>
                             <option value="not_equals" ${condition.operator === 'not_equals' ? 'selected' : ''}>Not Equals</option>
                             <option value="contains" ${condition.operator === 'contains' ? 'selected' : ''}>Contains</option>
+                            <option value="starts_with" ${condition.operator === 'starts_with' ? 'selected' : ''}>Starts With</option>
+                            <option value="ends_with" ${condition.operator === 'ends_with' ? 'selected' : ''}>Ends With</option>
+                            <option value="is_empty" ${condition.operator === 'is_empty' ? 'selected' : ''}>Is Empty</option>
+                            <option value="is_not_empty" ${condition.operator === 'is_not_empty' ? 'selected' : ''}>Is Not Empty</option>
                         </select>
                     </div>
                     <div class="property-group-compact">
-                        <input type="text" value="${condition.value || ''}" placeholder="Value"
+                        <label class="control-label">Value</label>
+                        <input type="text" value="${condition.value || ''}" 
+                               placeholder="Value to compare against..."
                                onchange="window.AppModules.formBuilder.updatePageCondition(${index}, 'value', this.value)">
                     </div>
-                    <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.removePageConditionCompact(${index})">×</button>
                 </div>
             </div>
         `).join('');
+    }
+
+    renderPageConditionsCompact(conditions, availableFields) {
+        // Fallback to advanced version for backwards compatibility
+        return this.renderPageConditionsAdvanced(conditions, availableFields);
     }
 
     renderFieldOptionsCompact(fields, selectedValue) {
@@ -4249,7 +4265,7 @@ export class FormBuilder {
     addPageConditionCompact() {
         const currentPage = this.getCurrentPage();
         if (!currentPage.conditionalVisibility) {
-            currentPage.conditionalVisibility = { enabled: true, conditions: [], logic: 'AND' };
+            currentPage.conditionalVisibility = { enabled: true, conditions: [], logicExpression: '' };
         }
         if (!currentPage.conditionalVisibility.conditions) {
             currentPage.conditionalVisibility.conditions = [];
@@ -4265,7 +4281,7 @@ export class FormBuilder {
         const conditionsList = document.getElementById('page-conditions-list');
         if (conditionsList) {
             const availableFields = this.getAvailableFieldsForPageConditions(currentPage);
-            conditionsList.innerHTML = this.renderPageConditionsCompact(currentPage.conditionalVisibility.conditions, availableFields);
+            conditionsList.innerHTML = this.renderPageConditionsAdvanced(currentPage.conditionalVisibility.conditions, availableFields);
         }
         this.markFormDirty();
     }
@@ -4280,7 +4296,7 @@ export class FormBuilder {
         const conditionsList = document.getElementById('page-conditions-list');
         if (conditionsList) {
             const availableFields = this.getAvailableFieldsForPageConditions(currentPage);
-            conditionsList.innerHTML = this.renderPageConditionsCompact(currentPage.conditionalVisibility.conditions, availableFields);
+            conditionsList.innerHTML = this.renderPageConditionsAdvanced(currentPage.conditionalVisibility.conditions, availableFields);
         }
         this.markFormDirty();
     }
