@@ -3499,18 +3499,30 @@ export class FormBuilder {
         const styling = field.styling;
         
         return `
-            <!-- Style Presets -->
+            <!-- Field Style Presets -->
             <div class="property-group-compact">
-                <label>Style Preset</label>
-                <select id="prop-stylePreset" onchange="window.AppModules.formBuilder.applyFieldStylePreset(this.value)">
-                    <option value="">None (Custom)</option>
-                    <option value="modern" ${styling.preset === 'modern' ? 'selected' : ''}>Modern</option>
-                    <option value="minimal" ${styling.preset === 'minimal' ? 'selected' : ''}>Minimal</option>
-                    <option value="rounded" ${styling.preset === 'rounded' ? 'selected' : ''}>Rounded</option>
-                    <option value="material" ${styling.preset === 'material' ? 'selected' : ''}>Material Design</option>
-                    <option value="bold" ${styling.preset === 'bold' ? 'selected' : ''}>Bold</option>
-                </select>
-                <div class="help-text">Apply predefined styles</div>
+                <label>🎨 Field Style Presets</label>
+                <div class="style-presets">
+                    <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyFieldStylePreset('modern')">
+                        ✨ Modern
+                    </button>
+                    <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyFieldStylePreset('minimal')">
+                        📝 Minimal
+                    </button>
+                    <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyFieldStylePreset('rounded')">
+                        🔘 Rounded
+                    </button>
+                    <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyFieldStylePreset('material')">
+                        📱 Material
+                    </button>
+                    <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyFieldStylePreset('bold')">
+                        💪 Bold
+                    </button>
+                    <button class="style-preset-btn" onclick="window.AppModules.formBuilder.resetFieldStyles()">
+                        🔄 Reset
+                    </button>
+                </div>
+                <div class="help-text">Quick field styling presets</div>
             </div>
 
             <!-- Layout Options -->
@@ -3557,26 +3569,32 @@ export class FormBuilder {
                 </div>
             </div>
 
-            <!-- Colors -->
+            <!-- Field Colors -->
             <div class="property-group-compact">
-                <label>Colors</label>
-                <div class="property-row">
-                    <div class="property-group-compact">
+                <label>🎨 Field Colors</label>
+                <div class="color-picker-group">
+                    <div class="color-picker-item">
                         <label>Background</label>
-                        <input type="color" value="${styling.backgroundColor || '#ffffff'}"
+                        <input type="color" class="color-picker" value="${styling.backgroundColor || '#ffffff'}"
                                onchange="window.AppModules.formBuilder.updateFieldStyling('backgroundColor', this.value)">
                     </div>
-                    <div class="property-group-compact">
-                        <label>Text Color</label>
-                        <input type="color" value="${styling.color || '#000000'}"
+                    <div class="color-picker-item">
+                        <label>Text</label>
+                        <input type="color" class="color-picker" value="${styling.color || '#000000'}"
                                onchange="window.AppModules.formBuilder.updateFieldStyling('color', this.value)">
                     </div>
-                    <div class="property-group-compact">
-                        <label>Border Color</label>
-                        <input type="color" value="${styling.borderColor || '#e5e7eb'}"
+                    <div class="color-picker-item">
+                        <label>Border</label>
+                        <input type="color" class="color-picker" value="${styling.borderColor || '#e5e7eb'}"
                                onchange="window.AppModules.formBuilder.updateFieldStyling('borderColor', this.value)">
                     </div>
+                    <div class="color-picker-item">
+                        <label>Focus</label>
+                        <input type="color" class="color-picker" value="${styling.focusColor || '#8b5cf6'}"
+                               onchange="window.AppModules.formBuilder.updateFieldStyling('focusColor', this.value)">
+                    </div>
                 </div>
+                <div class="help-text">Customize field appearance</div>
             </div>
 
             <!-- Typography -->
@@ -3633,22 +3651,46 @@ export class FormBuilder {
                 </div>
             </div>
 
-            <!-- Custom CSS -->
+            <!-- Field Custom CSS -->
             <div class="property-group-compact">
-                <label>Custom CSS</label>
-                <textarea id="prop-customCSS" rows="4"
-                          placeholder="/* Custom CSS for this field */\n.field-wrapper { }"
-                          onchange="window.AppModules.formBuilder.updateFieldStyling('customCSS', this.value)">${styling.customCSS || ''}</textarea>
-                <div class="help-text">Write custom CSS rules</div>
+                <label>🎨 Field Custom CSS</label>
+                <div class="css-editor-container">
+                    <textarea id="prop-customCSS" class="css-editor" rows="5"
+                              placeholder="/* Custom CSS for this field */
+.field-wrapper {
+    /* Field container styles */
+}
+
+.field-input {
+    /* Input element styles */
+}
+
+.field-label {
+    /* Label styles */
+}"
+                              onchange="window.AppModules.formBuilder.updateFieldStyling('customCSS', this.value)">${styling.customCSS || ''}</textarea>
+                    <div class="help-text">CSS styles applied only to this field</div>
+                    <div class="property-row" style="margin-top: var(--space-2);">
+                        <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.formatFieldCSS()">
+                            ✨ Format
+                        </button>
+                        <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.insertFieldCSSTemplate()">
+                            📝 Template
+                        </button>
+                        <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.clearFieldCSS()">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- CSS Classes -->
             <div class="property-group-compact">
-                <label>CSS Classes</label>
+                <label>🏷️ CSS Classes</label>
                 <input type="text" id="prop-cssClasses" value="${field.cssClasses || ''}"
-                       placeholder="class1 class2"
+                       placeholder="class1 class2 custom-field"
                        onchange="window.AppModules.formBuilder.updateFieldProperty('cssClasses', this.value)">
-                <div class="help-text">Space-separated class names</div>
+                <div class="help-text">Space-separated CSS class names to add to this field</div>
             </div>
         `;
     }
@@ -8946,6 +8988,105 @@ export class FormBuilder {
         
         this.renderFormCanvas();
         this.markFormDirty();
+    }
+
+    // ==========================================================================
+    // FIELD-LEVEL CUSTOM STYLES FUNCTIONALITY
+    // ==========================================================================
+
+    resetFieldStyles() {
+        const field = this.selectedField;
+        if (!field) return;
+
+        console.log('🔄 Resetting field styles to default');
+
+        // Reset field styling to defaults
+        field.styling = {};
+
+        // Refresh properties panel and canvas
+        this.showFieldProperties();
+        this.renderFormCanvas();
+        this.markFormDirty();
+        console.log('✅ Field styles reset to default');
+    }
+
+    formatFieldCSS() {
+        const cssEditor = document.getElementById('prop-customCSS');
+        if (!cssEditor) return;
+
+        try {
+            // Basic CSS formatting
+            let css = cssEditor.value;
+            css = css.replace(/;\s*}/g, ';\n}');
+            css = css.replace(/{/g, ' {\n    ');
+            css = css.replace(/;(?!\s*})/g, ';\n    ');
+            css = css.replace(/}\s*/g, '}\n\n');
+            css = css.replace(/,\s*/g, ',\n');
+            css = css.trim();
+
+            cssEditor.value = css;
+            this.updateFieldStyling('customCSS', css);
+            console.log('✨ Field CSS formatted successfully');
+        } catch (error) {
+            console.error('❌ Error formatting field CSS:', error);
+        }
+    }
+
+    insertFieldCSSTemplate() {
+        const template = `/* Field Container */
+.field-wrapper {
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+/* Field Label */
+.field-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Field Input */
+.field-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.field-input:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* Field Help Text */
+.field-help {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}`;
+
+        const cssEditor = document.getElementById('prop-customCSS');
+        if (cssEditor) {
+            cssEditor.value = template;
+            this.updateFieldStyling('customCSS', template);
+            console.log('📝 Field CSS template inserted');
+        }
+    }
+
+    clearFieldCSS() {
+        if (confirm('🗑️ Clear field CSS? This cannot be undone.')) {
+            const cssEditor = document.getElementById('prop-customCSS');
+            if (cssEditor) {
+                cssEditor.value = '';
+                this.updateFieldStyling('customCSS', '');
+                console.log('🗑️ Field CSS cleared');
+            }
+        }
     }
 
     toggleCustomEmail(enabled) {
