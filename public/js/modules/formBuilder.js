@@ -3187,7 +3187,7 @@ export class FormBuilder {
 
     switchPageSubTab(tabName) {
         // Hide all page sub-tab contents
-        const tabs = ['basic', 'salesforce', 'conditions', 'navigation', 'advanced'];
+        const tabs = ['basic', 'styles', 'salesforce', 'conditions', 'navigation', 'advanced'];
         tabs.forEach(tab => {
             const content = document.getElementById(`page-${tab}-tab`);
             const button = document.querySelector(`[onclick="window.AppModules.formBuilder.switchPageSubTab('${tab}')"]`);
@@ -4034,6 +4034,223 @@ export class FormBuilder {
         }
     }
 
+    // ==========================================================================
+    // PAGE-LEVEL CUSTOM STYLES FUNCTIONALITY
+    // ==========================================================================
+
+    updatePageStyleProperty(key, value) {
+        const currentPage = this.getCurrentPage();
+        if (!currentPage) return;
+
+        if (!currentPage.styleSettings) {
+            currentPage.styleSettings = {};
+        }
+
+        currentPage.styleSettings[key] = value;
+        console.log(`🎨 Updated page style setting: ${key} =`, value);
+        this.markFormDirty();
+    }
+
+    applyPageThemePreset(theme) {
+        console.log(`🎨 Applying page theme preset: ${theme}`);
+        const currentPage = this.getCurrentPage();
+        if (!currentPage) return;
+
+        const presets = {
+            clean: {
+                width: 'normal',
+                columns: '1',
+                backgroundColor: '#ffffff',
+                headerColor: '#1f2937',
+                borderColor: '#e5e7eb',
+                customCSS: `/* Clean Page Theme */
+.page-container {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+.page-header {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}`
+            },
+            card: {
+                width: 'narrow',
+                columns: '1',
+                backgroundColor: '#ffffff',
+                headerColor: '#8b5cf6',
+                borderColor: '#d1d5db',
+                customCSS: `/* Card Page Theme */
+.page-container {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    max-width: 600px;
+    margin: 2rem auto;
+}
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}`
+            },
+            centered: {
+                width: 'narrow',
+                columns: '1',
+                backgroundColor: '#f9fafb',
+                headerColor: '#374151',
+                borderColor: '#d1d5db',
+                customCSS: `/* Centered Page Theme */
+.page-container {
+    background: #f9fafb;
+    text-align: center;
+    padding: 3rem 2rem;
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.page-content {
+    max-width: 500px;
+    margin: 0 auto;
+}`
+            },
+            wide: {
+                width: 'wide',
+                columns: '2',
+                backgroundColor: '#ffffff',
+                headerColor: '#059669',
+                borderColor: '#d1fae5',
+                customCSS: `/* Wide Page Theme */
+.page-container {
+    background: #ffffff;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.page-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}`
+            }
+        };
+
+        const preset = presets[theme];
+        if (preset) {
+            // Apply all preset values
+            Object.entries(preset).forEach(([key, value]) => {
+                this.updatePageStyleProperty(key, value);
+            });
+
+            // Refresh the page properties to show new values
+            this.showPageProperties();
+            console.log(`✅ Applied page theme: ${theme}`);
+        }
+    }
+
+    resetPageStyles() {
+        console.log('🔄 Resetting page styles to default');
+        const currentPage = this.getCurrentPage();
+        if (!currentPage) return;
+
+        const defaultSettings = {
+            width: 'normal',
+            columns: '1',
+            backgroundColor: '#ffffff',
+            headerColor: '#8b5cf6',
+            borderColor: '#e5e7eb',
+            customCSS: ''
+        };
+
+        Object.entries(defaultSettings).forEach(([key, value]) => {
+            this.updatePageStyleProperty(key, value);
+        });
+
+        this.showPageProperties();
+        console.log('✅ Page styles reset to default');
+    }
+
+    formatPageCSS() {
+        const cssEditor = document.getElementById('page-custom-css');
+        if (!cssEditor) return;
+
+        try {
+            // Basic CSS formatting
+            let css = cssEditor.value;
+            css = css.replace(/;\s*}/g, ';\n}');
+            css = css.replace(/{/g, ' {\n    ');
+            css = css.replace(/;(?!\s*})/g, ';\n    ');
+            css = css.replace(/}\s*/g, '}\n\n');
+            css = css.replace(/,\s*/g, ',\n');
+            css = css.trim();
+
+            cssEditor.value = css;
+            this.updatePageStyleProperty('customCSS', css);
+            console.log('✨ Page CSS formatted successfully');
+        } catch (error) {
+            console.error('❌ Error formatting page CSS:', error);
+        }
+    }
+
+    insertPageCSSTemplate() {
+        const template = `/* Page Container Styling */
+.page-container {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 800px;
+    margin: 2rem auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Page Header */
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #8b5cf6;
+}
+
+/* Page Content Area */
+.page-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .page-container {
+        padding: 1rem;
+        margin: 1rem;
+    }
+}`;
+
+        const cssEditor = document.getElementById('page-custom-css');
+        if (cssEditor) {
+            cssEditor.value = template;
+            this.updatePageStyleProperty('customCSS', template);
+            console.log('📝 Page CSS template inserted');
+        }
+    }
+
+    clearPageCSS() {
+        if (confirm('🗑️ Clear all page CSS? This cannot be undone.')) {
+            const cssEditor = document.getElementById('page-custom-css');
+            if (cssEditor) {
+                cssEditor.value = '';
+                this.updatePageStyleProperty('customCSS', '');
+                console.log('🗑️ Page CSS cleared');
+            }
+        }
+    }
+
     updateNavigationConfig(buttonType, property, value) {
         if (!this.currentForm.navigationConfig) {
             this.currentForm.navigationConfig = {};
@@ -4109,6 +4326,7 @@ export class FormBuilder {
                 <!-- Page Sub-Tabs -->
                 <div class="property-sub-tabs">
                     <button class="property-sub-tab active" onclick="window.AppModules.formBuilder.switchPageSubTab('basic')">📄 Basic</button>
+                    <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchPageSubTab('styles')">🎨 Styles</button>
                     <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchPageSubTab('salesforce')">🔗 SF</button>
                     <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchPageSubTab('conditions')">🔍 Logic</button>
                     <button class="property-sub-tab" onclick="window.AppModules.formBuilder.switchPageSubTab('navigation')">⬅️➡️ Nav</button>
@@ -4131,6 +4349,112 @@ export class FormBuilder {
                                   placeholder="Optional description..."
                                   onchange="window.AppModules.formBuilder.updatePageProperty('description', this.value)">${page.description || ''}</textarea>
                         <div class="help-text">Description shown to users</div>
+                    </div>
+                </div>
+
+                <!-- Page Styles Tab -->
+                <div class="property-sub-content" id="page-styles-tab" style="display: none;">
+                    <!-- Page Style Presets -->
+                    <div class="property-group-compact">
+                        <label>🎨 Page Style Presets</label>
+                        <div class="style-presets">
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyPageThemePreset('clean')">
+                                ✨ Clean
+                            </button>
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyPageThemePreset('card')">
+                                🃏 Card
+                            </button>
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyPageThemePreset('centered')">
+                                📍 Centered
+                            </button>
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.applyPageThemePreset('wide')">
+                                📏 Wide
+                            </button>
+                            <button class="style-preset-btn" onclick="window.AppModules.formBuilder.resetPageStyles()">
+                                🔄 Reset
+                            </button>
+                        </div>
+                        <div class="help-text">Apply page layout presets</div>
+                    </div>
+
+                    <!-- Page Layout Settings -->
+                    <div class="property-group-compact">
+                        <label>📐 Layout Settings</label>
+                        <div class="property-row">
+                            <div class="property-group-compact">
+                                <label>Page Width</label>
+                                <select id="page-width" onchange="window.AppModules.formBuilder.updatePageStyleProperty('width', this.value)">
+                                    <option value="narrow" ${(page.styleSettings?.width || 'normal') === 'narrow' ? 'selected' : ''}>Narrow (600px)</option>
+                                    <option value="normal" ${(page.styleSettings?.width || 'normal') === 'normal' ? 'selected' : ''}>Normal (800px)</option>
+                                    <option value="wide" ${(page.styleSettings?.width || 'normal') === 'wide' ? 'selected' : ''}>Wide (1200px)</option>
+                                    <option value="full" ${(page.styleSettings?.width || 'normal') === 'full' ? 'selected' : ''}>Full Width</option>
+                                </select>
+                            </div>
+                            <div class="property-group-compact">
+                                <label>Column Layout</label>
+                                <select id="page-columns" onchange="window.AppModules.formBuilder.updatePageStyleProperty('columns', this.value)">
+                                    <option value="1" ${(page.styleSettings?.columns || '1') === '1' ? 'selected' : ''}>Single Column</option>
+                                    <option value="2" ${(page.styleSettings?.columns || '1') === '2' ? 'selected' : ''}>Two Columns</option>
+                                    <option value="3" ${(page.styleSettings?.columns || '1') === '3' ? 'selected' : ''}>Three Columns</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Page Color Customization -->
+                    <div class="property-group-compact">
+                        <label>🎨 Page Colors</label>
+                        <div class="color-picker-group">
+                            <div class="color-picker-item">
+                                <label>Background</label>
+                                <input type="color" class="color-picker" id="page-bg-color" value="${page.styleSettings?.backgroundColor || '#ffffff'}"
+                                       onchange="window.AppModules.formBuilder.updatePageStyleProperty('backgroundColor', this.value)">
+                            </div>
+                            <div class="color-picker-item">
+                                <label>Header</label>
+                                <input type="color" class="color-picker" id="page-header-color" value="${page.styleSettings?.headerColor || '#8b5cf6'}"
+                                       onchange="window.AppModules.formBuilder.updatePageStyleProperty('headerColor', this.value)">
+                            </div>
+                            <div class="color-picker-item">
+                                <label>Border</label>
+                                <input type="color" class="color-picker" id="page-border-color" value="${page.styleSettings?.borderColor || '#e5e7eb'}"
+                                       onchange="window.AppModules.formBuilder.updatePageStyleProperty('borderColor', this.value)">
+                            </div>
+                        </div>
+                        <div class="help-text">Customize page-specific colors</div>
+                    </div>
+
+                    <!-- Page Custom CSS -->
+                    <div class="property-group-compact">
+                        <label>🎨 Page Custom CSS</label>
+                        <div class="css-editor-container">
+                            <textarea id="page-custom-css" class="css-editor" rows="6" 
+                                placeholder="/* Page-specific CSS */
+.page-container {
+    /* Page wrapper styles */
+}
+
+.page-header {
+    /* Page title area */
+}
+
+.page-content {
+    /* Page content area */
+}"
+                                onchange="window.AppModules.formBuilder.updatePageStyleProperty('customCSS', this.value)">${page.styleSettings?.customCSS || ''}</textarea>
+                            <div class="help-text">CSS styles applied only to this page</div>
+                            <div class="property-row" style="margin-top: var(--space-2);">
+                                <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.formatPageCSS()">
+                                    ✨ Format
+                                </button>
+                                <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.insertPageCSSTemplate()">
+                                    📝 Template
+                                </button>
+                                <button type="button" class="property-button-compact" onclick="window.AppModules.formBuilder.clearPageCSS()">
+                                    🗑️ Clear
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
