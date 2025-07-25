@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salesforce Form Builder - Modern Edition</title>
+    <title>Salesforce Form Builder - Classic 3-Column Layout</title>
     <link rel="stylesheet" href="styles-notion-enhanced.css">
     <link rel="stylesheet" href="styles-modern-redesign.css">
     <link rel="stylesheet" href="styles-unified-experience.css">
@@ -152,7 +152,7 @@
                     🏢 Org Manager
                 </a>
                 <button class="header-link" onclick="toggleModernMode()" style="border: none; background: none; cursor: pointer; color: var(--make-purple-600);">
-                    ✨ Modern UI
+                    🏗️ Classic Layout
                 </button>
             </div>
             
@@ -387,7 +387,7 @@
     </div>
 
     <!-- Unified Experience Container -->
-    <div class="unified-container" id="unifiedContainer" style="display: block;">
+    <div class="unified-container" id="unifiedContainer" style="display: none;">
         <!-- Left Panel - Field Palette -->
         <div class="unified-panel unified-panel-left" id="fieldPalettePanel">
             <div class="unified-panel-header">
@@ -561,8 +561,8 @@
         </button>
     </div>
 
-    <!-- Legacy Main Container -->
-    <div class="container">
+    <!-- Main Container -->
+    <div class="container" style="display: block;">
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-content">
