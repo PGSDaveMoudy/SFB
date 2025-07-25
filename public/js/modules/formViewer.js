@@ -58,7 +58,7 @@ export class FormViewer {
             // Render the form first, then setup conditional logic
             await this.renderForm();
         } catch (error) {
-            debugError('FormViewer'('Error loading form:', error);
+            debugError('FormViewer', 'Error loading form:', error);
             this.showError('Failed to load form');
         }
     }
