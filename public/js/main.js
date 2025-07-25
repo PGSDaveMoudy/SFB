@@ -47,6 +47,10 @@ async function initializeApp() {
     const urlParams = new URLSearchParams(window.location.search);
     const connected = urlParams.get('connected');
     
+    // Handle OAuth success callback
+    if (connected === 'true') {
+        console.log('OAuth connection detected, will check status after initialization');
+    }
     
     // Initialize core modules
     modules.salesforce = new SalesforceConnector();
@@ -100,6 +104,20 @@ async function initializeApp() {
     // Show welcome modal on first visit
     checkFirstVisit();
     
+    // Handle OAuth success callback
+    if (connected === 'true') {
+        // Force a connection status check to update UI
+        setTimeout(async () => {
+            console.log('Checking connection status after OAuth callback...');
+            await modules.salesforce.checkConnectionStatus();
+            
+            // Show success message if connected
+            if (window.AppState.salesforceConnected) {
+                showConnectionSuccessMessage();
+            }
+        }, 1000); // Wait a moment for UI to fully load
+    }
+    
     // Clean up URL params
     if (connected) {
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -145,6 +163,54 @@ window.closeIntroModal = function(showTutorial = false) {
         console.log('Tutorial mode enabled');
     }
 };
+
+// Show success message after OAuth connection
+function showConnectionSuccessMessage() {
+    // Create a toast notification
+    const toast = document.createElement('div');
+    toast.className = 'connection-success-toast';
+    toast.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 10000;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease;
+        ">
+            <span style="font-size: 18px;">✅</span>
+            Successfully connected to Salesforce!
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Add animation styles if not already present
+    if (!document.getElementById('toast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'toast-styles';
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Remove after 4 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 4000);
+}
 
 // Global functions exposed to HTML
 window.connectToSalesforce = async function() {
