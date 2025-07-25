@@ -517,7 +517,7 @@ export class FormViewer {
             multiPage.updateNavigationButtons();
         } else {
             // Fallback to simple logic if multiPage not available
-            debugWarn('FormViewer'('🔄 FORM VIEWER: multiPage module not available, using fallback navigation logic');
+            debugWarn('FormViewer', '🔄 FORM VIEWER: multiPage module not available, using fallback navigation logic');
             const prevBtn = document.getElementById('prevPageBtn');
             const nextBtn = document.getElementById('nextPageBtn');
             const submitBtn = document.getElementById('submitBtn');
@@ -830,7 +830,7 @@ export class FormViewer {
                 debugInfo('FormViewer', `Hidden field found: ${!!hiddenField}`);
                 
                 if (!addButton) {
-                    debugError('FormViewer'(`❌ Add Another button NOT FOUND for repeat page ${page.id}`);
+                    debugError('FormViewer', `❌ Add Another button NOT FOUND for repeat page ${page.id}`);
                 } else {
                     debugInfo('FormViewer', `✅ Add Another button found for page ${page.id}`);
                 }
@@ -942,7 +942,7 @@ export class FormViewer {
                 throw new Error(response.error || 'Submission failed');
             }
         } catch (error) {
-            debugError('FormViewer'('Form submission error:', error);
+            debugError('FormViewer', 'Form submission error:', error);
             this.showSubmissionError(error.message);
         }
     }
@@ -991,7 +991,7 @@ export class FormViewer {
                             debugInfo('FormViewer', `❌ No instances found in hidden field for page ${page.id}`);
                         }
                     } catch (e) {
-                        debugError('FormViewer'(`Could not parse collected data for ${page.id}`, e);
+                        debugError('FormViewer', `Could not parse collected data for ${page.id}`, e);
                     }
                 } else {
                     debugInfo('FormViewer', `❌ No hidden input found or empty value for page ${page.id}`);
@@ -1083,7 +1083,7 @@ export class FormViewer {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                debugError('FormViewer'(`Server responded with status ${response.status}:`, errorText);
+                debugError('FormViewer', `Server responded with status ${response.status}:`, errorText);
                 throw new Error(`Submission failed: ${response.statusText || 'Server Error'}. Details: ${errorText.substring(0, 100)}...`);
             }
             
@@ -1108,7 +1108,7 @@ export class FormViewer {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                debugError('FormViewer'(`Server responded with status ${response.status}:`, errorText);
+                debugError('FormViewer', `Server responded with status ${response.status}:`, errorText);
                 throw new Error(`Submission failed: ${response.statusText || 'Server Error'}. Details: ${errorText.substring(0, 100)}...`);
             }
             
@@ -1174,7 +1174,7 @@ export class FormViewer {
         
         const conditionalLogic = window.AppModules.conditionalLogic;
         if (!conditionalLogic) {
-            debugWarn('FormViewer'('ConditionalLogic module not available');
+            debugWarn('FormViewer', 'ConditionalLogic module not available');
             return;
         }
         
@@ -1270,7 +1270,7 @@ export class FormViewer {
                         debugInfo('FormViewer', '🔄 [GET RECORDS DEBUG] Calling refreshAllDataTables...');
                         window.AppModules.fieldTypes.refreshAllDataTables();
                     } else {
-                        debugError('FormViewer'('❌ [GET RECORDS DEBUG] fieldTypes module not available!');
+                        debugError('FormViewer', '❌ [GET RECORDS DEBUG] fieldTypes module not available!');
                     }
                 }, 100);
                 
@@ -1298,7 +1298,7 @@ export class FormViewer {
                     });
                 }, 500);
             } else {
-                debugWarn('FormViewer'('⚠️ [GET RECORDS DEBUG] No variables received or FormVariables not available:', {
+                debugWarn('FormViewer', '⚠️ [GET RECORDS DEBUG] No variables received or FormVariables not available:', {
                     hasVariables: !!result.variables,
                     variableCount: result.variables ? Object.keys(result.variables).length : 0,
                     hasFormVariables: !!window.FormVariables
@@ -1308,7 +1308,7 @@ export class FormViewer {
             debugInfo('FormViewer', `✅ Successfully processed Get Records page ${page.id}`);
             
         } catch (error) {
-            debugError('FormViewer'(`❌ Error processing Get Records page ${page.id}:`, error);
+            debugError('FormViewer', `❌ Error processing Get Records page ${page.id}:`, error);
             // Don't block navigation on error, but log it
         }
     }
