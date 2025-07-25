@@ -303,12 +303,13 @@ body {
 }
 
 .container {
-    display: grid;
-    grid-template-columns: 320px 1fr 380px;
+    display: grid !important;
+    grid-template-columns: 320px 1fr 380px !important;
     height: calc(100vh - 60px); /* Account for header height */
     background: var(--notion-gray-50);
     gap: 0;
     overflow: hidden;
+    flex-direction: initial !important; /* Override mobile flex-direction */
 }
 
 /* ==========================================================================
@@ -322,7 +323,14 @@ body {
     flex-direction: column;
     height: calc(100vh - 60px);
     overflow: hidden;
-    position: relative;
+    position: relative !important; /* Override mobile fixed positioning */
+    transform: none !important; /* Override mobile transforms */
+    width: auto !important; /* Override mobile width */
+    left: auto !important; /* Override mobile positioning */
+    top: auto !important; /* Override mobile positioning */
+    bottom: auto !important; /* Override mobile positioning */
+    box-shadow: none !important; /* Override mobile shadow */
+    padding-top: 0 !important; /* Override mobile padding */
 }
 
 .sidebar::before {
@@ -734,6 +742,9 @@ body {
     overflow-y: auto; /* Allow scrolling in main content */
     position: relative;
     height: calc(100vh - 60px);
+    flex: initial !important; /* Override mobile flex settings */
+    order: initial !important; /* Override mobile order */
+    padding: var(--space-8) !important; /* Override mobile padding */
 }
 
 .main-content::before {
@@ -1142,9 +1153,17 @@ body {
     grid-template-rows: auto auto 1fr; /* Header, Tabs, Content */
     height: calc(100vh - 60px);
     overflow: hidden;
-    position: relative;
+    position: relative !important; /* Override mobile fixed positioning */
     min-height: 0; /* Important for nested grid/flex items */
     transition: all var(--duration-normal) var(--ease-out);
+    transform: none !important; /* Override mobile transforms */
+    width: auto !important; /* Override mobile width */
+    right: auto !important; /* Override mobile positioning */
+    left: auto !important; /* Override mobile positioning */
+    top: auto !important; /* Override mobile positioning */
+    bottom: auto !important; /* Override mobile positioning */
+    box-shadow: none !important; /* Override mobile shadow */
+    max-width: none !important; /* Override mobile max-width */
 }
 
 /* Properties Header - Fixed Height */
