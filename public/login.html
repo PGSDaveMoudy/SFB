@@ -337,12 +337,8 @@
                     // Store user info
                     localStorage.setItem('userInfo', JSON.stringify(data.user));
                     
-                    // Redirect to main app or org manager
-                    if (data.organizations && data.organizations.length > 0) {
-                        window.location.href = '/';
-                    } else {
-                        window.location.href = '/org-manager.html';
-                    }
+                    // Always redirect to main app and show org manager after login
+                    window.location.href = '/?showOrgManager=true';
                 } else {
                     errorDiv.textContent = data.error || 'Login failed';
                     errorDiv.style.display = 'block';
@@ -410,9 +406,9 @@
                     successDiv.textContent = 'Account created successfully! Redirecting...';
                     successDiv.style.display = 'block';
                     
-                    // Redirect to org manager to set up first org
+                    // Redirect to main app with org manager modal
                     setTimeout(() => {
-                        window.location.href = '/org-manager.html';
+                        window.location.href = '/?showOrgManager=true';
                     }, 1500);
                 } else {
                     errorDiv.textContent = data.error || 'Registration failed';
@@ -429,7 +425,7 @@
 
         // Connect with Salesforce (legacy)
         function connectWithSalesforce() {
-            window.location.href = '/org-manager.html';
+            window.location.href = '/?showOrgManager=true';
         }
 
         // Check if already logged in

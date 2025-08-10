@@ -113,10 +113,11 @@ async function initializeApp() {
         return;
     }
     
-    // Check for connection status in URL params
+    // Check for connection status and other URL params
     const urlParams = new URLSearchParams(window.location.search);
     const connected = urlParams.get('connected');
     const error = urlParams.get('error');
+    const showOrgManager = urlParams.get('showOrgManager') === 'true';
     
     // Handle OAuth callbacks
     if (connected === 'true') {
@@ -133,6 +134,13 @@ async function initializeApp() {
         // Clean up the error from URL
         const newUrl = new URL(window.location);
         newUrl.searchParams.delete('error');
+        window.history.replaceState({}, document.title, newUrl.toString());
+    }
+    
+    // Clean up showOrgManager from URL but remember the flag
+    if (showOrgManager) {
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.delete('showOrgManager');
         window.history.replaceState({}, document.title, newUrl.toString());
     }
     
@@ -206,6 +214,16 @@ async function initializeApp() {
                 showConnectionSuccessMessage();
             }
         }, 1000); // Wait a moment for UI to fully load
+    }
+    
+    // Show org manager modal if requested (after login)
+    if (showOrgManager) {
+        setTimeout(() => {
+            if (window.showOrgManager && typeof window.showOrgManager === 'function') {
+                debugInfo('Main', 'Showing org manager modal after login');
+                window.showOrgManager();
+            }
+        }, 1500); // Wait for UI to fully initialize
     }
     
     // Clean up URL params
