@@ -2277,10 +2277,18 @@ function generateSessionId() {
 app.post('/api/forms/:formId/submit', upload.any(), async (req, res) => {
     try {
         const { formId } = req.params;
+        console.log('🔍 [SUBMIT DEBUG] Form ID requested:', formId);
+        
         const db = getFormsDB();
+        console.log('🔍 [SUBMIT DEBUG] Forms DB loaded, forms count:', Object.keys(db.forms || {}).length);
+        console.log('🔍 [SUBMIT DEBUG] Available form IDs:', Object.keys(db.forms || {}).slice(0, 5));
+        
         const form = db.forms[formId];
+        console.log('🔍 [SUBMIT DEBUG] Form found:', !!form);
+        console.log('🔍 [SUBMIT DEBUG] Form published:', !!form?.published);
         
         if (!form || !form.published) {
+            console.error('❌ [SUBMIT DEBUG] Form not found or not published');
             return res.status(404).json({ error: 'Form not found or not published' });
         }
         
@@ -2417,6 +2425,17 @@ app.post('/api/forms/:formId/submit', upload.any(), async (req, res) => {
         
         console.log('📋 Submission metadata:', submissionMetadata);
         
+        // Enhanced form structure debugging
+        console.log('🔍 [FORM DEBUG] Form found:', !!form);
+        console.log('🔍 [FORM DEBUG] Form ID:', form?.id);
+        console.log('🔍 [FORM DEBUG] Form name:', form?.name);
+        console.log('🔍 [FORM DEBUG] Pages count:', form?.pages?.length);
+        if (form?.pages) {
+            form.pages.forEach((page, index) => {
+                console.log(`🔍 [FORM DEBUG] Page ${index}: id="${page.id}", name="${page.name}", object="${page.salesforceObject}", fields=${page.fields?.length}, repeat=${!!page.repeatConfig?.enabled}`);
+            });
+        }
+        
         // Check if this is a page-only processing request
         if (submissionMetadata.processPageOnly && submissionMetadata.pageId) {
             console.log(`📄 Processing only page: ${submissionMetadata.pageId}`);
@@ -2434,6 +2453,9 @@ app.post('/api/forms/:formId/submit', upload.any(), async (req, res) => {
         // not the current user's session (since forms are public)
         let conn = null;
         
+        console.log('🔍 [CONNECT DEBUG] Form has creatorConnection:', !!form.creatorConnection);
+        console.log('🔍 [CONNECT DEBUG] Has accessToken:', !!form.creatorConnection?.accessToken);
+        
         // Try to use the form creator's stored connection first
         if (form.creatorConnection && form.creatorConnection.accessToken) {
             try {
@@ -2448,8 +2470,9 @@ app.post('/api/forms/:formId/submit', upload.any(), async (req, res) => {
                 });
                 
                 // Verify the connection works
-                await conn.identity();
-                console.log("Using form creator's connection for form submission");
+                const identity = await conn.identity();
+                console.log("✅ [CONNECT DEBUG] Using form creator's connection for form submission");
+                console.log("🔍 [CONNECT DEBUG] Connected as:", identity.display_name);
             } catch (creatorConnError) {
                 console.error('Form creator connection failed:', creatorConnError.message);
                 conn = null;
@@ -2501,13 +2524,21 @@ app.post('/api/forms/:formId/submit', upload.any(), async (req, res) => {
                 continue; // Skip repeating (child) pages in this pass
             }
 
+            console.log(`🔍 [PASS 1] Processing parent page: ${page.id} (${page.salesforceObject})`);
+            console.log(`🔍 [PASS 1] Page fields:`, page.fields.map(f => ({ id: f.id, salesforceField: f.salesforceField })));
+            console.log(`🔍 [PASS 1] Available formData keys:`, Object.keys(formData));
+
             const record = {};
             let recordId = null;
             
             // Map fields from the main formData object
             for (const field of page.fields) {
-                if (field.salesforceField && formData[field.id]) {
+                console.log(`🔍 [PASS 1] Checking field ${field.id} -> ${field.salesforceField}, value: ${formData[field.id]}`);
+                if (field.salesforceField && formData[field.id] !== undefined && formData[field.id] !== null && formData[field.id] !== '') {
                     record[field.salesforceField] = formData[field.id];
+                    console.log(`✅ [PASS 1] Mapped ${field.id} -> ${field.salesforceField} = ${formData[field.id]}`);
+                } else {
+                    console.log(`❌ [PASS 1] Skipped ${field.id} (salesforceField: ${field.salesforceField}, value: ${formData[field.id]}, type: ${typeof formData[field.id]})`);
                 }
             }
             
@@ -2711,6 +2742,7 @@ app.post('/api/forms/:formId/submit', upload.any(), async (req, res) => {
                         console.log(`Creating PARENT ${page.salesforceObject} with payload:`, JSON.stringify(record, null, 2));
                         const result = await conn.sobject(page.salesforceObject).create(record);
                         console.log(`  ✅ Created ${page.salesforceObject} with ID: ${result.id}`);
+                        console.log(`  📋 Storing parent record ID: parentRecords["${page.id}"] = "${result.id}"`);
                         results.push({ pageId: page.id, result });
                         parentRecords[page.id] = result.id; // Store the created ID by its page ID
                     }
@@ -2726,7 +2758,8 @@ app.post('/api/forms/:formId/submit', upload.any(), async (req, res) => {
 
         // --- PASS 2: Create all child records (repeating pages) ---
         console.log('\n--- PASS 2: Creating Child Records ---');
-        console.log('DEBUG: formData for child records:', JSON.stringify(formData, null, 2));
+        console.log('🔍 [PASS 2] Available parent records:', parentRecords);
+        console.log('🔍 [PASS 2] formData keys:', Object.keys(formData));
         for (const page of form.pages) {
             if (!page.repeatConfig?.enabled) {
                 continue; // Skip non-repeating (parent) pages
@@ -2742,12 +2775,14 @@ app.post('/api/forms/:formId/submit', upload.any(), async (req, res) => {
             console.log(`DEBUG: Processing repeating page: ${page.id} (salesforceObject: ${page.salesforceObject})`);
             console.log(`DEBUG: Instances found: ${instances.length}`);
 
-            // Find the parent record's ID
-            const parentId = parentRecords[page.parentPageId];
-            console.log(`DEBUG: Parent page ID: ${page.parentPageId}, Retrieved Parent ID: ${parentId}`);
+            // Find the parent record's ID - check both parentPageId and recordLinking.parentSource
+            const parentPageId = page.parentPageId || page.recordLinking?.parentSource;
+            const parentId = parentRecords[parentPageId];
+            console.log(`DEBUG: Parent page ID: ${parentPageId} (from ${page.parentPageId ? 'parentPageId' : 'recordLinking.parentSource'}), Retrieved Parent ID: ${parentId}`);
 
             if (!parentId) {
-                console.error(`  ⚠️  Could not find parent record ID for page ${page.id} (expected from page ${page.parentPageId}). Skipping child record creation.`);
+                console.error(`  ⚠️  Could not find parent record ID for page ${page.id} (expected from page ${parentPageId}). Skipping child record creation.`);
+                console.error(`  🔍  Available parent record IDs:`, Object.keys(parentRecords));
                 continue;
             }
 
@@ -2764,10 +2799,11 @@ app.post('/api/forms/:formId/submit', upload.any(), async (req, res) => {
                     }
                 }
 
-                // Set the relationship to the parent record
-                if (page.parentField) {
-                    record[page.parentField] = parentId;
-                    console.log(`DEBUG: Setting parentField ${page.parentField} to ${parentId} for instance ${i}`);
+                // Set the relationship to the parent record - check both parentField and recordLinking.relationshipField
+                const parentField = page.parentField || page.recordLinking?.relationshipField;
+                if (parentField) {
+                    record[parentField] = parentId;
+                    console.log(`DEBUG: Setting parentField ${parentField} (from ${page.parentField ? 'parentField' : 'recordLinking.relationshipField'}) to ${parentId} for instance ${i}`);
                 } else {
                     console.error(`  ⚠️  Configuration error: parentField not defined for repeating page ${page.id}`);
                     console.error(`     Expected field like 'AccountId' to link ${page.salesforceObject} to parent record.`);
