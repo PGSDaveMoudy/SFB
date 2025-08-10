@@ -131,7 +131,7 @@ class EmailService {
                     'X-Priority': '1',
                     'X-MSMail-Priority': 'High',
                     'Importance': 'high',
-                    'X-Mailer': 'Salesforce Form Builder v1.0'
+                    'X-Mailer': 'PilotForms v1.0'
                 }
             };
 
@@ -496,7 +496,7 @@ ${footerText}
                 <p>You can now use this email configuration for sending OTP verification codes and other form-related emails.</p>
                 
                 <p>Best regards,<br>
-                <strong>Salesforce Form Builder Team</strong></p>
+                <strong>PilotForms Team</strong></p>
             </div>
             <div class="footer">
                 <p>This is an automated test message from your form builder email configuration.</p>
@@ -528,7 +528,7 @@ Configuration Verified:
 You can now use this email configuration for sending OTP verification codes and other form-related emails.
 
 Best regards,
-Salesforce Form Builder Team
+PilotForms Team
 
 This is an automated test message from your form builder email configuration.
 ${footerText}

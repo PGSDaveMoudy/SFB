@@ -4276,7 +4276,7 @@
           },
           "recordLinking": {
             "enabled": true,
-            "parentSource": "page_1",
+            "parentSource": "page_0",
             "relationshipField": "AccountId"
           }
         }
@@ -4292,7 +4292,7 @@
       },
       "userId": "005gK000002NvXVQA0",
       "organizationId": "00DgK000002zFFXUA2",
-      "updatedAt": "2025-08-10T05:42:00.000Z",
+      "updatedAt": "2025-08-10T06:00:11.120Z",
       "createdAt": "2025-08-10T05:17:56.736Z",
       "creatorConnection": {
         "userId": "005gK000002NvXVQA0",
@@ -4303,6 +4303,98 @@
       "publicUrl": "https://pilotforms.com/form/c38e60b7-9dc7-4a58-9884-d588c01ec2b5",
       "isDraft": true,
       "title": "Untitled Draft"
+    },
+    "draft_005gK000002NvXVQA0_1754809012522": {
+      "id": "draft_005gK000002NvXVQA0_1754809012522",
+      "name": "email verification",
+      "description": "",
+      "pages": [
+        {
+          "id": "page_1",
+          "name": "Page 1",
+          "fields": [
+            {
+              "id": "field_1",
+              "type": "email-verify",
+              "label": "Email Verification",
+              "placeholder": "",
+              "required": false,
+              "helpText": "",
+              "salesforceField": null,
+              "conditionalVisibility": {
+                "enabled": false,
+                "dependsOn": null,
+                "condition": "equals",
+                "value": ""
+              },
+              "verifyConfig": {
+                "title": "Email Verification",
+                "instructions": "Enter your email address and click verify to continue.",
+                "buttonText": "Verify Email",
+                "successMessage": "Email verified successfully!",
+                "resendText": "Resend Code",
+                "requiredToSubmit": true,
+                "enableContactLookup": false,
+                "requireExistingContact": false,
+                "contactNotFoundMessage": "No account found with this email address.",
+                "setVariables": {
+                  "emailVerified": "true",
+                  "verifiedEmail": "{{email}}"
+                }
+              },
+              "styling": {}
+            }
+          ],
+          "salesforceObject": "Account",
+          "actionType": "create",
+          "hiddenFields": [],
+          "conditionalVisibility": {
+            "enabled": false,
+            "conditions": [],
+            "logic": "AND"
+          },
+          "repeatConfig": null,
+          "variables": {},
+          "navigationConfig": {
+            "next": {
+              "conditionalVisibility": {
+                "enabled": false,
+                "conditions": [],
+                "logic": "AND"
+              }
+            },
+            "submit": {
+              "conditionalVisibility": {
+                "enabled": false,
+                "conditions": [],
+                "logic": "AND"
+              }
+            }
+          }
+        }
+      ],
+      "settings": {
+        "submitButtonText": "Submit",
+        "successMessage": "Thank you for your submission!",
+        "redirectUrl": "3MVG9rZjd7MXFdLgxaMZUqPLjxNtkCfOGsWxYg0SBaBX4TzOc8wL91FZikEZpzXfMoYHwT1Afb1RDMUv5vWzU",
+        "requireAuth": false,
+        "customCSS": "",
+        "theme": "light",
+        "emailPass": "98C3CF6FFC6D6612A9D10D47FB21F6694B8447AD04DB03EB44299030EF78DF3A"
+      },
+      "userId": "005gK000002NvXVQA0",
+      "organizationId": "00DgK000002zFFXUA2",
+      "isDraft": true,
+      "title": "Untitled Draft",
+      "updatedAt": "2025-08-10T17:00:04.403Z",
+      "createdAt": "2025-08-10T06:56:52.529Z",
+      "published": false,
+      "publishedAt": null,
+      "publicUrl": null,
+      "creatorConnection": {
+        "userId": "005gK000002NvXVQA0",
+        "organizationId": "00DgK000002zFFXUA2"
+      }
     }
   }
 }

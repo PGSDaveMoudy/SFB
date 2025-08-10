@@ -495,6 +495,8 @@ export class FormViewer {
         const multiPage = window.AppModules.multiPage;
         
         pages.forEach((page, index) => {
+            if (!page) return; // Guard against null elements
+            
             if (index === this.currentPage) {
                 // Show current page only if it's not conditionally hidden
                 const pageId = page.dataset.pageId;

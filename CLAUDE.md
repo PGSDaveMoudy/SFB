@@ -1,4 +1,4 @@
-# Salesforce Form Builder - Complete Implementation Guide
+# PilotForms - Complete Implementation Guide
 
 ## 🔄 Version Control Instructions
 
@@ -267,7 +267,7 @@ EMAIL_FROM_ADDRESS=noreply@yourdomain.com
 
 ### Automated Deployment Script
 
-The Salesforce Form Builder includes a comprehensive deployment script that automates the entire production setup process. This script handles everything from system dependencies to SSL certificates and email configuration.
+The PilotForms includes a comprehensive deployment script that automates the entire production setup process. This script handles everything from system dependencies to SSL certificates and email configuration.
 
 #### Quick Deployment
 
@@ -485,4 +485,4 @@ The deployment includes enterprise-grade security:
 
 ---
 
-**This documentation represents the current state of the Salesforce Form Builder as of January 2025.**
+**This documentation represents the current state of the PilotForms as of January 2025.**

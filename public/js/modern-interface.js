@@ -1,4 +1,4 @@
-// Modern Interface Controller for Salesforce Form Builder
+// Modern Interface Controller for PilotForms
 // Handles floating UI, FABs, dark mode, and magical popup system
 
 // Magical Popup System Manager
@@ -22,7 +22,6 @@ class MagicalPopupManager {
             this.closeAllPopups();
         });
         
-        console.log('✨ Magical Popup System initialized');
     }
     
     // Create and show a toast notification
@@ -392,7 +391,7 @@ class MagicalPopupManager {
 // Magical popup system instance
 let magicalPopups;
 
-// Modern Interface Controller for Salesforce Form Builder
+// Modern Interface Controller for PilotForms
 // Handles floating UI, FABs, dark mode, and modern interactions
 
 class ModernInterface {
@@ -430,7 +429,6 @@ class ModernInterface {
             this.showWelcomePopup();
         }, 1000);
         
-        console.log('🚀 Modern Interface initialized with Magical Popups');
     }
     
     checkModernMode() {
@@ -488,7 +486,6 @@ class ModernInterface {
         // Update connection status in modern interface
         this.updateConnectionStatus();
         
-        console.log('✨ Modern interface enabled');
     }
     
     disableModernInterface() {
@@ -505,7 +502,6 @@ class ModernInterface {
         // Remove modern mode class from body
         document.body.classList.remove('modern-mode');
         
-        console.log('📋 Legacy interface enabled');
     }
     
     toggleModernMode() {
@@ -532,7 +528,6 @@ class ModernInterface {
             themeBtn.textContent = this.isDarkMode ? '☀️' : '🌙';
         }
         
-        console.log(`🎨 Theme set to: ${theme}`);
     }
     
     toggleTheme() {
@@ -762,7 +757,6 @@ class ModernInterface {
                 this.togglePropertiesPanel();
             }
             
-            console.log(`✅ Field ${fieldType} added via modern palette`);
         } else {
             console.error('❌ Cannot add field - no current page or form builder');
             this.showErrorFeedback('Please connect to Salesforce and create a form first');
@@ -936,7 +930,6 @@ class ModernInterface {
             this.togglePropertiesPanel();
         }
         
-        console.log(`🎯 Selected field: ${fieldId}`);
     }
     
     updateModernPageTabs() {

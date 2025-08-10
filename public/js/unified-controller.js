@@ -12,7 +12,6 @@ class UnifiedExperienceController {
         this.fabMenuOpen = false;
         this.currentSelectedField = null;
         
-        console.log('🚀 Initializing Unified Experience Controller');
         this.init();
     }
     
@@ -26,7 +25,6 @@ class UnifiedExperienceController {
     }
     
     setupController() {
-        console.log('⚙️ Setting up Unified Controller');
         
         // Hide legacy interface
         this.toggleInterface();
@@ -43,7 +41,6 @@ class UnifiedExperienceController {
         // Set up field palette drag/drop
         this.setupFieldPaletteDragDrop();
         
-        console.log('✅ Unified Experience Controller initialized');
     }
     
     toggleInterface() {
@@ -59,7 +56,6 @@ class UnifiedExperienceController {
             unifiedContainer.style.display = 'block';
         }
         
-        console.log('🔄 Switched to Unified Interface');
     }
     
     setupEventListeners() {
@@ -88,7 +84,6 @@ class UnifiedExperienceController {
             themeToggle.addEventListener('click', () => this.toggleTheme());
         }
         
-        console.log('🎛️ Event listeners set up');
     }
     
     initializePanels() {
@@ -98,7 +93,6 @@ class UnifiedExperienceController {
         // Update connection status
         this.updateConnectionStatus();
         
-        console.log('📋 Panels initialized');
     }
     
     integrateWithExistingModules() {
@@ -107,7 +101,6 @@ class UnifiedExperienceController {
             if (window.AppModules && window.AppModules.formBuilder) {
                 this.formBuilder = window.AppModules.formBuilder;
                 this.setupFormBuilderIntegration();
-                console.log('🔗 Connected to existing Form Builder');
             } else {
                 setTimeout(checkModules, 100);
             }
@@ -186,7 +179,6 @@ class UnifiedExperienceController {
             });
         }
         
-        console.log('🎯 Field palette drag/drop set up');
     }
     
     // ==========================================================================
@@ -212,7 +204,6 @@ class UnifiedExperienceController {
             }
         }
         
-        console.log(`🌟 FAB Menu ${this.fabMenuOpen ? 'opened' : 'closed'}`);
         
         // If on mobile and menu opened, setup action buttons
         if (this.fabMenuOpen && window.AppModules && window.AppModules.mobile && window.AppModules.mobile.isMobileDevice()) {
@@ -242,7 +233,6 @@ class UnifiedExperienceController {
         this.fabMenuOpen = false;
         this.toggleFabMenu();
         
-        console.log('🧩 Field Palette opened');
     }
     
     openPropertiesPanel() {
@@ -261,7 +251,6 @@ class UnifiedExperienceController {
         this.fabMenuOpen = false;
         this.toggleFabMenu();
         
-        console.log('⚙️ Properties Panel opened');
     }
     
     closeFieldPalette() {
@@ -270,7 +259,6 @@ class UnifiedExperienceController {
         if (palette) palette.classList.remove('active');
         
         this.updateBackdrop();
-        console.log('🧩 Field Palette closed');
     }
     
     closePropertiesPanel() {
@@ -279,7 +267,6 @@ class UnifiedExperienceController {
         if (properties) properties.classList.remove('active');
         
         this.updateBackdrop();
-        console.log('⚙️ Properties Panel closed');
     }
     
     closeAllPanels() {
@@ -294,7 +281,6 @@ class UnifiedExperienceController {
         if (properties) properties.classList.remove('active');
         if (backdrop) backdrop.classList.remove('active');
         
-        console.log('📋 All panels closed');
     }
     
     updateBackdrop() {
@@ -310,7 +296,6 @@ class UnifiedExperienceController {
     // ==========================================================================
     
     addFieldFromPalette(fieldType) {
-        console.log(`➕ Adding field: ${fieldType}`);
         this.addFieldToForm(fieldType);
         
         // Show success feedback
@@ -363,7 +348,6 @@ class UnifiedExperienceController {
                 // Auto-select the new field
                 this.selectFieldUnified(newFieldId);
                 
-                console.log(`✅ Added ${fieldType} field with ID: ${newFieldId}`);
             } else {
                 console.error('❌ No current page available');
                 if (window.magicalPopups) {
@@ -459,7 +443,6 @@ class UnifiedExperienceController {
             // Add click handlers for field selection
             this.setupFieldClickHandlers();
             
-            console.log(`🎨 Rendered ${currentPage.fields.length} fields in unified canvas`);
             
         } catch (error) {
             console.error('❌ Error rendering form canvas:', error);
@@ -549,7 +532,6 @@ class UnifiedExperienceController {
     // ==========================================================================
     
     selectFieldUnified(fieldId) {
-        console.log(`🎯 Selecting field: ${fieldId}`);
         
         // Remove selection from all fields
         document.querySelectorAll('.unified-field-wrapper').forEach(wrapper => {
@@ -594,7 +576,6 @@ class UnifiedExperienceController {
                 propertiesContent.innerHTML = this.renderBasicFieldProperties(field);
             }
             
-            console.log(`⚙️ Showing properties for field: ${fieldId}`);
             
         } catch (error) {
             console.error('❌ Error showing field properties:', error);
@@ -779,7 +760,6 @@ class UnifiedExperienceController {
                     this.selectFieldUnified(fieldId);
                 }, 100);
                 
-                console.log(`✏️ Updated ${property} for field ${fieldId}`);
             }
         } catch (error) {
             console.error('❌ Error updating field property:', error);
@@ -849,7 +829,6 @@ class UnifiedExperienceController {
             themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
         }
         
-        console.log(`🎨 Theme switched to: ${newTheme}`);
     }
     
     // ==========================================================================
@@ -928,7 +907,6 @@ function addFieldFromPalette(fieldType) {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Initializing Unified Experience');
     unifiedController = new UnifiedExperienceController();
 });
 

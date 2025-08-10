@@ -165,6 +165,78 @@ const SalesforceOrg = sequelize.define('SalesforceOrg', {
     ]
 });
 
+// User table for authentication
+const User = sequelize.define('User', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+            isEmail: true
+        }
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    firstName: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    lastName: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    isActive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    },
+    lastLoginAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    emailVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    verificationToken: {
+        type: DataTypes.STRING,
+        allowNull: true
+    }
+}, {
+    tableName: 'users',
+    indexes: [
+        {
+            unique: true,
+            fields: ['email']
+        }
+    ],
+    hooks: {
+        beforeCreate: async (user) => {
+            if (user.password) {
+                const salt = await bcrypt.genSalt(10);
+                user.password = await bcrypt.hash(user.password, salt);
+            }
+        },
+        beforeUpdate: async (user) => {
+            if (user.changed('password')) {
+                const salt = await bcrypt.genSalt(10);
+                user.password = await bcrypt.hash(user.password, salt);
+            }
+        }
+    }
+});
+
+// Add instance method to verify password
+User.prototype.verifyPassword = async function(password) {
+    return await bcrypt.compare(password, this.password);
+};
+
 // User-Org Access table (stores OAuth tokens per user per org)
 const UserOrgAccess = sequelize.define('UserOrgAccess', {
     id: {
@@ -309,6 +381,12 @@ const FormSubmission = sequelize.define('FormSubmission', {
 });
 
 // Define associations
+User.hasMany(UserOrgAccess, { foreignKey: 'userId', as: 'orgAccess' });
+UserOrgAccess.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+User.hasMany(SalesforceOrg, { foreignKey: 'createdBy', as: 'createdOrgs' });
+SalesforceOrg.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+
 SalesforceOrg.hasMany(UserOrgAccess, { foreignKey: 'orgId', as: 'userAccess' });
 UserOrgAccess.belongsTo(SalesforceOrg, { foreignKey: 'orgId', as: 'org' });
 
@@ -622,10 +700,92 @@ class DatabaseManager {
             throw error;
         }
     }
+
+    // User Management Methods
+    static async createUser(userData) {
+        try {
+            const user = await User.create(userData);
+            return user;
+        } catch (error) {
+            console.error('Error creating user:', error);
+            throw error;
+        }
+    }
+
+    static async getUserByEmail(email) {
+        try {
+            const user = await User.findOne({
+                where: { email: email.toLowerCase() }
+            });
+            return user;
+        } catch (error) {
+            console.error('Error fetching user by email:', error);
+            throw error;
+        }
+    }
+
+    static async getUserById(userId) {
+        try {
+            const user = await User.findByPk(userId);
+            return user;
+        } catch (error) {
+            console.error('Error fetching user by ID:', error);
+            throw error;
+        }
+    }
+
+    static async updateUserLastLogin(userId) {
+        try {
+            await User.update(
+                { lastLoginAt: new Date() },
+                { where: { id: userId } }
+            );
+        } catch (error) {
+            console.error('Error updating user last login:', error);
+            throw error;
+        }
+    }
+
+    static async getUserOrganizations(userId) {
+        try {
+            const userOrgAccess = await UserOrgAccess.findAll({
+                where: { userId, isActive: true },
+                include: [{
+                    model: SalesforceOrg,
+                    as: 'org',
+                    where: { isActive: true }
+                }]
+            });
+            return userOrgAccess.map(access => access.org);
+        } catch (error) {
+            console.error('Error fetching user organizations:', error);
+            throw error;
+        }
+    }
+
+    static async linkUserToOrg(userId, orgId) {
+        try {
+            const [userOrgAccess, created] = await UserOrgAccess.findOrCreate({
+                where: { userId, orgId },
+                defaults: { isActive: true }
+            });
+            
+            if (!created && !userOrgAccess.isActive) {
+                userOrgAccess.isActive = true;
+                await userOrgAccess.save();
+            }
+            
+            return userOrgAccess;
+        } catch (error) {
+            console.error('Error linking user to org:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = {
     sequelize,
+    User,
     SalesforceOrg,
     UserOrgAccess,
     FormSubmission,

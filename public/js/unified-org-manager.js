@@ -14,12 +14,13 @@ window.showOrgManager = function() {
 // Load all organizations
 async function loadOrganizations() {
     try {
+        // Get auth headers
+        const headers = window.Auth ? window.Auth.getHeaders() : { 'Content-Type': 'application/json' };
+        
         const response = await fetch('/api/orgs', {
             method: 'GET',
             credentials: 'same-origin', // Important for including session cookies
-            headers: {
-                'Content-Type': 'application/json',
-            }
+            headers: headers
         });
         
         if (!response.ok) {
@@ -28,15 +29,17 @@ async function loadOrganizations() {
         }
         
         const data = await response.json();
-        console.log('Loaded organizations:', data);
         
         const orgCards = document.getElementById('orgCards');
         if (!orgCards) return;
         
         // Extract organizations from the API response
         let orgsList = [];
-        if (data && data.success) {
-            // Combine userOrgs and availableOrgs
+        if (data && data.success && data.organizations) {
+            // Use the organizations array from the response
+            orgsList = Array.isArray(data.organizations) ? data.organizations : [];
+        } else if (data && data.success) {
+            // Combine userOrgs and availableOrgs (legacy support)
             const userOrgs = Array.isArray(data.userOrgs) ? data.userOrgs : [];
             const availableOrgs = Array.isArray(data.availableOrgs) ? data.availableOrgs : [];
             orgsList = [...userOrgs, ...availableOrgs];
@@ -113,7 +116,6 @@ async function checkCurrentConnection() {
         }
         
         const data = await response.json();
-        console.log('Current connection status:', data);
         
         const statusIndicator = document.getElementById('statusIndicator');
         const statusText = document.getElementById('statusText');
@@ -198,10 +200,13 @@ window.registerNewOrg = async function() {
     }
     
     try {
+        // Get auth headers
+        const headers = window.Auth ? window.Auth.getHeaders() : { 'Content-Type': 'application/json' };
+        
         const response = await fetch('/api/orgs/register', {
             method: 'POST',
             credentials: 'same-origin', // Include session cookies
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify({ 
                 name, 
                 clientId,

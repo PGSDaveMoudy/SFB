@@ -1,8 +1,8 @@
-# Salesforce Form Builder - Enterprise Edition
+# PilotForms - Enterprise Edition
 
 <div align="center">
 
-![Salesforce Form Builder](https://img.shields.io/badge/Salesforce-Form%20Builder-blue?style=for-the-badge&logo=salesforce)
+![PilotForms](https://img.shields.io/badge/Salesforce-Form%20Builder-blue?style=for-the-badge&logo=salesforce)
 ![Version](https://img.shields.io/badge/Version-2025.1-green?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-Enterprise-purple?style=for-the-badge)
 
@@ -14,7 +14,7 @@
 
 ---
 
-## 🌟 **What is Salesforce Form Builder?**
+## 🌟 **What is PilotForms?**
 
 A production-ready, enterprise-grade form builder that seamlessly integrates with Salesforce CRM. Create beautiful, responsive forms with advanced features like e-signatures, conditional logic, multi-page workflows, and automated data collection - all without writing code.
 
@@ -294,6 +294,6 @@ Create sophisticated business processes with:
 
 **Built with ❤️ for Salesforce professionals**
 
-*Salesforce Form Builder - Enterprise Edition © 2025*
+*PilotForms - Enterprise Edition © 2025*
 
 </div>

@@ -118,20 +118,20 @@ export class SalesforceConnector {
                 statusText.textContent = 'Connected';
             }
             
-            // Hide connect buttons and show disconnect button
-            connectBtn.style.display = 'none';
-            connectUsernameBtn.style.display = 'none';
+            // Hide connect buttons if they exist (they may have been removed)
+            if (connectBtn) connectBtn.style.display = 'none';
+            if (connectUsernameBtn) connectUsernameBtn.style.display = 'none';
             
             // Show disconnect button if it doesn't exist
             let disconnectBtn = document.getElementById('disconnectBtn');
-            if (!disconnectBtn) {
+            if (!disconnectBtn && connectUsernameBtn && connectUsernameBtn.parentNode) {
                 disconnectBtn = document.createElement('button');
                 disconnectBtn.id = 'disconnectBtn';
                 disconnectBtn.className = 'button button-secondary';
                 disconnectBtn.textContent = 'Disconnect';
                 disconnectBtn.onclick = window.disconnectFromSalesforce;
                 connectUsernameBtn.parentNode.appendChild(disconnectBtn);
-            } else {
+            } else if (disconnectBtn) {
                 disconnectBtn.style.display = 'block';
             }
             
@@ -142,9 +142,9 @@ export class SalesforceConnector {
             statusEl.classList.add('disconnected');
             statusText.textContent = 'Not Connected';
             
-            // Show connect buttons and hide disconnect button
-            connectBtn.style.display = 'block';
-            connectUsernameBtn.style.display = 'block';
+            // Show connect buttons if they exist (they may have been removed)
+            if (connectBtn) connectBtn.style.display = 'block';
+            if (connectUsernameBtn) connectUsernameBtn.style.display = 'block';
             
             const disconnectBtn = document.getElementById('disconnectBtn');
             if (disconnectBtn) {

@@ -1,5 +1,5 @@
 /**
- * Centralized Debug System for Salesforce Form Builder
+ * Centralized Debug System for PilotForms
  * Replaces all console.log statements with configurable logging
  */
 
@@ -13,7 +13,7 @@ const DEBUG_LEVELS = {
 };
 
 // Current debug level (can be changed via localStorage or programmatically)
-let currentDebugLevel = parseInt(localStorage.getItem('sfb_debug_level')) || DEBUG_LEVELS.INFO;
+let currentDebugLevel = parseInt(localStorage.getItem('sfb_debug_level')) || DEBUG_LEVELS.ERROR;
 
 // Module-specific debug states (can enable/disable per module)
 const moduleDebugState = JSON.parse(localStorage.getItem('sfb_module_debug')) || {};

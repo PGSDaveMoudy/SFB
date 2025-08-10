@@ -238,6 +238,33 @@ export class FormStorage {
         }
     }
     
+    async unpublishForm(formId) {
+        try {
+            const response = await fetch(`/api/forms/${formId}/unpublish`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Update local cache
+                this.forms.set(formId, result.form);
+                
+                debugInfo('FormStorage', 'Form unpublished successfully');
+                return result;
+            } else {
+                throw new Error(result.error || 'Unpublish failed');
+            }
+        } catch (error) {
+            debugError('FormStorage', 'Error unpublishing form:', error);
+            alert(`Failed to unpublish form: ${error.message}`);
+            return null;
+        }
+    }
+    
     async exportForm(formId) {
         try {
             const response = await fetch(`/api/forms/${formId}/export`, {
@@ -481,6 +508,9 @@ export class FormStorage {
                     <button class="link-btn" onclick="window.open('${form.publicUrl}', '_blank')" title="View Form">
                         👁️ View Form
                     </button>
+                    <button class="secondary-btn" onclick="window.AppModules.formStorage.unpublishFormAction('${form.id}')">
+                        🔒 Unpublish
+                    </button>
                 </div>
                 ` : `
                 <div class="form-card-links">
@@ -530,6 +560,17 @@ export class FormStorage {
             this.showPublishSuccessModal(result.publicUrl);
             // Refresh the forms list
             await this.showMyForms();
+        }
+    }
+    
+    async unpublishFormAction(formId) {
+        if (confirm('Are you sure you want to unpublish this form? It will no longer be accessible via the public link.')) {
+            const result = await this.unpublishForm(formId);
+            if (result) {
+                alert('Form unpublished successfully');
+                // Refresh the forms list
+                await this.showMyForms();
+            }
         }
     }
     

@@ -1,4 +1,4 @@
-// SMTP Server Integration for Salesforce Form Builder
+// SMTP Server Integration for PilotForms
 // Connects the custom SMTP server with the existing email service
 
 const CustomSMTPServer = require('./smtpServer');

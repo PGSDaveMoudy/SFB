@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1200, initial-scale=0.8">
-    <title>Salesforce Form Builder - Classic 3-Column Layout</title>
+    <title>PilotForms - Classic 3-Column Layout</title>
     <link rel="stylesheet" href="styles-notion-enhanced.css">
     <link rel="stylesheet" href="styles-modern-redesign.css">
     <link rel="stylesheet" href="styles-unified-experience.css">
@@ -16,14 +16,14 @@
         <div class="mobile-landing-content">
             <div class="mobile-landing-header">
                 <div class="mobile-landing-logo">💻</div>
-                <h1>Salesforce Form Builder</h1>
+                <h1>PilotForms</h1>
                 <p class="mobile-landing-subtitle">Desktop Experience Required</p>
             </div>
             
             <div class="mobile-landing-message">
                 <div class="message-icon">🖥️</div>
                 <h2>Larger Screen Required</h2>
-                <p>The Salesforce Form Builder requires a minimum screen width of 1400px to display all three columns properly and provide the best experience.</p>
+                <p>The PilotForms requires a minimum screen width of 1400px to display all three columns properly and provide the best experience.</p>
                 
                 <div class="features-grid">
                     <div class="feature-item">
@@ -57,7 +57,7 @@
             
             <div class="mobile-landing-footer">
                 <p>Thank you for understanding!</p>
-                <div class="company-logo">🚀 Salesforce Form Builder</div>
+                <div class="company-logo">🚀 PilotForms</div>
             </div>
         </div>
     </div>
@@ -74,9 +74,6 @@
                 </button>
                 <button class="actions-item" onclick="saveForm()" title="Save current form">
                     💾 Save Form
-                </button>
-                <button class="actions-item" onclick="publishForm()" title="Publish form for public access">
-                    🚀 Publish Form
                 </button>
                 <div class="actions-divider"></div>
                 <button class="actions-item" onclick="previewForm()" title="Preview form">
@@ -102,7 +99,7 @@
         <div class="modal-content intro-modal-content">
             <div class="intro-header">
                 <div class="intro-logo">🚀</div>
-                <h2>Welcome to Salesforce Form Builder</h2>
+                <h2>Welcome to PilotForms</h2>
                 <p class="intro-subtitle">Build professional forms with enterprise-grade features</p>
             </div>
             
@@ -176,7 +173,7 @@
     <!-- Legacy Welcome Modal (kept for compatibility) -->
     <div id="welcomeModal" class="modal" style="display: none;">
         <div class="modal-content welcome-modal">
-            <h2>Welcome to Salesforce Form Builder</h2>
+            <h2>Welcome to PilotForms</h2>
             <p>Build professional forms with advanced features:</p>
             <ul class="feature-list">
                 <li>✨ <strong>WYSIWYG Builder</strong> - What you build is what users see</li>
@@ -215,7 +212,7 @@
     <!-- Top Header Bar -->
     <header class="top-header">
         <div class="header-left">
-            <h1 class="app-title">Salesforce Form Builder</h1>
+            <h1 class="app-title">PilotForms</h1>
             <span class="app-subtitle">Enterprise Edition</span>
         </div>
         
@@ -228,24 +225,7 @@
         </div>
         
         <div class="header-right">
-            <div class="header-links">
-                <a href="./developer.html" class="header-link" target="_blank">
-                    🛠️ Developer
-                </a>
-                <a href="./help.html" class="header-link" target="_blank">
-                    ❓ Help
-                </a>
-            </div>
             
-            <!-- Salesforce Connection Buttons -->
-            <div class="header-connection">
-                <button id="connectBtn" class="button button-primary button-compact">
-                    Connect OAuth
-                </button>
-                <button id="connectUsernameBtn" class="button button-secondary button-compact">
-                    Username/Password
-                </button>
-            </div>
         </div>
     </header>
 
@@ -269,9 +249,6 @@
                 </button>
                 <button class="nav-action-btn" onclick="showMyForms()" title="My Forms">
                     📋
-                </button>
-                <button class="nav-action-btn" onclick="showHelp()" title="Help">
-                    ❓
                 </button>
             </div>
         </nav>
@@ -313,9 +290,6 @@
                 </button>
                 <button class="fab-action" data-tooltip="Save" onclick="saveForm()">
                     💾
-                </button>
-                <button class="fab-action" data-tooltip="Publish" onclick="publishForm()">
-                    🚀
                 </button>
             </div>
             <button class="main-fab" onclick="toggleFabMenu()">
@@ -580,9 +554,6 @@
                     <button class="unified-btn unified-btn-secondary" onclick="saveForm()" title="Save Form">
                         💾 Save
                     </button>
-                    <button class="unified-btn unified-btn-primary" onclick="publishForm()" title="Publish Form">
-                        🚀 Publish
-                    </button>
                 </div>
             </nav>
 
@@ -650,34 +621,6 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-content">
-            <!-- Organization Selection -->
-            <div class="section" id="orgSelection" style="display: none;">
-                <h3>Select Organization</h3>
-                <div class="org-selector">
-                    <select id="orgSelector" class="form-select">
-                        <option value="">Choose Salesforce Org...</option>
-                    </select>
-                    <button id="connectToOrgBtn" class="button button-primary" style="margin-top: var(--space-2); width: 100%;" disabled>
-                        Connect to Selected Org
-                    </button>
-                </div>
-                <div class="org-status-display" id="currentOrgStatus" style="display: none;">
-                    <div class="current-org-info">
-                        <div class="org-connected-indicator">
-                            <span class="status-icon connected">●</span>
-                            <span class="status-text">Connected to:</span>
-                        </div>
-                        <div class="org-details">
-                            <div class="org-name" id="currentOrgName"></div>
-                            <div class="org-type" id="currentOrgType"></div>
-                        </div>
-                        <button id="disconnectOrgBtn" class="button button-secondary" style="margin-top: var(--space-2); width: 100%;">
-                            Disconnect
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Building Blocks -->
             <div class="section" id="buildingBlocks" style="display: none;">
                 <h3>Building Blocks</h3>
@@ -905,45 +848,13 @@
     <div id="publishSettingsModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closePublishSettingsModal()">&times;</span>
-            <h2>📅 Publish Form Settings</h2>
-            <p>Configure when your form should be available</p>
+            <h2>🚀 Publish Form</h2>
+            <p>Your form will be published and made available for submissions.</p>
             
-            <form id="publishSettingsForm">
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="enableDateRange" onchange="toggleDateRangeFields(this.checked)">
-                        Set availability date range (temporary form)
-                    </label>
-                </div>
-                
-                <div id="dateRangeFields" style="display: none;">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Start Date & Time</label>
-                            <input type="datetime-local" id="publishStartDate" class="form-input">
-                            <div class="help-text">When the form becomes available</div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>End Date & Time</label>
-                            <input type="datetime-local" id="publishEndDate" class="form-input">
-                            <div class="help-text">When the form expires and is no longer accessible</div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Expiration Message</label>
-                        <textarea id="expirationMessage" class="form-input" rows="3" 
-                                  placeholder="This form is no longer accepting submissions.">This form is no longer accepting submissions.</textarea>
-                        <div class="help-text">Message shown to users after the form expires</div>
-                    </div>
-                </div>
-                
-                <div class="modal-actions">
-                    <button type="button" class="button button-secondary" onclick="closePublishSettingsModal()">Cancel</button>
-                    <button type="button" class="button button-primary" onclick="confirmPublish()">🚀 Publish Form</button>
-                </div>
-            </form>
+            <div class="modal-actions">
+                <button type="button" class="button button-secondary" onclick="closePublishSettingsModal()">Cancel</button>
+                <button type="button" class="button button-primary" onclick="confirmPublish()">🚀 Publish Form</button>
+            </div>
         </div>
     </div>
     
@@ -1171,7 +1082,6 @@
         // Override fetch to add debugging
         const originalFetch = window.fetch;
         window.fetch = function(...args) {
-            console.log('🌐 Fetch request:', args[0], args[1]);
             return originalFetch.apply(this, args)
                 .then(response => {
                     if (!response.ok) {
@@ -1366,7 +1276,6 @@
         // Make variables easily accessible for debugging
         window.vars = window.FormVariables;
         
-        console.log('🌐 Global Variable System initialized (Form Builder)');
     </script>
 
     <!-- Bottom Footer Bar - REMOVED as it's replaced by floating menu buttons -->
@@ -1511,11 +1420,9 @@
         const desktopApp = document.getElementById('desktopApplication');
         
         if (isSmallScreen) {
-            console.log('Small screen detected (' + window.innerWidth + 'px) - showing desktop requirement message');
             mobileApp.style.display = 'flex';
             desktopApp.style.display = 'none';
         } else {
-            console.log('Large screen detected (' + window.innerWidth + 'px) - showing form builder');
             mobileApp.style.display = 'none';
             desktopApp.style.display = 'block';
         }

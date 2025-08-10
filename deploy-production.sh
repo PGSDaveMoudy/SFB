@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Salesforce Form Builder - Production Deployment Script
+# PilotForms - Production Deployment Script
 # This script automates the complete deployment of SFB to production
 # Created: July 2025
 # Author: Claude (Anthropic AI)
@@ -16,10 +16,10 @@ PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
 
 # Configuration
-DOMAIN="www.portwoodglobalsolutions.com"
-MAIL_DOMAIN="mail.portwoodglobalsolutions.com"
+DOMAIN="pilotforms.com"
+MAIL_DOMAIN="mail.pilotforms.com"
 APP_PORT="8443"
-EMAIL_FROM="noreply@portwoodglobalsolutions.com"
+EMAIL_FROM="noreply@pilotforms.com"
 
 # Function to print colored output
 print_step() {
@@ -156,7 +156,7 @@ configure_hostname() {
     echo "$MAIL_DOMAIN" > /etc/hostname
     
     # Update /etc/hosts
-    sed -i "s/server1\.portwoodglobalsolutions\.com/${MAIL_DOMAIN} portwoodglobalsolutions.com ${DOMAIN}/g" /etc/hosts
+    sed -i "s/server1\.portwoodglobalsolutions\.com/${MAIL_DOMAIN} pilotforms.com ${DOMAIN}/g" /etc/hosts
     
     print_success "Hostname configured"
 }
@@ -170,7 +170,7 @@ setup_ssl() {
 server {
     listen 80;
     listen [::]:80;
-    server_name ${DOMAIN} portwoodglobalsolutions.com;
+    server_name ${DOMAIN} pilotforms.com;
 
     location /.well-known/acme-challenge/ {
         root /var/www/html;
@@ -190,7 +190,7 @@ EOF
     nginx -t && systemctl restart nginx
     
     # Generate SSL certificates
-    certbot certonly --nginx -d portwoodglobalsolutions.com -d "$DOMAIN" --non-interactive --agree-tos --email "admin@portwoodglobalsolutions.com"
+    certbot certonly --nginx -d pilotforms.com -d "$DOMAIN" --non-interactive --agree-tos --email "admin@pilotforms.com"
     
     print_success "SSL certificates generated"
 }
@@ -200,7 +200,7 @@ configure_nginx() {
     print_step "Configuring Nginx reverse proxy..."
     
     # Create main Nginx configuration
-    cat > /etc/nginx/sites-available/portwoodglobalsolutions.com << 'EOF'
+    cat > /etc/nginx/sites-available/pilotforms.com << 'EOF'
 upstream sfb_backend {
     ip_hash;
     server 127.0.0.1:8443 max_fails=3 fail_timeout=30s;
@@ -217,7 +217,7 @@ proxy_cache_path /var/cache/nginx/sfb levels=1:2 keys_zone=sfb_cache:10m max_siz
 server {
     listen 80;
     listen [::]:80;
-    server_name www.portwoodglobalsolutions.com portwoodglobalsolutions.com;
+    server_name pilotforms.com www.pilotforms.com;
 
     # Redirect all HTTP to HTTPS
     return 301 https://$host$request_uri;
@@ -226,11 +226,11 @@ server {
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name www.portwoodglobalsolutions.com portwoodglobalsolutions.com;
+    server_name pilotforms.com www.pilotforms.com;
 
     # SSL Configuration
-    ssl_certificate /etc/letsencrypt/live/portwoodglobalsolutions.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/portwoodglobalsolutions.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/pilotforms.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/pilotforms.com/privkey.pem;
     
     # SSL Security Settings
     ssl_protocols TLSv1.2 TLSv1.3;
@@ -372,7 +372,7 @@ EOF
     
     # Remove temporary config and enable main config
     rm -f /etc/nginx/sites-enabled/temp-ssl.conf
-    ln -sf /etc/nginx/sites-available/portwoodglobalsolutions.com /etc/nginx/sites-enabled/
+    ln -sf /etc/nginx/sites-available/pilotforms.com /etc/nginx/sites-enabled/
     
     # Test and reload Nginx
     nginx -t && systemctl reload nginx
@@ -409,8 +409,8 @@ readme_directory = no
 compatibility_level = 3.6
 
 # TLS parameters
-smtpd_tls_cert_file=/etc/letsencrypt/live/portwoodglobalsolutions.com/fullchain.pem
-smtpd_tls_key_file=/etc/letsencrypt/live/portwoodglobalsolutions.com/privkey.pem
+smtpd_tls_cert_file=/etc/letsencrypt/live/pilotforms.com/fullchain.pem
+smtpd_tls_key_file=/etc/letsencrypt/live/pilotforms.com/privkey.pem
 smtpd_tls_security_level=may
 
 smtp_tls_CApath=/etc/ssl/certs
@@ -422,7 +422,7 @@ myhostname = ${MAIL_DOMAIN}
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 myorigin = /etc/mailname
-mydestination = \$myhostname, portwoodglobalsolutions.com, ${MAIL_DOMAIN}, localhost.portwoodglobalsolutions.com, localhost
+mydestination = \$myhostname, pilotforms.com, ${MAIL_DOMAIN}, localhost.pilotforms.com, localhost
 relayhost = 
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 mailbox_size_limit = 0
@@ -441,9 +441,9 @@ EOF
     echo "${MAIL_DOMAIN}" > /etc/mailname
     
     # Configure OpenDKIM
-    mkdir -p /etc/opendkim/keys/portwoodglobalsolutions.com
-    cd /etc/opendkim/keys/portwoodglobalsolutions.com
-    opendkim-genkey -s default -d portwoodglobalsolutions.com
+    mkdir -p /etc/opendkim/keys/pilotforms.com
+    cd /etc/opendkim/keys/pilotforms.com
+    opendkim-genkey -s default -d pilotforms.com
     chown opendkim:opendkim default.private
     
     # OpenDKIM configuration files
@@ -451,15 +451,15 @@ EOF
 127.0.0.1
 localhost
 192.168.1.0/24
-*.portwoodglobalsolutions.com
+*.pilotforms.com
 EOF
 
     cat > /etc/opendkim/KeyTable << EOF
-default._domainkey.portwoodglobalsolutions.com portwoodglobalsolutions.com:default:/etc/opendkim/keys/portwoodglobalsolutions.com/default.private
+default._domainkey.pilotforms.com pilotforms.com:default:/etc/opendkim/keys/pilotforms.com/default.private
 EOF
 
     cat > /etc/opendkim/SigningTable << EOF
-*@portwoodglobalsolutions.com default._domainkey.portwoodglobalsolutions.com
+*@pilotforms.com default._domainkey.pilotforms.com
 EOF
 
     # Update OpenDKIM configuration
@@ -477,7 +477,7 @@ EOF
     
     print_success "Email system configured"
     print_info "DKIM public key for DNS:"
-    cat /etc/opendkim/keys/portwoodglobalsolutions.com/default.txt
+    cat /etc/opendkim/keys/pilotforms.com/default.txt
 }
 
 # Function to setup PM2
@@ -557,7 +557,7 @@ test_deployment() {
     fi
     
     # Test email sending
-    if echo "Test email from SFB deployment script" | mail -s "SFB Deployment Test" "admin@portwoodglobalsolutions.com" 2>/dev/null; then
+    if echo "Test email from SFB deployment script" | mail -s "SFB Deployment Test" "admin@pilotforms.com" 2>/dev/null; then
         print_success "Email system working"
     else
         print_warning "Email test failed - check configuration"
@@ -576,15 +576,15 @@ test_deployment() {
 
 # Function to display final information
 display_final_info() {
-    print_success "🎉 Salesforce Form Builder deployed successfully!"
+    print_success "🎉 PilotForms deployed successfully!"
     echo
     print_info "🌐 Website: https://${DOMAIN}"
     print_info "📧 Email: ${EMAIL_FROM}"
     print_info "🏢 Org Manager: https://${DOMAIN}/org-manager.html"
     echo
     print_info "📝 Required DNS Records:"
-    echo "   - MX: mail.portwoodglobalsolutions.com (Priority: 10)"
-    echo "   - TXT (SPF): v=spf1 mx a ip4:159.196.64.152 ~all"
+    echo "   - MX: mail.pilotforms.com (Priority: 10)"
+    echo "   - TXT (SPF): v=spf1 mx a ~all"
     echo "   - TXT (DKIM): Add the DKIM record shown above"
     echo
     print_info "🔧 Management Commands:"
@@ -601,7 +601,7 @@ display_final_info() {
 main() {
     echo -e "${PURPLE}"
     echo "╔═══════════════════════════════════════════════╗"
-    echo "║     Salesforce Form Builder - Deployment     ║"
+    echo "║     PilotForms - Deployment     ║"
     echo "║              Production Script                ║"
     echo "╚═══════════════════════════════════════════════╝"
     echo -e "${NC}"

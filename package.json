@@ -1,7 +1,7 @@
 {
   "name": "salesforce-form-builder",
   "version": "1.0.0",
-  "description": "Enterprise Salesforce Form Builder with E-Signatures, Multi-Page Forms, and Auto-Save",
+  "description": "Enterprise PilotForms with E-Signatures, Multi-Page Forms, and Auto-Save",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -29,10 +29,12 @@
     "fs-extra": "^11.3.0",
     "helmet": "^7.1.0",
     "jsforce": "^2.0.0-beta.28",
+    "jsonwebtoken": "^9.0.2",
     "mailparser": "^3.7.4",
     "multer": "^2.0.0",
     "node-cron": "^4.2.1",
     "nodemailer": "^6.10.1",
+    "playwright": "^1.54.2",
     "sequelize": "^6.37.1",
     "smtp-server": "^3.14.0",
     "sqlite3": "^5.1.7",

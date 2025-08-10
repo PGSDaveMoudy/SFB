@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Org API</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #666;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #5855eb;
+        }
+        .result {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .error {
+            background: #fee;
+            border-color: #fcc;
+            color: #c00;
+        }
+        .success {
+            background: #efe;
+            border-color: #cfc;
+            color: #060;
+        }
+        .warning {
+            background: #ffeaa7;
+            border-color: #fdcb6e;
+            color: #d63031;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Organization API Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>Session Test</h2>
+        <button onclick="testSession()">Test Session</button>
+        <div id="sessionResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Organization APIs</h2>
+        <button onclick="testGetOrgs()">GET /api/orgs</button>
+        <button onclick="testCurrentOrg()">GET /api/orgs/current</button>
+        <button onclick="testRegisterOrg()">Test Register Org</button>
+        <div id="orgResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Registration Form</h2>
+        <div style="display: grid; gap: 10px; max-width: 500px;">
+            <input type="text" id="testOrgName" placeholder="Organization Name" style="padding: 8px;">
+            <input type="text" id="testClientId" placeholder="Client ID" style="padding: 8px;">
+            <input type="password" id="testClientSecret" placeholder="Client Secret" style="padding: 8px;">
+            <select id="testOrgType" style="padding: 8px;">
+                <option value="production">Production</option>
+                <option value="sandbox">Sandbox</option>
+                <option value="developer">Developer</option>
+            </select>
+            <button onclick="registerTestOrg()">Register Organization</button>
+        </div>
+        <div id="registerResult" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        async function testSession() {
+            const resultDiv = document.getElementById('sessionResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Testing session...';
+            
+            try {
+                // Make a simple request to check if cookies are being sent
+                const response = await fetch('/api/orgs', {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const cookies = document.cookie;
+                const sessionInfo = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    cookies: cookies || 'No cookies found',
+                    credentials: 'same-origin is being used'
+                };
+                
+                resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
+                resultDiv.textContent = 'Session Test Results:\n' + JSON.stringify(sessionInfo, null, 2);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Session test failed: ' + error.message;
+            }
+        }
+
+        async function testGetOrgs() {
+            const resultDiv = document.getElementById('orgResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Loading organizations...';
+            
+            try {
+                const response = await fetch('/api/orgs', {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
+                resultDiv.textContent = `GET /api/orgs Response (${response.status}):\n` + JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Failed to load organizations: ' + error.message;
+            }
+        }
+
+        async function testCurrentOrg() {
+            const resultDiv = document.getElementById('orgResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Checking current organization...';
+            
+            try {
+                const response = await fetch('/api/orgs/current', {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
+                resultDiv.textContent = `GET /api/orgs/current Response (${response.status}):\n` + JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Failed to check current org: ' + error.message;
+            }
+        }
+
+        async function testRegisterOrg() {
+            const resultDiv = document.getElementById('orgResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result warning';
+            resultDiv.textContent = 'Test Registration:\n\n' +
+                'Organization Name: Test Org\n' +
+                'Client ID: test-client-id-123\n' +
+                'Client Secret: test-client-secret-456\n' +
+                'Type: developer\n\n' +
+                'Use the form below to actually register an org.';
+        }
+
+        async function registerTestOrg() {
+            const resultDiv = document.getElementById('registerResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Registering organization...';
+            
+            const name = document.getElementById('testOrgName').value;
+            const clientId = document.getElementById('testClientId').value;
+            const clientSecret = document.getElementById('testClientSecret').value;
+            const type = document.getElementById('testOrgType').value;
+            
+            if (!name || !clientId || !clientSecret) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Please fill in all required fields';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/orgs/register', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        clientId,
+                        clientSecret,
+                        type
+                    })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.className = 'result ' + (data.success ? 'success' : 'error');
+                resultDiv.textContent = `Registration Response (${response.status}):\n` + JSON.stringify(data, null, 2);
+                
+                if (data.success) {
+                    // Clear form
+                    document.getElementById('testOrgName').value = '';
+                    document.getElementById('testClientId').value = '';
+                    document.getElementById('testClientSecret').value = '';
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Registration failed: ' + error.message;
+            }
+        }
+
+        // Test session on page load
+        window.addEventListener('load', () => {
+            console.log('Page loaded, testing session automatically...');
+            testSession();
+        });
+    </script>
+</body>
+</html>

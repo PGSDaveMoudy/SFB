@@ -1,4 +1,4 @@
-// Custom SMTP Server for Salesforce Form Builder
+// Custom SMTP Server for PilotForms
 // Provides secure, self-hosted email delivery for OTP and form notifications
 
 const { SMTPServer } = require('smtp-server');

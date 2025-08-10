@@ -2987,7 +2987,7 @@ export class FormBuilder {
                                 <label for="form-use-custom-email">Use Custom SMTP Server</label>
                             </div>
                         </div>
-                        <div class="help-text">Configure custom email settings for OTP delivery (defaults to portwoodglobalsolutions.com)</div>
+                        <div class="help-text">Configure custom email settings for OTP delivery (defaults to pilotforms.com)</div>
                     </div>
 
                     <div id="custom-email-config" style="display: ${settings.useCustomEmail ? 'block' : 'none'}">
@@ -3220,6 +3220,128 @@ export class FormBuilder {
         const selectedButton = document.querySelector(`[onclick="window.AppModules.formBuilder.switchFieldSubTab('${tabName}')"]`);
         if (selectedContent) selectedContent.style.display = 'block';
         if (selectedButton) selectedButton.classList.add('active');
+        
+        // Load Salesforce fields when switching to Salesforce tab
+        if (tabName === 'salesforce') {
+            this.loadSalesforceFieldsForMapping();
+        }
+    }
+    
+    async loadSalesforceFieldsForMapping() {
+        const currentPage = this.getCurrentPage();
+        const salesforceObject = currentPage?.salesforceObject;
+        
+        if (!window.AppState.salesforceConnected || !salesforceObject) {
+            return;
+        }
+        
+        try {
+            // Get the field dropdown
+            const fieldSelect = document.getElementById('prop-salesforceField');
+            if (!fieldSelect) return;
+            
+            // Show loading state
+            fieldSelect.innerHTML = '<option value="_loading_">Loading fields...</option>';
+            
+            // Ensure salesforce connector is available
+            let salesforceConnector = window.AppModules?.salesforce;
+            
+            // If not available in AppModules, try to get it directly
+            if (!salesforceConnector) {
+                console.warn('SalesforceConnector not found in AppModules, attempting direct access...');
+                // Try to initialize or get the connector
+                if (window.SalesforceConnector) {
+                    salesforceConnector = new window.SalesforceConnector();
+                    await salesforceConnector.initialize();
+                } else {
+                    throw new Error('SalesforceConnector class not available');
+                }
+            }
+            
+            // Verify the method exists
+            if (!salesforceConnector.getObjectFields) {
+                throw new Error('getObjectFields method not available on salesforce connector');
+            }
+            
+            // Load fields from Salesforce
+            const fields = await salesforceConnector.getObjectFields(salesforceObject);
+            
+            // Clear and populate dropdown
+            fieldSelect.innerHTML = '<option value="">Not Mapped</option>';
+            
+            // Group fields by type for better organization
+            const standardFields = [];
+            const customFields = [];
+            
+            fields.forEach(field => {
+                if (field.name.endsWith('__c')) {
+                    customFields.push(field);
+                } else {
+                    standardFields.push(field);
+                }
+            });
+            
+            // Add standard fields
+            if (standardFields.length > 0) {
+                const standardGroup = document.createElement('optgroup');
+                standardGroup.label = 'Standard Fields';
+                
+                standardFields.forEach(field => {
+                    const option = document.createElement('option');
+                    option.value = field.name;
+                    option.textContent = `${field.label} (${field.name}) - ${field.type}`;
+                    
+                    // Select current value if it matches
+                    if (this.selectedField?.salesforceField === field.name) {
+                        option.selected = true;
+                    }
+                    
+                    standardGroup.appendChild(option);
+                });
+                
+                fieldSelect.appendChild(standardGroup);
+            }
+            
+            // Add custom fields
+            if (customFields.length > 0) {
+                const customGroup = document.createElement('optgroup');
+                customGroup.label = 'Custom Fields';
+                
+                customFields.forEach(field => {
+                    const option = document.createElement('option');
+                    option.value = field.name;
+                    option.textContent = `${field.label} (${field.name}) - ${field.type}`;
+                    
+                    // Select current value if it matches
+                    if (this.selectedField?.salesforceField === field.name) {
+                        option.selected = true;
+                    }
+                    
+                    customGroup.appendChild(option);
+                });
+                
+                fieldSelect.appendChild(customGroup);
+            }
+            
+            
+        } catch (error) {
+            console.error('❌ Error loading Salesforce fields:', error);
+            console.error('Debug info:', {
+                salesforceConnected: window.AppState.salesforceConnected,
+                salesforceObject: salesforceObject,
+                appModules: Object.keys(window.AppModules || {}),
+                salesforceModule: !!window.AppModules?.salesforce
+            });
+            
+            const fieldSelect = document.getElementById('prop-salesforceField');
+            if (fieldSelect) {
+                fieldSelect.innerHTML = `
+                    <option value="">Not Mapped</option>
+                    <option value="_error_">Error loading fields - ${error.message}</option>
+                    <option value="_manual_">Enter field API name manually</option>
+                `;
+            }
+        }
     }
 
     renderFieldConfigTab(field) {
@@ -3415,42 +3537,110 @@ export class FormBuilder {
     }
 
     renderFieldSalesforceTab(field) {
+        // Enhanced Salesforce field mapping for all field types
         if (field.type === 'lookup') {
             return `
-                <div class="property-group-compact">
-                    <label>Salesforce Object</label>
-                    <select id="prop-lookupObject" onchange="window.AppModules.formBuilder.updateLookupObject(this.value)">
-                        <option value="">Select Object...</option>
-                    </select>
-                    <div class="help-text">Object to search</div>
-                </div>
-                
-                <div class="property-row">
+                <div class="salesforce-mapping">
+                    <h4>🔍 Lookup Configuration</h4>
                     <div class="property-group-compact">
-                        <label>Display Field</label>
-                        <select id="prop-displayField" onchange="window.AppModules.formBuilder.updateFieldProperty('displayField', this.value)">
-                            <option value="Name">Name</option>
+                        <label>Salesforce Object</label>
+                        <select id="prop-lookupObject" class="salesforce-field-select" onchange="window.AppModules.formBuilder.updateLookupObject(this.value)">
+                            <option value="">Select Object...</option>
                         </select>
-                        <div class="help-text">Field to show</div>
+                        <div class="mapping-help-text">Object to search for records</div>
+                    </div>
+                    
+                    <div class="property-row">
+                        <div class="property-group-compact">
+                            <label>Display Field</label>
+                            <select id="prop-displayField" class="salesforce-field-select" onchange="window.AppModules.formBuilder.updateFieldProperty('displayField', this.value)">
+                                <option value="Name">Name</option>
+                            </select>
+                            <div class="mapping-help-text">Field to show in dropdown</div>
+                        </div>
+                        
+                        <div class="property-group-compact">
+                            <label>Search Field</label>
+                            <select id="prop-searchField" class="salesforce-field-select" onchange="window.AppModules.formBuilder.updateFieldProperty('searchField', this.value)">
+                                <option value="Name">Name</option>
+                            </select>
+                            <div class="mapping-help-text">Field to search in</div>
+                        </div>
                     </div>
                     
                     <div class="property-group-compact">
-                        <label>Search Field</label>
-                        <select id="prop-searchField" onchange="window.AppModules.formBuilder.updateFieldProperty('searchField', this.value)">
-                            <option value="Name">Name</option>
-                        </select>
-                        <div class="help-text">Field to search</div>
+                        <label>Store Record ID Variable</label>
+                        <input type="text" id="prop-storeIdVariable" value="${field.storeIdVariable || ''}" class="salesforce-field-select"
+                               onchange="window.AppModules.formBuilder.updateFieldProperty('storeIdVariable', this.value)">
+                        <div class="mapping-help-text">Variable name to store selected record ID</div>
                     </div>
                 </div>
             `;
         }
         
+        // Get current page's Salesforce object for field mapping
+        const currentPage = this.getCurrentPage();
+        const salesforceObject = currentPage?.salesforceObject;
+        
         return `
-            <div class="property-group-compact">
-                <label>Salesforce Field</label>
-                <input type="text" id="prop-salesforceField" value="${field.salesforceField || ''}"
-                       onchange="window.AppModules.formBuilder.updateFieldProperty('salesforceField', this.value)">
-                <div class="help-text">API name of Salesforce field</div>
+            <div class="salesforce-mapping">
+                <h4>🔗 Field Mapping</h4>
+                ${!window.AppState.salesforceConnected ? `
+                    <div class="mapping-required">
+                        ⚠️ Please connect to Salesforce first to enable field mapping
+                    </div>
+                ` : ''}
+                
+                ${!salesforceObject ? `
+                    <div class="property-group-compact">
+                        <div class="mapping-required">
+                            ⚠️ No Salesforce object selected for this page
+                        </div>
+                        <div class="mapping-help-text">Go to Page properties and select a Salesforce object first</div>
+                    </div>
+                ` : `
+                    <div class="property-group-compact">
+                        <label>Map to Salesforce Field</label>
+                        <select id="prop-salesforceField" class="salesforce-field-select" 
+                                onchange="window.AppModules.formBuilder.updateFieldProperty('salesforceField', this.value)">
+                            <option value="">Not Mapped</option>
+                            <option value="_loading_">Loading fields...</option>
+                        </select>
+                        <div class="mapping-help-text">
+                            Current object: <strong>${salesforceObject}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="property-group-compact">
+                        <label>Manual Field API Name</label>
+                        <input type="text" id="prop-salesforceFieldManual" value="${field.salesforceField || ''}" 
+                               class="salesforce-field-select" placeholder="e.g., Custom_Field__c"
+                               onchange="window.AppModules.formBuilder.updateFieldProperty('salesforceField', this.value)">
+                        <div class="mapping-help-text">Override with custom field API name</div>
+                    </div>
+                    
+                    ${field.type === 'checkbox' ? `
+                        <div class="property-group-compact">
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="prop-booleanMapping" ${field.booleanMapping ? 'checked' : ''}
+                                       onchange="window.AppModules.formBuilder.updateFieldProperty('booleanMapping', this.checked)">
+                                <label for="prop-booleanMapping">Map as Boolean</label>
+                            </div>
+                            <div class="mapping-help-text">Convert checkbox to true/false for Salesforce</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${field.type === 'select' || field.type === 'radio' ? `
+                        <div class="property-group-compact">
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="prop-usePicklistValues" ${field.usePicklistValues ? 'checked' : ''}
+                                       onchange="window.AppModules.formBuilder.updateFieldProperty('usePicklistValues', this.checked)">
+                                <label for="prop-usePicklistValues">Load Picklist Values</label>
+                            </div>
+                            <div class="mapping-help-text">Automatically load options from Salesforce picklist</div>
+                        </div>
+                    ` : ''}
+                `}
             </div>
         `;
     }
@@ -4538,6 +4728,87 @@ export class FormBuilder {
                         </select>
                         <div class="help-text">Variable with record ID to update</div>
                     </div>
+
+                    <!-- Record Linking Section -->
+                    <div class="property-group-compact">
+                        <div class="property-section-header">
+                            <h4>🔗 Record Linking</h4>
+                            <div class="help-text">Link this record to parent records created on previous pages</div>
+                        </div>
+                        
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="page-enable-record-linking" 
+                                   ${page.recordLinking?.enabled ? 'checked' : ''}
+                                   onchange="window.AppModules.formBuilder.toggleRecordLinking(this.checked)">
+                            <label for="page-enable-record-linking">Enable Record Linking</label>
+                        </div>
+                        
+                        <div id="record-linking-config" style="display: ${page.recordLinking?.enabled ? 'block' : 'none'};">
+                            <div class="property-group-compact">
+                                <label>Parent Record Source</label>
+                                <select id="page-parent-record-source" 
+                                        onchange="window.AppModules.formBuilder.updateRecordLinkingProperty('parentSource', this.value)">
+                                    <option value="">Select parent record...</option>
+                                    ${this.renderParentRecordOptions(page.recordLinking?.parentSource)}
+                                </select>
+                                <div class="help-text">Choose which page's record to link to</div>
+                            </div>
+                            
+                            <div class="property-group-compact" id="relationship-field-group" 
+                                 style="display: ${page.recordLinking?.parentSource ? 'block' : 'none'};">
+                                <label>Relationship Field</label>
+                                <select id="page-relationship-field" 
+                                        onchange="window.AppModules.formBuilder.updateRecordLinkingProperty('relationshipField', this.value)">
+                                    <option value="">Select relationship field...</option>
+                                    ${this.renderRelationshipFieldOptions(page.salesforceObject, page.recordLinking?.relationshipField)}
+                                </select>
+                                <div class="help-text">Field that links to the parent record</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Repeating Pages Section -->
+                    <div class="property-group-compact">
+                        <div class="property-section-header">
+                            <h4>🔄 Repeating Pages</h4>
+                            <div class="help-text">Allow users to create multiple records of this type</div>
+                        </div>
+                        
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="page-enable-repeat" 
+                                   ${page.repeatConfig?.enabled ? 'checked' : ''}
+                                   onchange="window.AppModules.formBuilder.togglePageRepeat(this.checked)">
+                            <label for="page-enable-repeat">Enable Repeating Page</label>
+                        </div>
+                        
+                        <div id="repeat-config" style="display: ${page.repeatConfig?.enabled ? 'block' : 'none'};">
+                            <div class="property-row">
+                                <div class="property-group-compact">
+                                    <label>Repeat Button Text</label>
+                                    <input type="text" id="page-repeat-button-text" 
+                                           value="${page.repeatConfig?.buttonText || 'Add Another'}"
+                                           placeholder="Add Another Contact"
+                                           onchange="window.AppModules.formBuilder.updateRepeatProperty('buttonText', this.value)">
+                                </div>
+                                <div class="property-group-compact">
+                                    <label>Max Instances</label>
+                                    <input type="number" id="page-repeat-max" 
+                                           value="${page.repeatConfig?.maxInstances || 10}"
+                                           min="1" max="50"
+                                           onchange="window.AppModules.formBuilder.updateRepeatProperty('maxInstances', parseInt(this.value))">
+                                </div>
+                            </div>
+                            
+                            <div class="property-group-compact">
+                                <label>Instance Label Template</label>
+                                <input type="text" id="page-repeat-label-template" 
+                                       value="${page.repeatConfig?.labelTemplate || 'Instance {number}'}"
+                                       placeholder="Contact {number}"
+                                       onchange="window.AppModules.formBuilder.updateRepeatProperty('labelTemplate', this.value)">
+                                <div class="help-text">Use {number} for instance number, {field_name} for field values</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Conditions Tab -->
@@ -5141,6 +5412,113 @@ export class FormBuilder {
         // Update page tabs if name changed
         if (property === 'name') {
             this.updatePageTabs();
+        }
+    }
+
+    // Toggle record linking functionality
+    toggleRecordLinking(enabled) {
+        const currentPage = this.getCurrentPage();
+        if (!currentPage) return;
+        
+        if (!currentPage.recordLinking) {
+            currentPage.recordLinking = {
+                enabled: false,
+                parentSource: '',
+                relationshipField: ''
+            };
+        }
+        
+        currentPage.recordLinking.enabled = enabled;
+        this.markFormDirty();
+        
+        // Show/hide record linking configuration
+        const configDiv = document.getElementById('record-linking-config');
+        if (configDiv) {
+            configDiv.style.display = enabled ? 'block' : 'none';
+        }
+    }
+
+    // Update record linking properties
+    updateRecordLinkingProperty(property, value) {
+        const currentPage = this.getCurrentPage();
+        if (!currentPage) return;
+        
+        if (!currentPage.recordLinking) {
+            currentPage.recordLinking = {};
+        }
+        
+        currentPage.recordLinking[property] = value;
+        this.markFormDirty();
+        
+        // Show relationship field dropdown when parent source is selected
+        if (property === 'parentSource') {
+            const relationshipGroup = document.getElementById('relationship-field-group');
+            if (relationshipGroup) {
+                relationshipGroup.style.display = value ? 'block' : 'none';
+            }
+            
+            // Refresh relationship field options
+            this.refreshRelationshipFieldOptions();
+        }
+    }
+
+    // Render parent record options (pages that create records)
+    renderParentRecordOptions(selectedValue) {
+        const pages = this.currentForm.pages || [];
+        const currentPageIndex = this.currentPageIndex;
+        
+        return pages
+            .filter((page, index) => {
+                // Only show pages that come before this page and create records
+                return index < currentPageIndex && 
+                       page.salesforceObject && 
+                       page.actionType === 'create';
+            })
+            .map(page => {
+                const pageName = page.name || `Page ${pages.indexOf(page) + 1}`;
+                const objectLabel = page.salesforceObject;
+                return `<option value="page_${pages.indexOf(page)}" ${selectedValue === `page_${pages.indexOf(page)}` ? 'selected' : ''}>
+                    ${pageName} (${objectLabel})
+                </option>`;
+            })
+            .join('');
+    }
+
+    // Render relationship field options based on current object
+    renderRelationshipFieldOptions(currentObject, selectedValue) {
+        if (!currentObject) {
+            return '<option value="">Select Salesforce object first</option>';
+        }
+        
+        // This would be populated with actual relationship fields from Salesforce
+        // For now, return common relationship field patterns
+        const commonRelationshipFields = [
+            { name: 'AccountId', label: 'Account' },
+            { name: 'ContactId', label: 'Contact' },
+            { name: 'OpportunityId', label: 'Opportunity' },
+            { name: 'LeadId', label: 'Lead' },
+            { name: 'CaseId', label: 'Case' },
+            { name: 'ParentId', label: 'Parent Record' }
+        ];
+        
+        return commonRelationshipFields
+            .map(field => `<option value="${field.name}" ${selectedValue === field.name ? 'selected' : ''}>
+                ${field.label} (${field.name})
+            </option>`)
+            .join('');
+    }
+
+    // Refresh relationship field options when parent source changes
+    refreshRelationshipFieldOptions() {
+        const currentPage = this.getCurrentPage();
+        if (!currentPage || !currentPage.salesforceObject) return;
+        
+        const dropdown = document.getElementById('page-relationship-field');
+        if (dropdown) {
+            dropdown.innerHTML = `
+                <option value="">Select relationship field...</option>
+                ${this.renderRelationshipFieldOptions(currentPage.salesforceObject, currentPage.recordLinking?.relationshipField)}
+            `;
         }
     }
 

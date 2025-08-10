@@ -1,4 +1,4 @@
-// Main entry point for Salesforce Form Builder
+// Main entry point for PilotForms
 // This file loads and initializes all modules
 
 import { FormBuilder } from './modules/formBuilder.js';
@@ -19,10 +19,70 @@ const { debugError, debugWarn, debugInfo, debugDebug, debugVerbose } = window.SF
 window.AppState = {
     salesforceConnected: false,
     userInfo: null,
+    authToken: null,
     currentForm: null,
     selectedField: null,
     forms: new Map(),
     isDirty: false
+};
+
+// Authentication helpers
+window.Auth = {
+    getToken() {
+        return localStorage.getItem('authToken');
+    },
+    
+    setToken(token) {
+        localStorage.setItem('authToken', token);
+        window.AppState.authToken = token;
+    },
+    
+    removeToken() {
+        localStorage.removeItem('authToken');
+        window.AppState.authToken = null;
+    },
+    
+    getHeaders() {
+        const token = this.getToken();
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        return headers;
+    },
+    
+    async verifyAuth() {
+        const token = this.getToken();
+        if (!token) return false;
+        
+        try {
+            const response = await fetch('/api/auth/me', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                window.AppState.userInfo = data.user;
+                return true;
+            } else {
+                this.removeToken();
+                return false;
+            }
+        } catch (error) {
+            console.error('Auth verification error:', error);
+            return false;
+        }
+    },
+    
+    redirectToLogin() {
+        window.location.href = '/login.html';
+    }
 };
 
 // Initialize modules
@@ -43,15 +103,37 @@ const modules = {
 
 // Application initialization
 async function initializeApp() {
-    debugInfo('Main', 'Initializing Salesforce Form Builder...');
+    debugInfo('Main', 'Initializing PilotForms...');
+    
+    // Check authentication first
+    const isAuthenticated = await window.Auth.verifyAuth();
+    if (!isAuthenticated) {
+        debugInfo('Main', 'User not authenticated, redirecting to login...');
+        window.Auth.redirectToLogin();
+        return;
+    }
     
     // Check for connection status in URL params
     const urlParams = new URLSearchParams(window.location.search);
     const connected = urlParams.get('connected');
+    const error = urlParams.get('error');
     
-    // Handle OAuth success callback
+    // Handle OAuth callbacks
     if (connected === 'true') {
-        console.log('OAuth connection detected, will check status after initialization');
+        // OAuth success - URL will be cleaned up later
+    } else if (error) {
+        // Handle OAuth or other errors
+        if (error === 'oauth_failed') {
+            debugError('Main', 'OAuth connection failed');
+            // Show user-friendly error message
+            if (window.magicalPopups) {
+                window.magicalPopups.showToast('Connection failed. Please try again.', 'error');
+            }
+        }
+        // Clean up the error from URL
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.delete('error');
+        window.history.replaceState({}, document.title, newUrl.toString());
     }
     
     // Initialize core modules
@@ -117,7 +199,6 @@ async function initializeApp() {
     if (connected === 'true') {
         // Force a connection status check to update UI
         setTimeout(async () => {
-            console.log('Checking connection status after OAuth callback...');
             await modules.salesforce.checkConnectionStatus();
             
             // Show success message if connected
@@ -159,14 +240,16 @@ function setupGlobalEventListeners() {
 // Check first visit
 function checkFirstVisit() {
     if (!localStorage.getItem('sfb_visited')) {
-        document.getElementById('introModal').style.display = 'block';
+        const modal = document.getElementById('introModal');
+        if (modal) modal.style.display = 'block';
         localStorage.setItem('sfb_visited', 'true');
     }
 }
 
 // Intro modal functions
 window.closeIntroModal = function(showTutorial = false) {
-    document.getElementById('introModal').style.display = 'none';
+    const modal = document.getElementById('introModal');
+    if (modal) modal.style.display = 'none';
     if (showTutorial) {
         // Could add tutorial highlights here in the future
         debugInfo('Main', 'Tutorial mode enabled');
@@ -227,15 +310,18 @@ window.connectToSalesforce = async function() {
 };
 
 window.showUsernameLogin = function() {
-    document.getElementById('usernameModal').style.display = 'block';
+    const modal = document.getElementById('usernameModal');
+    if (modal) modal.style.display = 'block';
 };
 
 window.closeUsernameModal = function() {
-    document.getElementById('usernameModal').style.display = 'none';
+    const modal = document.getElementById('usernameModal');
+    if (modal) modal.style.display = 'none';
 };
 
 window.closeWelcomeModal = function() {
-    document.getElementById('welcomeModal').style.display = 'none';
+    const modal = document.getElementById('welcomeModal');
+    if (modal) modal.style.display = 'none';
 };
 
 window.saveForm = async function() {
@@ -267,15 +353,8 @@ window.publishForm = async function() {
         window.pendingPublishFormId = savedForm.id;
         debugInfo('Main', '✅ Set pendingPublishFormId to:', window.pendingPublishFormId);
         
-        // Show publish settings modal
+        // Show publish modal
         document.getElementById('publishSettingsModal').style.display = 'block';
-        
-        // Set default dates (start now, end in 30 days)
-        const now = new Date();
-        const thirtyDaysLater = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
-        
-        document.getElementById('publishStartDate').value = formatDateTimeLocal(now);
-        document.getElementById('publishEndDate').value = formatDateTimeLocal(thirtyDaysLater);
         
     } catch (error) {
         debugError('Main', 'Error preparing form for publishing:', error);
@@ -300,12 +379,14 @@ window.toggleActionsDropdown = function() {
     const dropdown = document.getElementById('actionsDropdown');
     const arrow = document.getElementById('actionsArrow');
     
+    if (!dropdown) return;
+    
     if (dropdown.classList.contains('active')) {
         dropdown.classList.remove('active');
-        arrow.textContent = '▼';
+        if (arrow) arrow.textContent = '▼';
     } else {
         dropdown.classList.add('active');
-        arrow.textContent = '▲';
+        if (arrow) arrow.textContent = '▲';
     }
 };
 
@@ -753,21 +834,6 @@ window.closePublishSuccessModal = function() {
     }
 };
 
-// Helper function to format date for datetime-local input
-window.formatDateTimeLocal = function(date) {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
-
-window.toggleDateRangeFields = function(enabled) {
-    document.getElementById('dateRangeFields').style.display = enabled ? 'block' : 'none';
-};
-
 window.closePublishSettingsModal = function() {
     document.getElementById('publishSettingsModal').style.display = 'none';
     window.pendingPublishFormId = null;
@@ -780,36 +846,15 @@ window.confirmPublish = async function() {
             return;
         }
         
-        const publishSettings = {
-            enableDateRange: document.getElementById('enableDateRange').checked
-        };
-        
-        if (publishSettings.enableDateRange) {
-            publishSettings.startDate = document.getElementById('publishStartDate').value;
-            publishSettings.endDate = document.getElementById('publishEndDate').value;
-            publishSettings.expirationMessage = document.getElementById('expirationMessage').value;
-            
-            // Validate dates
-            if (!publishSettings.startDate || !publishSettings.endDate) {
-                alert('Please specify both start and end dates.');
-                return;
-            }
-            
-            if (new Date(publishSettings.startDate) >= new Date(publishSettings.endDate)) {
-                alert('End date must be after start date.');
-                return;
-            }
-        }
-        
-        // Store the form ID before closing modal (since closeModal sets it to null)
+        // Store the form ID before closing modal
         const formIdToPublish = window.pendingPublishFormId;
         debugInfo('Main', '🔍 Form ID to publish:', formIdToPublish);
         
         // Close settings modal
         closePublishSettingsModal();
         
-        // Publish with settings using stored ID
-        const result = await modules.formStorage.publishForm(formIdToPublish, publishSettings);
+        // Publish form directly (no date range settings)
+        const result = await modules.formStorage.publishForm(formIdToPublish);
         
         if (result && result.publicUrl) {
             // Store form ID for export functionality

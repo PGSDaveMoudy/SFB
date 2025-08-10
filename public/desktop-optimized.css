@@ -1,0 +1,607 @@
+/* Desktop-Optimized Layout with Mobile Landing Page */
+
+/* Mobile Landing Page Styles */
+.mobile-landing-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.mobile-landing-content {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 30px;
+    max-width: 450px;
+    margin: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.mobile-landing-header {
+    margin-bottom: 30px;
+}
+
+.mobile-landing-logo {
+    font-size: 4rem;
+    margin-bottom: 15px;
+}
+
+.mobile-landing-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 8px;
+}
+
+.mobile-landing-subtitle {
+    font-size: 1rem;
+    color: #718096;
+    font-weight: 500;
+}
+
+.mobile-landing-message {
+    margin-bottom: 30px;
+}
+
+.message-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.mobile-landing-message h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 15px;
+}
+
+.mobile-landing-message p {
+    font-size: 1rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #4a5568;
+}
+
+.feature-icon {
+    font-size: 1.2rem;
+}
+
+.mobile-landing-cta {
+    background: #f7fafc;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.mobile-landing-cta p {
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #2d3748;
+}
+
+.mobile-landing-cta ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mobile-landing-cta li {
+    padding: 6px 0;
+    color: #4a5568;
+    position: relative;
+    padding-left: 20px;
+}
+
+.mobile-landing-cta li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #48bb78;
+    font-weight: 600;
+}
+
+.mobile-landing-footer {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 20px;
+}
+
+.mobile-landing-footer p {
+    color: #718096;
+    margin-bottom: 15px;
+}
+
+.company-logo {
+    font-weight: 600;
+    color: #667eea;
+    font-size: 1.1rem;
+}
+
+/* Fix Modal Visibility Issues */
+.modal-subtitle,
+.modal-actions {
+    display: none !important;
+}
+
+.modal-subtitle.active,
+.modal-actions.active {
+    display: block !important;
+}
+
+/* Desktop Layout Optimizations - Completely Fit on Screen */
+@media (min-width: 1400px) {
+    /* Absolute positioning to ensure perfect fit */
+    html, body {
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+    
+    /* Top Header - Ultra compact */
+    .top-header {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        max-height: 50px !important;
+        padding: 5px 15px !important;
+        z-index: 100 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        box-sizing: border-box !important;
+    }
+    
+    .header-left .app-title {
+        font-size: 1.3rem !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+    }
+    
+    .header-left .app-subtitle {
+        font-size: 0.85rem !important;
+        line-height: 1 !important;
+    }
+    
+    .header-connection {
+        display: flex !important;
+        gap: 6px !important;
+    }
+    
+    .button-compact {
+        padding: 6px 10px !important;
+        font-size: 0.85rem !important;
+        line-height: 1.2 !important;
+    }
+    
+    /* Main container - Absolute positioned below header */
+    .container {
+        position: absolute !important;
+        top: 50px !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        display: flex !important;
+        overflow: hidden !important;
+        height: calc(100vh - 50px) !important;
+        width: 100vw !important;
+    }
+    
+    /* Left Sidebar - Compact to allow wider properties */
+    .sidebar {
+        position: relative !important;
+        width: 180px !important;
+        min-width: 180px !important;
+        max-width: 180px !important;
+        height: 100% !important;
+        overflow: hidden !important;
+        flex-shrink: 0 !important;
+        border-right: 1px solid #e2e8f0 !important;
+        background: white !important;
+    }
+    
+    .sidebar-content {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding: 10px 8px !important;
+    }
+    
+    /* Field palette - Ultra compact grid */
+    .field-palette {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 4px !important;
+    }
+    
+    .field-block {
+        padding: 6px 3px !important;
+        font-size: 0.75rem !important;
+        min-height: 48px !important;
+        height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        gap: 3px !important;
+        line-height: 1.1 !important;
+        border-radius: 4px !important;
+        margin: 0 !important;
+        overflow: visible !important;
+    }
+    
+    .field-block .field-icon {
+        font-size: 1.2rem !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+    }
+    
+    .field-block span:not(.field-icon) {
+        font-size: 0.65rem !important;
+        line-height: 1.1 !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        text-overflow: visible !important;
+        display: block !important;
+        width: 100% !important;
+    }
+    
+    /* Section headers - Readable */
+    .section h3 {
+        font-size: 0.95rem !important;
+        margin: 10px 0 8px 0 !important;
+        padding: 4px 0 !important;
+        line-height: 1.2 !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Connection status - Ultra compact */
+    .section {
+        margin-bottom: 10px !important;
+    }
+    
+    /* Main content - Use all remaining space */
+    .main-content {
+        flex: 1 !important;
+        height: 100% !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        position: relative !important;
+    }
+    
+    /* Page tabs - Ultra compact */
+    .page-tabs {
+        height: 30px !important;
+        min-height: 30px !important;
+        max-height: 30px !important;
+        flex-shrink: 0 !important;
+        padding: 3px 10px !important;
+        line-height: 1 !important;
+    }
+    
+    /* Form canvas - Use remaining height */
+    .form-canvas {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding: 10px !important;
+        position: relative !important;
+        height: calc(100% - 30px) !important;
+    }
+    
+    /* Right Properties panel - Much wider for comfortable use */
+    .properties-panel {
+        position: relative !important;
+        width: 480px !important;
+        min-width: 480px !important;
+        max-width: 480px !important;
+        height: 100% !important;
+        overflow: hidden !important;
+        flex-shrink: 0 !important;
+        border-left: 1px solid #e2e8f0 !important;
+        background: white !important;
+    }
+    
+    .properties-header {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 55px !important;
+        min-height: 55px !important;
+        max-height: 55px !important;
+        padding: 10px 12px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        background: white !important;
+        z-index: 10 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+    
+    .properties-header h3 {
+        font-size: 1rem !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        font-weight: 600 !important;
+    }
+    
+    #propertyContent {
+        position: absolute !important;
+        top: 55px !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding: 12px !important;
+    }
+    
+    /* Property sections - Full readability */
+    .property-section {
+        padding: 8px 0 !important;
+    }
+    
+    .property-section .form-group {
+        margin-bottom: 15px !important;
+        display: block !important;
+        width: 100% !important;
+    }
+    
+    .property-section label {
+        font-size: 0.9rem !important;
+        margin-bottom: 6px !important;
+        line-height: 1.3 !important;
+        font-weight: 500 !important;
+        display: block !important;
+        width: 100% !important;
+        color: #374151 !important;
+    }
+    
+    .property-section input,
+    .property-section select,
+    .property-section textarea {
+        font-size: 0.9rem !important;
+        padding: 10px 12px !important;
+        line-height: 1.4 !important;
+        min-height: 40px !important;
+        border-radius: 6px !important;
+        border: 1px solid #d1d5db !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        background: white !important;
+        display: block !important;
+    }
+    
+    .property-section textarea {
+        min-height: 80px !important;
+        resize: vertical !important;
+    }
+    
+    .property-section select {
+        height: 40px !important;
+        cursor: pointer !important;
+    }
+    
+    /* Salesforce Field Mapping Styles */
+    .salesforce-mapping {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        padding: 16px !important;
+        margin: 12px 0 !important;
+    }
+    
+    .salesforce-mapping h4 {
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        margin: 0 0 12px 0 !important;
+        color: #1f2937 !important;
+    }
+    
+    .salesforce-field-select {
+        background: white !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 6px !important;
+        padding: 10px 12px !important;
+        font-size: 0.9rem !important;
+        width: 100% !important;
+        min-height: 40px !important;
+    }
+    
+    .mapping-required {
+        color: #dc2626 !important;
+        font-size: 0.75rem !important;
+        margin-top: 2px !important;
+    }
+    
+    .mapping-help-text {
+        font-size: 0.75rem !important;
+        color: #6b7280 !important;
+        margin-top: 3px !important;
+        line-height: 1.3 !important;
+    }
+    
+    /* Property tabs - Wider and more readable */
+    .property-tabs {
+        display: flex !important;
+        gap: 3px !important;
+        height: 35px !important;
+        margin-bottom: 10px !important;
+        flex-shrink: 0 !important;
+        padding: 0 5px !important;
+    }
+    
+    .property-tab {
+        padding: 8px 16px !important;
+        font-size: 0.85rem !important;
+        line-height: 1.2 !important;
+        min-height: 35px !important;
+        height: 35px !important;
+        border-radius: 6px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        flex: 1 !important;
+    }
+    
+    /* Connection status buttons - Readable */
+    .button, .button-compact {
+        padding: 5px 8px !important;
+        font-size: 0.8rem !important;
+        line-height: 1.3 !important;
+        min-height: 28px !important;
+        height: 28px !important;
+    }
+    
+    /* Connection buttons in sidebar - Readable */
+    .section .button {
+        width: 100% !important;
+        text-align: center !important;
+        margin-top: 6px !important;
+        padding: 6px 8px !important;
+        font-size: 0.8rem !important;
+    }
+    
+    /* Connection status indicator - Readable */
+    .connection-status {
+        font-size: 0.8rem !important;
+        padding: 4px 8px !important;
+        line-height: 1.2 !important;
+    }
+    
+    /* Auto-save indicator - Position fixed */
+    .auto-save-indicator {
+        position: fixed !important;
+        bottom: 10px !important;
+        right: 490px !important;
+        z-index: 1000 !important;
+        font-size: 0.7rem !important;
+        padding: 3px 6px !important;
+    }
+    
+    /* Modal adjustments for desktop */
+    .modal-content {
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+    }
+    
+    /* Hide mobile controls completely on desktop */
+    .mobile-menu-toggle,
+    .mobile-properties-toggle,
+    .mobile-nav,
+    .mobile-overlay {
+        display: none !important;
+    }
+    
+    /* Ensure form builder sections are visible */
+    #orgSelection,
+    #buildingBlocks {
+        display: block !important;
+    }
+    
+    /* Form fields in canvas - Better spacing */
+    .form-field {
+        margin-bottom: 10px !important;
+    }
+    
+    /* Empty state in canvas */
+    .empty-state h2 {
+        font-size: 1.6rem !important;
+        margin-bottom: 12px !important;
+        font-weight: 600 !important;
+    }
+    
+    .empty-state p {
+        font-size: 1rem !important;
+        line-height: 1.4 !important;
+    }
+    
+    /* Ensure org selector is readable */
+    .org-selector select {
+        width: 100% !important;
+        font-size: 0.8rem !important;
+        padding: 5px 8px !important;
+        line-height: 1.3 !important;
+    }
+    
+    /* Ultra thin scrollbars */
+    .sidebar-content::-webkit-scrollbar,
+    #propertyContent::-webkit-scrollbar,
+    .form-canvas::-webkit-scrollbar {
+        width: 4px !important;
+    }
+    
+    .sidebar-content::-webkit-scrollbar-track,
+    #propertyContent::-webkit-scrollbar-track,
+    .form-canvas::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+    
+    .sidebar-content::-webkit-scrollbar-thumb,
+    #propertyContent::-webkit-scrollbar-thumb,
+    .form-canvas::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2) !important;
+        border-radius: 2px !important;
+    }
+    
+    .sidebar-content::-webkit-scrollbar-thumb:hover,
+    #propertyContent::-webkit-scrollbar-thumb:hover,
+    .form-canvas::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.4) !important;
+    }
+    
+    /* Force everything to fit within viewport */
+    * {
+        box-sizing: border-box !important;
+    }
+}
+
+/* Hide desktop optimizations on smaller screens */
+@media (max-width: 1399px) {
+    #desktopApplication {
+        display: none !important;
+    }
+    
+    .mobile-landing-page {
+        display: flex !important;
+    }
+}

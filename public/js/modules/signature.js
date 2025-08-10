@@ -551,7 +551,7 @@ export class Signature {
             signatures: signatures,
             legalDeclaration: {
                 text: 'This certificate confirms that the electronic signatures contained herein are legally valid and binding under applicable electronic signature laws including the Electronic Signatures in Global and National Commerce Act (ESIGN) and the Uniform Electronic Transactions Act (UETA).',
-                generatedBy: 'Salesforce Form Builder - Enterprise Edition',
+                generatedBy: 'PilotForms - Enterprise Edition',
                 version: '1.0'
             },
             integrity: {

@@ -1,0 +1,54 @@
+{
+  "id": "test-form",
+  "name": "Test Account + Contact Creation", 
+  "pages": [
+    {
+      "id": "page_1",
+      "name": "Account Page",
+      "fields": [
+        {
+          "id": "field_1",
+          "type": "text",
+          "label": "Account Name",
+          "salesforceField": "Name",
+          "required": true
+        }
+      ],
+      "salesforceObject": "Account",
+      "actionType": "create",
+      "repeatConfig": {
+        "enabled": false
+      }
+    },
+    {
+      "id": "page_1754800477642",
+      "name": "Contact Page", 
+      "fields": [
+        {
+          "id": "field_2",
+          "type": "text",
+          "label": "First Name",
+          "salesforceField": "FirstName"
+        },
+        {
+          "id": "field_3", 
+          "type": "text",
+          "label": "Last Name",
+          "salesforceField": "LastName"
+        }
+      ],
+      "salesforceObject": "Contact",
+      "actionType": "create",
+      "repeatConfig": {
+        "enabled": true,
+        "minInstances": 1,
+        "maxInstances": 10
+      },
+      "recordLinking": {
+        "enabled": true,
+        "parentSource": "page_1",
+        "relationshipField": "AccountId"
+      }
+    }
+  ]
+}

@@ -1,9 +1,6 @@
 
 
 require('dotenv').config();
-console.log('Server.js started at:', new Date().toISOString());
-console.log('SSL_KEY_PATH from .env:', process.env.SSL_KEY_PATH);
-console.log('SSL_CERT_PATH from .env:', process.env.SSL_CERT_PATH);
 const express = require('express');
 const https = require('https');
 const http = require('http');
@@ -18,10 +15,40 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 const jsforce = require('jsforce');
+const jwt = require('jsonwebtoken');
 const emailService = require('./emailService');
-const { DatabaseManager, SalesforceOrg, UserOrgAccess, FormSubmission, sequelize } = require('./database');
+const { DatabaseManager, User, SalesforceOrg, UserOrgAccess, FormSubmission, sequelize } = require('./database');
 
-// Middleware to check if user is authenticated
+// JWT secret key (should be in environment variable)
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
+
+// Middleware to check if user is authenticated with JWT
+const authenticateJWT = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    
+    if (authHeader) {
+        const token = authHeader.split(' ')[1]; // Bearer <token>
+        
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            req.user = await DatabaseManager.getUserById(decoded.userId);
+            if (req.user) {
+                next();
+            } else {
+                res.status(401).json({ message: 'User not found' });
+            }
+        } catch (error) {
+            res.status(403).json({ message: 'Invalid token' });
+        }
+    } else if (req.session.salesforceConnection && req.session.userInfo) {
+        // Fallback to session authentication for backward compatibility
+        next();
+    } else {
+        res.status(401).json({ message: 'Unauthorized: Please login or connect to Salesforce.' });
+    }
+};
+
+// Old middleware for backward compatibility
 const isAuthenticated = (req, res, next) => {
     if (req.session.salesforceConnection && req.session.userInfo) {
         next();
@@ -347,6 +374,147 @@ function recordSubmission(formId, submissionData, salesforceResults = null, file
     return submission;
 }
 
+// User Authentication Routes
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { email, password, firstName, lastName } = req.body;
+        
+        // Validation
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+        
+        if (password.length < 8) {
+            return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+        }
+        
+        // Check if user already exists
+        const existingUser = await DatabaseManager.getUserByEmail(email);
+        if (existingUser) {
+            return res.status(409).json({ error: 'User with this email already exists' });
+        }
+        
+        // Create new user
+        const user = await DatabaseManager.createUser({
+            email: email.toLowerCase(),
+            password,
+            firstName,
+            lastName
+        });
+        
+        // Generate JWT token
+        const token = jwt.sign(
+            { userId: user.id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+        
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName
+            }
+        });
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        // Validation
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+        
+        // Find user
+        const user = await DatabaseManager.getUserByEmail(email);
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+        
+        // Verify password
+        const isPasswordValid = await user.verifyPassword(password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+        
+        // Update last login
+        await DatabaseManager.updateUserLastLogin(user.id);
+        
+        // Get user's organizations
+        const organizations = await DatabaseManager.getUserOrganizations(user.id);
+        
+        // Generate JWT token
+        const token = jwt.sign(
+            { userId: user.id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+        
+        // Store user info in session for backward compatibility
+        req.session.user = {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName
+        };
+        
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName
+            },
+            organizations
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Session destruction error:', err);
+            return res.status(500).json({ success: false, error: 'Logout failed' });
+        }
+        res.clearCookie('connect.sid');
+        res.json({ success: true, message: 'Logged out successfully' });
+    });
+});
+
+app.get('/api/auth/me', authenticateJWT, async (req, res) => {
+    try {
+        const user = req.user;
+        const organizations = await DatabaseManager.getUserOrganizations(user.id);
+        
+        res.json({
+            user: {
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName
+            },
+            organizations
+        });
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Salesforce OAuth routes - Updated for multi-org support
 app.get('/api/salesforce/auth-url', (req, res) => {
     const loginUrl = req.query.loginUrl || 'https://login.salesforce.com'; // Allow custom login URLs
@@ -592,11 +760,18 @@ app.post('/api/salesforce/logout', (req, res) => {
 // MULTI-ORG API ENDPOINTS
 // =============================================================================
 
-// Register a new Salesforce org
-app.post('/api/orgs/register', async (req, res) => {
+// Register a new Salesforce org (requires authentication)
+app.post('/api/orgs/register', authenticateJWT, async (req, res) => {
     try {
         console.log('Received org registration request:', req.body);
         const { name, clientId, clientSecret, environment = 'production' } = req.body;
+        const userId = req.user ? req.user.id : req.session.user?.id;
+        
+        if (!userId) {
+            return res.status(401).json({
+                error: 'You must be logged in to register an organization'
+            });
+        }
         
         // Validation
         if (!name || !clientId || !clientSecret) {
@@ -620,16 +795,19 @@ app.post('/api/orgs/register', async (req, res) => {
             });
         }
 
-        // Create the org with the session user as creator
-        console.log('Creating org with userId:', req.session.userId);
+        // Create the org with the logged-in user as creator
+        console.log('Creating org with userId:', userId);
         const org = await DatabaseManager.createOrg({
             name,
             clientId,
             clientSecret,
             loginUrl,
             environment,
-            createdBy: req.session.userId
+            createdBy: userId
         });
+        
+        // Link the user to the org
+        await DatabaseManager.linkUserToOrg(userId, org.id);
 
         console.log('Org created successfully:', org.id, org.name);
 
@@ -658,61 +836,35 @@ app.post('/api/orgs/register', async (req, res) => {
     }
 });
 
-// Get orgs accessible to the current user (SECURITY: User-specific access only)
-app.get('/api/orgs', async (req, res) => {
+// Get orgs accessible to the current user (requires authentication)
+app.get('/api/orgs', authenticateJWT, async (req, res) => {
     try {
-        const userId = req.session.userId;
+        const userId = req.user ? req.user.id : req.session.user?.id;
         console.log('GET /api/orgs - userId:', userId);
         
-        // Get orgs that the user has created or has access to
-        const userOrgs = await DatabaseManager.getUserOrgs(userId);
-        
-        // Get orgs created by this user (based on session)
-        const allOrgs = await DatabaseManager.getOrgs();
-        console.log('All orgs in database:', allOrgs.length);
-        const userCreatedOrgs = allOrgs.filter(org => org.createdBy === userId);
-        console.log('Orgs created by user:', userCreatedOrgs.length);
-        
-        // Combine user's orgs (accessible + created), avoiding duplicates
-        const accessibleOrgIds = new Set(userOrgs.map(org => org.orgId || org.id));
-        const availableOrgs = [...userCreatedOrgs.filter(org => !accessibleOrgIds.has(org.id))];
-        
-        // Add orgs user has access to
-        userOrgs.forEach(userOrg => {
-            if (userOrg.org) {
-                availableOrgs.push(userOrg.org);
-            } else if (userOrg.name) {
-                availableOrgs.push(userOrg);
-            }
-        });
-        
-        // Filter out corrupted orgs from the response
-        const validOrgs = [];
-        for (const org of availableOrgs) {
-            // Check if org can be decrypted
-            try {
-                const fullOrg = await DatabaseManager.getOrgById(org.id);
-                if (!fullOrg.hasDecryptionError && fullOrg.decryptedClientSecret) {
-                    validOrgs.push({
-                        id: org.id,
-                        name: org.name,
-                        environment: org.environment,
-                        loginUrl: org.loginUrl,
-                        lastConnectedAt: org.lastConnectedAt,
-                        createdBy: org.createdBy
-                    });
-                } else {
-                    console.log(`Hiding corrupted org from UI: ${org.name}`);
-                }
-            } catch (error) {
-                console.log(`Skipping org due to error: ${org.name}`, error.message);
-            }
+        if (!userId) {
+            return res.status(401).json({
+                error: 'You must be logged in to view organizations'
+            });
         }
+        
+        // Get orgs that the user has access to through UserOrgAccess
+        const userOrgs = await DatabaseManager.getUserOrganizations(userId);
+        console.log('User organizations:', userOrgs.length);
+        
+        // Return the user's organizations
+        const validOrgs = userOrgs.map(org => ({
+            id: org.id,
+            name: org.name,
+            environment: org.environment,
+            loginUrl: org.loginUrl,
+            lastConnectedAt: org.lastConnectedAt,
+            createdAt: org.createdAt
+        }));
 
         res.json({
             success: true,
-            userOrgs,
-            availableOrgs: validOrgs
+            organizations: validOrgs
         });
         
     } catch (error) {
@@ -1555,6 +1707,44 @@ app.post('/api/forms/:formId/publish', (req, res) => {
         });
     } catch (error) {
         console.error('Error publishing form:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Unpublish form
+app.post('/api/forms/:formId/unpublish', (req, res) => {
+    try {
+        const { formId } = req.params;
+        const db = getFormsDB();
+        const form = db.forms[formId];
+        
+        if (!form) {
+            return res.status(404).json({ error: 'Form not found' });
+        }
+        
+        // Check if user owns the form
+        const userId = req.session.userInfo?.userId;
+        const organizationId = req.session.userInfo?.organizationId;
+        
+        if (form.userId !== userId || form.organizationId !== organizationId) {
+            return res.status(403).json({ error: 'Access denied. You can only unpublish your own forms.' });
+        }
+        
+        // Unpublish the form
+        form.published = false;
+        form.publishedAt = null;
+        form.publicUrl = null;
+        form.creatorConnection = null;
+        
+        saveFormsDB(db);
+        
+        res.json({
+            success: true, 
+            message: 'Form unpublished successfully',
+            form: form
+        });
+    } catch (error) {
+        console.error('Error unpublishing form:', error);
         res.status(500).json({ error: error.message });
     }
 });

@@ -27,7 +27,7 @@ const spamPreventionGuide = {
         'List-Unsubscribe': '<mailto:unsubscribe@portwoodglobalsolutions.com>',
         'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
         'Precedence': 'bulk',
-        'X-Mailer': 'Salesforce Form Builder v1.0',
+        'X-Mailer': 'PilotForms v1.0',
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal'
     },
