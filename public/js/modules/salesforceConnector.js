@@ -135,8 +135,8 @@ export class SalesforceConnector {
                 disconnectBtn.style.display = 'block';
             }
             
-            buildingBlocks.style.display = 'block';
-            bottomFooter.style.display = 'block';
+            if (buildingBlocks) buildingBlocks.style.display = 'block';
+            if (bottomFooter) bottomFooter.style.display = 'block';
         } else {
             statusEl.classList.remove('connected');
             statusEl.classList.add('disconnected');
@@ -151,8 +151,8 @@ export class SalesforceConnector {
                 disconnectBtn.style.display = 'none';
             }
             
-            buildingBlocks.style.display = 'none';
-            bottomFooter.style.display = 'none';
+            if (buildingBlocks) buildingBlocks.style.display = 'none';
+            if (bottomFooter) bottomFooter.style.display = 'none';
         }
     }
     

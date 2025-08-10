@@ -2,14 +2,101 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=1200, initial-scale=0.8">
     <title>Salesforce Form Builder - Classic 3-Column Layout</title>
     <link rel="stylesheet" href="styles-notion-enhanced.css">
     <link rel="stylesheet" href="styles-modern-redesign.css">
     <link rel="stylesheet" href="styles-unified-experience.css">
+    <link rel="stylesheet" href="desktop-optimized.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Mobile Landing Page (will be shown/hidden by JavaScript) -->
+    <div id="mobileLandingPage" class="mobile-landing-page" style="display: none;">
+        <div class="mobile-landing-content">
+            <div class="mobile-landing-header">
+                <div class="mobile-landing-logo">💻</div>
+                <h1>Salesforce Form Builder</h1>
+                <p class="mobile-landing-subtitle">Desktop Experience Required</p>
+            </div>
+            
+            <div class="mobile-landing-message">
+                <div class="message-icon">🖥️</div>
+                <h2>Larger Screen Required</h2>
+                <p>The Salesforce Form Builder requires a minimum screen width of 1400px to display all three columns properly and provide the best experience.</p>
+                
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <span class="feature-icon">🎯</span>
+                        <span>Precision Drag & Drop</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🖱️</span>
+                        <span>Advanced Field Properties</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📐</span>
+                        <span>Complex Form Layouts</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">⚙️</span>
+                        <span>Detailed Configuration</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mobile-landing-cta">
+                <p><strong>To access the Form Builder:</strong></p>
+                <ul>
+                    <li>Use a desktop or laptop computer</li>
+                    <li>Ensure your screen is at least 1400px wide</li>
+                    <li>Maximize your browser window</li>
+                    <li>Use Chrome, Firefox, Safari, or Edge browser</li>
+                </ul>
+            </div>
+            
+            <div class="mobile-landing-footer">
+                <p>Thank you for understanding!</p>
+                <div class="company-logo">🚀 Salesforce Form Builder</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop Application (will be hidden on mobile) -->
+    <div id="desktopApplication">
+
+    <!-- Always-Visible Actions Button (Bottom-Right of Screen) -->
+    <div class="actions-button-container" id="mainActionsButton">
+        <div class="actions-dropdown" id="actionsDropdown">
+            <div class="actions-menu">
+                <button class="actions-item" onclick="showMyForms()" title="View all saved forms">
+                    📋 My Forms
+                </button>
+                <button class="actions-item" onclick="saveForm()" title="Save current form">
+                    💾 Save Form
+                </button>
+                <button class="actions-item" onclick="publishForm()" title="Publish form for public access">
+                    🚀 Publish Form
+                </button>
+                <div class="actions-divider"></div>
+                <button class="actions-item" onclick="previewForm()" title="Preview form">
+                    👁️ Preview
+                </button>
+                <button class="actions-item" onclick="newForm()" title="Create new form">
+                    ✨ New Form
+                </button>
+                <button class="actions-item" onclick="showOrgManager()" title="Manage Salesforce connections">
+                    🏢 Connect Org
+                </button>
+            </div>
+        </div>
+        <button class="actions-button" onclick="toggleActionsDropdown()" title="Form Actions">
+            <span class="actions-icon">⚡</span>
+            <span class="actions-text">Actions</span>
+            <span class="actions-arrow" id="actionsArrow">▼</span>
+        </button>
+    </div>
+
     <!-- Introduction Modal -->
     <div id="introModal" class="modal intro-modal">
         <div class="modal-content intro-modal-content">
@@ -148,12 +235,6 @@
                 <a href="./help.html" class="header-link" target="_blank">
                     ❓ Help
                 </a>
-                <a href="./org-manager.html" class="header-link" target="_blank">
-                    🏢 Org Manager
-                </a>
-                <button class="header-link" onclick="toggleModernMode()" style="border: none; background: none; cursor: pointer; color: var(--make-purple-600);">
-                    🏗️ Classic Layout
-                </button>
             </div>
             
             <!-- Salesforce Connection Buttons -->
@@ -560,6 +641,9 @@
             <span>+</span>
         </button>
     </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" onclick="closeMobilePanels()"></div>
 
     <!-- Main Container -->
     <div class="container" style="display: block;">
@@ -1287,10 +1371,165 @@
 
     <!-- Bottom Footer Bar - REMOVED as it's replaced by floating menu buttons -->
 
+    <!-- Unified Org Management Modal -->
+    <div id="unifiedOrgModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h2 style="margin: 0; color: #1f2937; font-size: 24px;">🏢 Salesforce Organizations</h2>
+                <button class="close" onclick="closeUnifiedOrgModal()" style="background: none; border: none; font-size: 32px; cursor: pointer; color: #6b7280;">&times;</button>
+            </div>
+
+            <!-- Current Connection Status -->
+            <div id="currentOrgStatus" style="background: #f3f4f6; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div id="statusIndicator" style="width: 12px; height: 12px; border-radius: 50%; background: #fbbf24;"></div>
+                    <div>
+                        <div style="font-weight: 600; color: #111827;" id="statusText">Checking connection...</div>
+                        <div style="color: #6b7280; font-size: 14px; margin-top: 4px;" id="orgDetails"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Org List -->
+            <div id="orgList" style="margin-bottom: 30px;">
+                <h3 style="color: #374151; margin-bottom: 16px;">Your Organizations</h3>
+                <div id="orgCards" style="display: grid; gap: 16px;">
+                    <!-- Org cards will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                <button onclick="showRegisterOrgForm()" style="padding: 12px 20px; background: #6366f1; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                    ➕ Register New Org
+                </button>
+                <button onclick="showConnectForm()" style="padding: 12px 20px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                    🔗 Quick Connect
+                </button>
+                <button onclick="refreshOrgList()" style="padding: 12px 20px; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                    🔄 Refresh
+                </button>
+            </div>
+
+            <!-- Registration Form (hidden by default) -->
+            <div id="registerOrgForm" style="display: none; margin-top: 30px; padding: 24px; background: #f9fafb; border-radius: 12px;">
+                <h3 style="margin-bottom: 20px; color: #111827;">Register New Organization</h3>
+                <div style="padding: 12px; background: #dbeafe; border: 1px solid #93c5fd; border-radius: 6px; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #1e40af; font-size: 14px;">
+                        <strong>📌 How to get these credentials:</strong><br>
+                        1. Go to Salesforce Setup → App Manager<br>
+                        2. Find your Connected App (or create one)<br>
+                        3. View the app to find Consumer Key (Client ID) and Consumer Secret<br>
+                        4. Make sure OAuth callback URL is: <code style="background: white; padding: 2px 4px; border-radius: 3px;">https://pilotforms.com/oauth/callback</code>
+                    </p>
+                </div>
+                <div style="display: grid; gap: 16px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; color: #374151; font-weight: 500;">Organization Name <span style="color: #ef4444;">*</span></label>
+                        <input type="text" id="regOrgName" placeholder="e.g., My Company Org" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; color: #374151; font-weight: 500;">Client ID (Consumer Key) <span style="color: #ef4444;">*</span></label>
+                        <input type="text" id="regClientId" placeholder="Your Salesforce App Consumer Key" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-family: monospace; font-size: 13px;" required>
+                        <small style="color: #6b7280; font-size: 12px;">Found in Salesforce Setup > App Manager > Your Connected App</small>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; color: #374151; font-weight: 500;">Client Secret (Consumer Secret) <span style="color: #ef4444;">*</span></label>
+                        <input type="password" id="regClientSecret" placeholder="Your Salesforce App Consumer Secret" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-family: monospace; font-size: 13px;" required>
+                        <small style="color: #6b7280; font-size: 12px;">Keep this secure - it will be encrypted when stored</small>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; color: #374151; font-weight: 500;">Organization Type</label>
+                        <select id="regOrgType" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+                            <option value="production">Production</option>
+                            <option value="sandbox">Sandbox</option>
+                            <option value="developer">Developer</option>
+                            <option value="scratch">Scratch</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; color: #374151; font-weight: 500;">Instance URL (Optional)</label>
+                        <input type="text" id="regInstanceUrl" placeholder="https://yourorg.salesforce.com" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+                    </div>
+                    <div style="display: flex; gap: 12px; margin-top: 12px;">
+                        <button onclick="registerNewOrg()" style="padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;">
+                            Register Organization
+                        </button>
+                        <button onclick="hideRegisterForm()" style="padding: 10px 20px; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 6px; font-weight: 500; cursor: pointer;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Connect Form (hidden by default) -->
+            <div id="quickConnectForm" style="display: none; margin-top: 30px; padding: 24px; background: #f9fafb; border-radius: 12px;">
+                <h3 style="margin-bottom: 20px; color: #111827;">Quick Connect with Credentials</h3>
+                <div style="display: grid; gap: 16px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; color: #374151; font-weight: 500;">Username</label>
+                        <input type="text" id="unifiedSfUsername" placeholder="your@salesforce.email" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; color: #374151; font-weight: 500;">Password</label>
+                        <input type="password" id="unifiedSfPassword" placeholder="Your password" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; color: #374151; font-weight: 500;">Security Token (if required)</label>
+                        <input type="text" id="unifiedSfToken" placeholder="Optional security token" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+                    </div>
+                    <div style="display: flex; gap: 12px; margin-top: 12px;">
+                        <button onclick="quickConnect()" style="padding: 10px 20px; background: #10b981; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;">
+                            Connect Now
+                        </button>
+                        <button onclick="hideConnectForm()" style="padding: 10px 20px; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 6px; font-weight: 500; cursor: pointer;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div> <!-- End desktopApplication -->
+
     <!-- Load JavaScript Modules -->
     <script src="js/debug.js"></script>
     <script src="js/modern-interface.js"></script>
+    <script src="js/unified-org-manager.js"></script>
     <script src="js/unified-controller.js"></script>
     <script type="module" src="js/main.js"></script>
+    
+    <!-- Mobile/Desktop Detection Script -->
+    <script>
+    // Detect screen size and show appropriate interface
+    function detectScreenSizeAndInitialize() {
+        // Use 1400px threshold to ensure 3 columns fit properly (300px + 400px + 300px + margins)
+        const isSmallScreen = window.innerWidth < 1400;
+        
+        const mobileApp = document.getElementById('mobileLandingPage');
+        const desktopApp = document.getElementById('desktopApplication');
+        
+        if (isSmallScreen) {
+            console.log('Small screen detected (' + window.innerWidth + 'px) - showing desktop requirement message');
+            mobileApp.style.display = 'flex';
+            desktopApp.style.display = 'none';
+        } else {
+            console.log('Large screen detected (' + window.innerWidth + 'px) - showing form builder');
+            mobileApp.style.display = 'none';
+            desktopApp.style.display = 'block';
+        }
+    }
+    
+    // Run detection immediately and on resize
+    detectScreenSizeAndInitialize();
+    
+    // Use debounced resize handler for better performance
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(detectScreenSizeAndInitialize, 100);
+    });
+    </script>
 </body>
 </html>

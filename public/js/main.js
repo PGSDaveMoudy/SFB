@@ -295,6 +295,32 @@ window.closeMyFormsModal = function() {
     document.getElementById('myFormsModal').style.display = 'none';
 };
 
+// Actions dropdown functionality
+window.toggleActionsDropdown = function() {
+    const dropdown = document.getElementById('actionsDropdown');
+    const arrow = document.getElementById('actionsArrow');
+    
+    if (dropdown.classList.contains('active')) {
+        dropdown.classList.remove('active');
+        arrow.textContent = '▼';
+    } else {
+        dropdown.classList.add('active');
+        arrow.textContent = '▲';
+    }
+};
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const container = document.querySelector('.actions-button-container');
+    const dropdown = document.getElementById('actionsDropdown');
+    const arrow = document.getElementById('actionsArrow');
+    
+    if (container && dropdown && !container.contains(event.target)) {
+        dropdown.classList.remove('active');
+        if (arrow) arrow.textContent = '▼';
+    }
+});
+
 // Forms search and filter functions
 window.clearFormsSearch = function() {
     const searchInput = document.getElementById('formsSearchInput');
@@ -967,6 +993,59 @@ function initializeCollapsibleSections() {
     // Initial setup
     setTimeout(restoreCollapsedStates, 100);
 }
+
+// Mobile UI controls
+window.toggleSidebar = function() {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        sidebar.classList.toggle('open');
+    }
+};
+
+window.togglePropertiesPanel = function() {
+    const propertiesPanel = document.querySelector('.properties-panel');
+    if (propertiesPanel) {
+        propertiesPanel.classList.toggle('open');
+    }
+};
+
+window.closeMobilePanels = function() {
+    const sidebar = document.querySelector('.sidebar');
+    const propertiesPanel = document.querySelector('.properties-panel');
+    
+    if (sidebar) {
+        sidebar.classList.remove('open');
+    }
+    if (propertiesPanel) {
+        propertiesPanel.classList.remove('open');
+    }
+};
+
+// Close mobile panels when clicking outside
+document.addEventListener('click', function(e) {
+    const sidebar = document.querySelector('.sidebar');
+    const propertiesPanel = document.querySelector('.properties-panel');
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const propertiesToggle = document.querySelector('.mobile-properties-toggle');
+    
+    // Close sidebar if clicking outside on mobile
+    if (window.innerWidth < 768) {
+        if (sidebar && sidebar.classList.contains('open') && 
+            !sidebar.contains(e.target) && 
+            !menuToggle.contains(e.target)) {
+            sidebar.classList.remove('open');
+        }
+    }
+    
+    // Close properties panel if clicking outside on mobile/tablet
+    if (window.innerWidth < 1024) {
+        if (propertiesPanel && propertiesPanel.classList.contains('open') && 
+            !propertiesPanel.contains(e.target) && 
+            !propertiesToggle.contains(e.target)) {
+            propertiesPanel.classList.remove('open');
+        }
+    }
+});
 
 // Initialize app when DOM is ready
 if (document.readyState === 'loading') {

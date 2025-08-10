@@ -30,9 +30,9 @@
 A production-ready, full-stack web application that creates custom forms with advanced drag-and-drop functionality, seamless Salesforce integration, and a modern interface. Features include conditional field visibility, real-time Salesforce picklist sync, lookup fields with advanced filtering, comprehensive form management, enterprise-grade electronic signature capabilities, and robust page reordering functionality.
 
 ## Server Configuration
-- **Domain**: www.portwoodglobalsolutions.com (clean URLs, no ports)
+- **Domain**: pilotforms.com (production domain)
 - **IP Address**: 159.196.64.152
-- **Hostname**: mail.portwoodglobalsolutions.com (updated for email compatibility)
+- **Hostname**: mail.pilotforms.com (for email services)
 - **Platform**: Ubuntu with Webuzo
 - **Reverse Proxy**: Nginx with SSL termination
 - **Application Port**: 8443 (internal), 443 (public via proxy)
@@ -41,7 +41,7 @@ A production-ready, full-stack web application that creates custom forms with ad
 ## Salesforce Configuration
 - **Consumer Key**: [REMOVED - See environment variables]
 - **Consumer Secret**: [REMOVED - See environment variables]
-- **OAuth Redirect URI**: https://www.portwoodglobalsolutions.com/oauth/callback
+- **OAuth Redirect URI**: https://pilotforms.com/oauth/callback
 - **Authentication**: PKCE-enabled OAuth 2.1 with fallback to username/password
 
 ## 🚀 Latest Features (January 2025)
@@ -329,7 +329,7 @@ After running the script, configure these DNS records:
 # MX Record (already configured)
 Type: MX
 Host: @
-Mail Server: mail.portwoodglobalsolutions.com
+Mail Server: mail.pilotforms.com
 Priority: 10
 
 # SPF Record (already configured)
@@ -345,7 +345,7 @@ Value: [DKIM public key from script output]
 # DMARC Record (recommended)
 Type: TXT
 Host: _dmarc
-Value: v=DMARC1; p=quarantine; rua=mailto:admin@portwoodglobalsolutions.com
+Value: v=DMARC1; p=quarantine; rua=mailto:admin@pilotforms.com
 ```
 
 #### Management Commands
@@ -370,7 +370,7 @@ tail -f /var/log/nginx/sfb_access.log
 tail -f /var/log/nginx/sfb_error.log
 
 # Test SSL configuration
-curl -I https://www.portwoodglobalsolutions.com
+curl -I https://pilotforms.com
 
 # Test email sending
 echo "Test message" | mail -s "Test" your-email@domain.com
@@ -386,7 +386,7 @@ systemctl status certbot.timer
 ```
 
 ##### Application Health
-- **URL**: https://www.portwoodglobalsolutions.com/health
+- **URL**: https://pilotforms.com/health
 - **PM2 Monitoring**: `pm2 monit`
 - **System Resources**: `htop` or `top`
 
@@ -421,7 +421,7 @@ logrotate -f /etc/logrotate.conf  # Force log rotation
 3. **SSL issues:**
    ```bash
    # Test SSL certificate
-   openssl s_client -connect www.portwoodglobalsolutions.com:443
+   openssl s_client -connect pilotforms.com:443
    
    # Check Nginx configuration
    nginx -t
@@ -447,7 +447,7 @@ SALESFORCE_CLIENT_SECRET=your-consumer-secret
 
 # Server Configuration
 PORT=8443
-DOMAIN=www.portwoodglobalsolutions.com
+DOMAIN=pilotforms.com
 
 # Security
 ENCRYPTION_KEY=generated-64-char-hex-key
@@ -456,7 +456,7 @@ SESSION_SECRET=generated-64-char-hex-key
 # Email Configuration
 EMAIL_SERVICE=smtp
 EMAIL_HOST=localhost
-EMAIL_FROM_ADDRESS=noreply@portwoodglobalsolutions.com
+EMAIL_FROM_ADDRESS=noreply@pilotforms.com
 ```
 
 #### Manual Deployment
