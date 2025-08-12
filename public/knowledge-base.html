@@ -1,0 +1,2078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SFB Knowledge Base - PilotForms Documentation</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --white: #ffffff;
+            --sidebar-width: 280px;
+            --header-height: 60px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 2rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: var(--gray-50);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+
+        .theme-toggle {
+            padding: 0.5rem;
+            background: var(--gray-100);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.25rem;
+        }
+
+        .theme-toggle:hover {
+            background: var(--gray-200);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--white);
+            border-right: 1px solid var(--gray-200);
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--gray-500);
+            margin-bottom: 0.5rem;
+            padding: 0 0.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 0.5rem 0.75rem;
+            color: var(--gray-700);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: var(--white);
+            font-weight: 500;
+        }
+
+        .nav-item-icon {
+            display: inline-block;
+            width: 1.25rem;
+            margin-right: 0.5rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 2rem;
+            min-height: calc(100vh - var(--header-height));
+        }
+
+        .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .section h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .section h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .section h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section p {
+            margin-bottom: 1rem;
+            color: var(--gray-600);
+            line-height: 1.75;
+        }
+
+        .section ul, .section ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .section li {
+            margin-bottom: 0.5rem;
+            color: var(--gray-600);
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--gray-900);
+            color: var(--gray-100);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .code-lang {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--gray-700);
+            color: var(--gray-300);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .inline-code {
+            background: var(--gray-100);
+            color: var(--danger);
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.875em;
+        }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+        }
+
+        th {
+            background: var(--gray-50);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-700);
+            border-bottom: 2px solid var(--gray-200);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: var(--gray-50);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 1.25rem;
+            transition: all 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .badge-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .badge-success {
+            background: var(--secondary);
+            color: var(--white);
+        }
+
+        .badge-warning {
+            background: var(--accent);
+            color: var(--white);
+        }
+
+        .badge-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        /* Alert Boxes */
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border-color: var(--secondary);
+            color: #166534;
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            border-color: var(--accent);
+            color: #92400e;
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            border-color: var(--danger);
+            color: #991b1b;
+        }
+
+        /* TOC in content */
+        .toc-box {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .toc-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--gray-800);
+        }
+
+        .toc-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc-list a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .toc-list a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        /* Copy Button */
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 3.5rem;
+            background: var(--gray-700);
+            color: var(--gray-300);
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--gray-600);
+            color: var(--white);
+        }
+
+        .copy-btn.copied {
+            background: var(--secondary);
+            color: var(--white);
+        }
+
+        /* Mobile Responsive */
+        .mobile-menu-toggle {
+            display: none;
+            padding: 0.5rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--gray-700);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .search-box {
+                display: none;
+            }
+
+            .content-wrapper {
+                padding: 0 1rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .header, .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin: 0;
+                padding: 1rem;
+            }
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background: var(--gray-900);
+            color: var(--gray-100);
+        }
+
+        body.dark-mode .header {
+            background: var(--gray-800);
+            border-color: var(--gray-700);
+        }
+
+        body.dark-mode .sidebar {
+            background: var(--gray-800);
+            border-color: var(--gray-700);
+        }
+
+        body.dark-mode .nav-item {
+            color: var(--gray-300);
+        }
+
+        body.dark-mode .nav-item:hover {
+            background: var(--gray-700);
+        }
+
+        body.dark-mode .section h1,
+        body.dark-mode .section h2,
+        body.dark-mode .section h3,
+        body.dark-mode .section h4 {
+            color: var(--gray-100);
+        }
+
+        body.dark-mode .section p,
+        body.dark-mode .section li {
+            color: var(--gray-300);
+        }
+
+        body.dark-mode .card,
+        body.dark-mode .feature-card {
+            background: var(--gray-800);
+            border-color: var(--gray-700);
+        }
+
+        body.dark-mode .table-wrapper {
+            border-color: var(--gray-700);
+        }
+
+        body.dark-mode table {
+            background: var(--gray-800);
+        }
+
+        body.dark-mode th {
+            background: var(--gray-700);
+            color: var(--gray-200);
+            border-color: var(--gray-600);
+        }
+
+        body.dark-mode td {
+            color: var(--gray-300);
+            border-color: var(--gray-700);
+        }
+
+        body.dark-mode .search-input {
+            background: var(--gray-700);
+            border-color: var(--gray-600);
+            color: var(--gray-100);
+        }
+
+        body.dark-mode .inline-code {
+            background: var(--gray-700);
+            color: #ff7b72;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <button class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+            <div class="logo">
+                <div class="logo-icon">📋</div>
+                <span>SFB Knowledge Base</span>
+            </div>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search documentation..." onkeyup="searchContent(this.value)">
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="nav-section">
+            <div class="nav-title">Getting Started</div>
+            <a class="nav-item active" onclick="showSection('overview')">
+                <span class="nav-item-icon">🏠</span>Overview
+            </a>
+            <a class="nav-item" onclick="showSection('quickstart')">
+                <span class="nav-item-icon">🚀</span>Quick Start
+            </a>
+            <a class="nav-item" onclick="showSection('features')">
+                <span class="nav-item-icon">✨</span>Features
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">Architecture</div>
+            <a class="nav-item" onclick="showSection('system-architecture')">
+                <span class="nav-item-icon">🏗️</span>System Architecture
+            </a>
+            <a class="nav-item" onclick="showSection('backend')">
+                <span class="nav-item-icon">⚙️</span>Backend Services
+            </a>
+            <a class="nav-item" onclick="showSection('frontend')">
+                <span class="nav-item-icon">🎨</span>Frontend Components
+            </a>
+            <a class="nav-item" onclick="showSection('database')">
+                <span class="nav-item-icon">🗄️</span>Database Schema
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">Integration</div>
+            <a class="nav-item" onclick="showSection('salesforce')">
+                <span class="nav-item-icon">☁️</span>Salesforce
+            </a>
+            <a class="nav-item" onclick="showSection('authentication')">
+                <span class="nav-item-icon">🔐</span>Authentication
+            </a>
+            <a class="nav-item" onclick="showSection('email')">
+                <span class="nav-item-icon">📧</span>Email Service
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">Development</div>
+            <a class="nav-item" onclick="showSection('api-reference')">
+                <span class="nav-item-icon">📡</span>API Reference
+            </a>
+            <a class="nav-item" onclick="showSection('developer-guide')">
+                <span class="nav-item-icon">👩‍💻</span>Developer Guide
+            </a>
+            <a class="nav-item" onclick="showSection('deployment')">
+                <span class="nav-item-icon">🚢</span>Deployment
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">Resources</div>
+            <a class="nav-item" onclick="showSection('troubleshooting')">
+                <span class="nav-item-icon">🔧</span>Troubleshooting
+            </a>
+            <a class="nav-item" onclick="showSection('best-practices')">
+                <span class="nav-item-icon">💎</span>Best Practices
+            </a>
+            <a class="nav-item" onclick="showSection('changelog')">
+                <span class="nav-item-icon">📝</span>Changelog
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-wrapper">
+            <!-- Overview Section -->
+            <section id="overview" class="section active">
+                <h1>SFB (Salesforce Form Builder)</h1>
+                <p><strong>PilotForms</strong> is an enterprise-grade form building platform that seamlessly integrates with Salesforce CRM systems. It provides a powerful drag-and-drop interface for creating sophisticated multi-page forms with advanced features.</p>
+
+                <div class="alert alert-info">
+                    <strong>Latest Version:</strong> v1.0.0 (January 2025) - Features include Variables Management System, Login Building Block Conditional Visibility, and Smart Dropdown Enhancements.
+                </div>
+
+                <h2>Key Capabilities</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <div class="feature-title">Visual Form Builder</div>
+                        <div class="feature-description">WYSIWYG drag-and-drop interface with real-time preview</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📄</div>
+                        <div class="feature-title">Multi-Page Forms</div>
+                        <div class="feature-description">Complex form flows with conditional navigation</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">✍️</div>
+                        <div class="feature-title">E-Signatures</div>
+                        <div class="feature-description">Legally compliant electronic signature capture</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">☁️</div>
+                        <div class="feature-title">Salesforce Integration</div>
+                        <div class="feature-description">Direct record creation and updates</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🏢</div>
+                        <div class="feature-title">Multi-Org Support</div>
+                        <div class="feature-description">Connect multiple Salesforce organizations</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💾</div>
+                        <div class="feature-title">Auto-Save</div>
+                        <div class="feature-description">Automatic progress preservation</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <div class="feature-title">Mobile Responsive</div>
+                        <div class="feature-description">Optimized for all devices</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔧</div>
+                        <div class="feature-title">15+ Field Types</div>
+                        <div class="feature-description">Including lookups, datatables, and rich text</div>
+                    </div>
+                </div>
+
+                <h2>Technology Stack</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Layer</th>
+                                <th>Technology</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge badge-primary">Backend</span></td>
+                                <td>Node.js, Express.js</td>
+                                <td>Server application and API endpoints</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-success">Database</span></td>
+                                <td>SQLite, Sequelize ORM</td>
+                                <td>Data persistence and models</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-warning">Frontend</span></td>
+                                <td>Vanilla JS (ES6), CSS3</td>
+                                <td>User interface and interactions</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-danger">Security</span></td>
+                                <td>JWT, bcrypt, AES-256</td>
+                                <td>Authentication and encryption</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Quick Start Section -->
+            <section id="quickstart" class="section">
+                <h1>Quick Start Guide</h1>
+                
+                <h2>Prerequisites</h2>
+                <ul>
+                    <li>Node.js 14+ and npm 6+</li>
+                    <li>Git for version control</li>
+                    <li>Salesforce Developer Account</li>
+                    <li>Connected App in Salesforce</li>
+                </ul>
+
+                <h2>Installation</h2>
+                <div class="code-block">
+                    <span class="code-lang">bash</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre># Clone repository
+git clone https://github.com/your-repo/sfb.git
+cd sfb
+
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.example .env
+
+# Configure your .env file with:
+# - Salesforce credentials
+# - Encryption keys
+# - Email settings
+
+# Start development server
+npm run dev</pre>
+                </div>
+
+                <h2>Environment Configuration</h2>
+                <div class="code-block">
+                    <span class="code-lang">env</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre># Required Environment Variables
+ENCRYPTION_KEY=64-character-hex-key
+JWT_SECRET=random-secret-key
+SESSION_SECRET=random-session-key
+PORT=8443
+DOMAIN=your-domain.com
+
+# Salesforce Configuration
+SALESFORCE_CLIENT_ID=your-consumer-key
+SALESFORCE_CLIENT_SECRET=your-consumer-secret
+
+# Email Configuration (choose one)
+EMAIL_SERVICE=gmail
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=app-specific-password</pre>
+                </div>
+
+                <h2>Production Deployment</h2>
+                <div class="alert alert-success">
+                    Use the automated deployment script for production setup:
+                </div>
+                <div class="code-block">
+                    <span class="code-lang">bash</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>sudo ./deploy-production.sh</pre>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section id="features" class="section">
+                <h1>Features Overview</h1>
+
+                <h2>🎨 Modern Design System</h2>
+                <div class="card">
+                    <div class="card-title">Professional Interface</div>
+                    <div class="card-description">
+                        <ul>
+                            <li>Clean, block-based design with professional styling</li>
+                            <li>Light and dark themes with persistent preference</li>
+                            <li>Responsive 3-column layout (sidebar, canvas, properties)</li>
+                            <li>Micro-animations and smooth transitions</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2>🔧 Advanced Form Building</h2>
+                <div class="card">
+                    <div class="card-title">Builder Features</div>
+                    <div class="card-description">
+                        <ul>
+                            <li><strong>WYSIWYG Builder:</strong> Form builder matches exact appearance</li>
+                            <li><strong>Drag-and-Drop:</strong> Fields and pages can be reordered</li>
+                            <li><strong>15+ Field Types:</strong> Text, Email, Lookup, Signature, DataTable, etc.</li>
+                            <li><strong>Rich Text Editor:</strong> Full Quill.js integration</li>
+                            <li><strong>File Upload:</strong> Direct attachment to Salesforce records</li>
+                            <li><strong>Conditional Visibility:</strong> Smart show/hide logic</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2>🔄 Advanced Workflow Features</h2>
+                <div class="card">
+                    <div class="card-title">Workflow Capabilities</div>
+                    <div class="card-description">
+                        <ul>
+                            <li><strong>Page Conditional Visibility:</strong> Show/hide entire pages</li>
+                            <li><strong>Repeat Pages:</strong> Multiple instances for related records</li>
+                            <li><strong>Smart Navigation:</strong> Skip hidden pages automatically</li>
+                            <li><strong>Variable Management:</strong> Cross-page data sharing</li>
+                            <li><strong>Login Building Block:</strong> Email-based contact lookup with OTP</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2>📧 Email Service Integration</h2>
+                <div class="card">
+                    <div class="card-title">Email Features</div>
+                    <div class="card-description">
+                        <ul>
+                            <li>Production email sending via SMTP/SendGrid</li>
+                            <li>Multiple provider support (Gmail, SendGrid, custom SMTP)</li>
+                            <li>Professional HTML/text templates</li>
+                            <li>OTP verification with 10-minute expiration</li>
+                            <li>Rate limiting and session management</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2>🛡️ Enterprise E-Signature System</h2>
+                <div class="card">
+                    <div class="card-title">E-Signature Compliance</div>
+                    <div class="card-description">
+                        <ul>
+                            <li>ESIGN Act and UETA compliant</li>
+                            <li>Complete audit trails with timestamps</li>
+                            <li>Canvas-based capture (touch and mouse)</li>
+                            <li>Customizable legal text and styling</li>
+                            <li>Mobile-optimized signature capture</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- System Architecture Section -->
+            <section id="system-architecture" class="section">
+                <h1>System Architecture</h1>
+
+                <div class="code-block">
+                    <span class="code-lang">ascii</span>
+                    <pre>┌─────────────────────────────────────────────────┐
+│                   Frontend                       │
+│  ┌──────────┐ ┌──────────┐ ┌──────────────┐    │
+│  │  Form    │ │  Form    │ │   Admin      │    │
+│  │ Builder  │ │  Viewer  │ │  Dashboard   │    │
+│  └──────────┘ └──────────┘ └──────────────┘    │
+└─────────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────┐
+│              Backend (Node.js)                   │
+│  ┌──────────┐ ┌──────────┐ ┌──────────────┐    │
+│  │   API    │ │  Auth    │ │  Salesforce  │    │
+│  │ Endpoints│ │  System  │ │  Connector   │    │
+│  └──────────┘ └──────────┘ └──────────────┘    │
+└─────────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────┐
+│          Database (SQLite/Sequelize)             │
+│  ┌──────────┐ ┌──────────┐ ┌──────────────┐    │
+│  │  Users   │ │  Forms   │ │ Submissions  │    │
+│  └──────────┘ └──────────┘ └──────────────┘    │
+└─────────────────────────────────────────────────┘</pre>
+                </div>
+
+                <h2>Module Architecture</h2>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>window.AppModules = {
+    formBuilder,      // Core form building logic
+    salesforce,       // Salesforce API integration
+    fieldTypes,       // Field rendering engine
+    dragDrop,         // Drag & drop interactions
+    conditionalLogic, // Visibility logic engine
+    formStorage,      // Form persistence layer
+    autoSave,         // Auto-save functionality
+    signature,        // E-signature handling
+    multiPage,        // Multi-page navigation
+    flowLogic,        // Advanced form flows
+    mobile           // Mobile optimizations
+}</pre>
+                </div>
+
+                <h2>Security Layers</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Layer</th>
+                                <th>Implementation</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Authentication</td>
+                                <td>JWT tokens, Session management</td>
+                                <td>User identity verification</td>
+                            </tr>
+                            <tr>
+                                <td>Authorization</td>
+                                <td>Role-based access control</td>
+                                <td>Resource access management</td>
+                            </tr>
+                            <tr>
+                                <td>Encryption</td>
+                                <td>AES-256-GCM</td>
+                                <td>Data protection at rest</td>
+                            </tr>
+                            <tr>
+                                <td>Transport</td>
+                                <td>HTTPS/TLS 1.3</td>
+                                <td>Data protection in transit</td>
+                            </tr>
+                            <tr>
+                                <td>Rate Limiting</td>
+                                <td>Express-rate-limit</td>
+                                <td>DDoS protection</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Backend Section -->
+            <section id="backend" class="section">
+                <h1>Backend Services</h1>
+
+                <h2>Core Server Configuration</h2>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// server.js configuration
+const app = express();
+
+// Security middleware
+app.use(helmet());
+app.use(cors());
+app.use(rateLimiter);
+
+// Session management
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    store: new SequelizeStore({ db: sequelize }),
+    resave: false,
+    saveUninitialized: false
+}));
+
+// Authentication
+app.use(authenticateJWT);</pre>
+                </div>
+
+                <h2>API Endpoints</h2>
+                
+                <h3>Authentication Endpoints</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Endpoint</th>
+                                <th>Purpose</th>
+                                <th>Auth Required</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge badge-success">POST</span></td>
+                                <td><code>/api/auth/register</code></td>
+                                <td>User registration</td>
+                                <td>No</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-success">POST</span></td>
+                                <td><code>/api/auth/login</code></td>
+                                <td>User login</td>
+                                <td>No</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-primary">GET</span></td>
+                                <td><code>/api/auth/me</code></td>
+                                <td>Get current user</td>
+                                <td>JWT</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-success">POST</span></td>
+                                <td><code>/api/send-otp</code></td>
+                                <td>Send OTP email</td>
+                                <td>No</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-success">POST</span></td>
+                                <td><code>/api/verify-otp</code></td>
+                                <td>Verify OTP code</td>
+                                <td>No</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Form Management Endpoints</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Endpoint</th>
+                                <th>Purpose</th>
+                                <th>Auth Required</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge badge-primary">GET</span></td>
+                                <td><code>/api/forms</code></td>
+                                <td>List forms</td>
+                                <td>Session</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-success">POST</span></td>
+                                <td><code>/api/save-form</code></td>
+                                <td>Save form config</td>
+                                <td>Session</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-primary">GET</span></td>
+                                <td><code>/api/forms/:id</code></td>
+                                <td>Get form config</td>
+                                <td>Optional</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-success">POST</span></td>
+                                <td><code>/api/forms/:id/publish</code></td>
+                                <td>Publish form</td>
+                                <td>Session</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-success">POST</span></td>
+                                <td><code>/api/forms/:id/submit</code></td>
+                                <td>Submit form data</td>
+                                <td>No</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>Middleware Stack</h2>
+                <div class="alert alert-info">
+                    The application uses a comprehensive middleware stack for security, performance, and functionality.
+                </div>
+
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// Rate limiting configuration
+const rateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5000, // limit each IP to 5000 requests
+    message: 'Too many requests from this IP'
+});
+
+// JWT authentication middleware
+const authenticateJWT = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'No token' });
+    
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ error: 'Invalid token' });
+        req.user = user;
+        next();
+    });
+};</pre>
+                </div>
+            </section>
+
+            <!-- Frontend Section -->
+            <section id="frontend" class="section">
+                <h1>Frontend Components</h1>
+
+                <h2>Page Structure</h2>
+                <div class="code-block">
+                    <span class="code-lang">html</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>&lt;!-- Main Application Structure --&gt;
+&lt;div id="app-shell"&gt;
+    &lt;!-- Left Panel: Field Palette --&gt;
+    &lt;div id="left-panel"&gt;&lt;/div&gt;
+    
+    &lt;!-- Center: Form Canvas --&gt;
+    &lt;div id="canvas-area"&gt;&lt;/div&gt;
+    
+    &lt;!-- Right Panel: Properties --&gt;
+    &lt;div id="right-panel"&gt;&lt;/div&gt;
+    
+    &lt;!-- FAB Menu --&gt;
+    &lt;div id="actions-button"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+                </div>
+
+                <h2>Module System</h2>
+                <h3>FormBuilder Module</h3>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// Key FormBuilder methods
+renderFormCanvas()           // Render form structure
+addField(fieldType)         // Add new field
+selectField(fieldElement)   // Select for editing
+deleteField(fieldId)        // Remove field
+updateFieldProperty()       // Update field config</pre>
+                </div>
+
+                <h3>Field Types</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-title">Basic Inputs</div>
+                        <div class="feature-description">text, email, phone, number, date, textarea</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-title">Selection</div>
+                        <div class="feature-description">select, radio, checkbox</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-title">Advanced</div>
+                        <div class="feature-description">lookup, richtext, signature, file, datatable</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-title">Special</div>
+                        <div class="feature-description">login, email-verify, display, section, columns</div>
+                    </div>
+                </div>
+
+                <h2>Drag & Drop System</h2>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// Drag sources
+setupFieldPalette()         // Initialize draggable fields
+handlePaletteDragStart()   // Start drag from palette
+
+// Drop targets
+setupDropZones()           // Initialize drop areas
+handleCanvasDrop()         // Handle field drops
+handleFieldReorder()       // Reorder existing fields</pre>
+                </div>
+            </section>
+
+            <!-- Database Section -->
+            <section id="database" class="section">
+                <h1>Database Schema</h1>
+
+                <h2>Tables Overview</h2>
+                <div class="alert alert-info">
+                    The application uses SQLite with Sequelize ORM for data persistence. All sensitive data is encrypted using AES-256-GCM.
+                </div>
+
+                <h3>Users Table</h3>
+                <div class="code-block">
+                    <span class="code-lang">sql</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>CREATE TABLE Users (
+    id UUID PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,  -- bcrypt hashed
+    firstName VARCHAR(100),
+    lastName VARCHAR(100),
+    isActive BOOLEAN DEFAULT true,
+    emailVerified BOOLEAN DEFAULT false,
+    lastLoginAt DATETIME,
+    createdAt DATETIME,
+    updatedAt DATETIME
+);</pre>
+                </div>
+
+                <h3>SalesforceOrgs Table</h3>
+                <div class="code-block">
+                    <span class="code-lang">sql</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>CREATE TABLE SalesforceOrgs (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    orgId VARCHAR(255),
+    clientId VARCHAR(255) NOT NULL,
+    clientSecret TEXT,  -- AES-256-GCM encrypted
+    loginUrl VARCHAR(255),
+    environment VARCHAR(50),  -- 'production' | 'sandbox'
+    isActive BOOLEAN DEFAULT true,
+    createdAt DATETIME,
+    updatedAt DATETIME
+);</pre>
+                </div>
+
+                <h2>Encryption Strategy</h2>
+                <div class="card">
+                    <div class="card-title">Data Security</div>
+                    <div class="card-description">
+                        <ul>
+                            <li><strong>Algorithm:</strong> AES-256-GCM encryption</li>
+                            <li><strong>Key Storage:</strong> Environment variable (64-char hex)</li>
+                            <li><strong>Encrypted Fields:</strong>
+                                <ul>
+                                    <li>SalesforceOrgs.clientSecret</li>
+                                    <li>UserOrgAccess.accessToken</li>
+                                    <li>UserOrgAccess.refreshToken</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Salesforce Section -->
+            <section id="salesforce" class="section">
+                <h1>Salesforce Integration</h1>
+
+                <h2>OAuth 2.1 Implementation</h2>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// OAuth Flow
+// 1. Authorization request
+GET /api/salesforce/connect
+→ Redirect to Salesforce login
+
+// 2. Authorization callback
+GET /oauth/callback?code=xxx&state=xxx
+→ Exchange code for tokens
+
+// 3. Token storage
+// Encrypted storage in UserOrgAccess table</pre>
+                </div>
+
+                <h2>PKCE Support</h2>
+                <div class="alert alert-success">
+                    The application implements PKCE (Proof Key for Code Exchange) for enhanced OAuth security.
+                </div>
+
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// Code verifier and challenge generation
+const codeVerifier = generateRandomString(128);
+const codeChallenge = base64url(sha256(codeVerifier));</pre>
+                </div>
+
+                <h2>Salesforce API Operations</h2>
+                <h3>Object Metadata</h3>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// Get available objects
+connection.describeGlobal()
+
+// Get object fields
+connection.sobject(objectName).describe()</pre>
+                </div>
+
+                <h3>Record Operations</h3>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// Create record
+connection.sobject(objectName).create(data)
+
+// Update record
+connection.sobject(objectName).update({ Id, ...data })
+
+// Query records
+connection.query(`SELECT ${fields} FROM ${object} WHERE ${conditions}`)</pre>
+                </div>
+            </section>
+
+            <!-- Authentication Section -->
+            <section id="authentication" class="section">
+                <h1>Authentication & Security</h1>
+
+                <h2>Authentication Methods</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-title">JWT Authentication</div>
+                        <div class="feature-description">
+                            Token-based authentication with 7-day expiration
+                        </div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-title">Session Authentication</div>
+                        <div class="feature-description">
+                            Cookie-based sessions with Sequelize store
+                        </div>
+                    </div>
+                </div>
+
+                <h3>JWT Implementation</h3>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// Token generation
+const token = jwt.sign(
+    { userId, email },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+);
+
+// Token verification
+jwt.verify(token, process.env.JWT_SECRET);</pre>
+                </div>
+
+                <h2>Security Features</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Implementation</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Password Security</td>
+                                <td>bcrypt with salt rounds</td>
+                                <td>Secure password storage</td>
+                            </tr>
+                            <tr>
+                                <td>Rate Limiting</td>
+                                <td>5000 requests/15min per IP</td>
+                                <td>DDoS protection</td>
+                            </tr>
+                            <tr>
+                                <td>CORS</td>
+                                <td>Configured for specific origins</td>
+                                <td>Cross-origin security</td>
+                            </tr>
+                            <tr>
+                                <td>HTTPS</td>
+                                <td>Enforced in production</td>
+                                <td>Transport security</td>
+                            </tr>
+                            <tr>
+                                <td>CSP</td>
+                                <td>Content Security Policy headers</td>
+                                <td>XSS protection</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Email Section -->
+            <section id="email" class="section">
+                <h1>Email Service</h1>
+
+                <h2>Configuration Options</h2>
+                <div class="code-block">
+                    <span class="code-lang">env</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre># Gmail SMTP
+EMAIL_SERVICE=gmail
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=app-specific-password
+
+# SendGrid API
+SENDGRID_API_KEY=your-api-key
+EMAIL_FROM_ADDRESS=noreply@domain.com
+
+# Custom SMTP
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_SECURE=false</pre>
+                </div>
+
+                <h2>OTP System</h2>
+                <div class="card">
+                    <div class="card-title">One-Time Password Features</div>
+                    <div class="card-description">
+                        <ul>
+                            <li><strong>Code Generation:</strong> 6-digit random numbers</li>
+                            <li><strong>Expiration:</strong> 10 minutes</li>
+                            <li><strong>Rate Limiting:</strong> 10-second cooldown</li>
+                            <li><strong>Storage:</strong> In-memory with cleanup</li>
+                            <li><strong>Security:</strong> Session-based verification</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- API Reference Section -->
+            <section id="api-reference" class="section">
+                <h1>API Reference</h1>
+
+                <h2>Form Configuration Object</h2>
+                <div class="code-block">
+                    <span class="code-lang">json</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>{
+    "id": "unique-form-id",
+    "title": "Form Title",
+    "description": "Form description",
+    "salesforceObject": "Contact",
+    "submitButtonText": "Submit",
+    "successMessage": "Thank you!",
+    "pages": [
+        {
+            "id": "page-1",
+            "title": "Page 1",
+            "salesforceObject": "Contact",
+            "fields": [
+                {
+                    "id": "field-1",
+                    "type": "text",
+                    "label": "First Name",
+                    "required": true,
+                    "salesforceField": "FirstName"
+                }
+            ],
+            "conditionalVisibility": {
+                "enabled": false,
+                "conditions": []
+            }
+        }
+    ],
+    "styling": {
+        "primaryColor": "#007bff",
+        "fontFamily": "Arial, sans-serif"
+    }
+}</pre>
+                </div>
+
+                <h2>Form Submission</h2>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// Request
+POST /api/forms/:id/submit
+{
+    "formData": {
+        "FirstName": "John",
+        "LastName": "Doe",
+        "Email": "john@example.com"
+    }
+}
+
+// Response
+{
+    "success": true,
+    "recordId": "003xx000000000",
+    "message": "Record created successfully"
+}</pre>
+                </div>
+
+                <h2>Error Response Format</h2>
+                <div class="code-block">
+                    <span class="code-lang">json</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>{
+    "error": true,
+    "message": "Human-readable error message",
+    "code": "ERROR_CODE",
+    "details": {}
+}</pre>
+                </div>
+            </section>
+
+            <!-- Developer Guide Section -->
+            <section id="developer-guide" class="section">
+                <h1>Developer Guide</h1>
+
+                <h2>Setting Up Development Environment</h2>
+                <h3>Prerequisites</h3>
+                <div class="code-block">
+                    <span class="code-lang">bash</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre># Check Node.js version
+node --version  # Should be 14+
+npm --version   # Should be 6+
+
+# Check Git
+git --version</pre>
+                </div>
+
+                <h2>Adding New Features</h2>
+                <h3>Adding a New Field Type</h3>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// 1. Add to fieldTypes.js
+renderNewFieldType(field) {
+    const element = document.createElement('div');
+    // Implementation
+    return element;
+}
+
+// 2. Add to field palette
+const fieldTypeConfig = {
+    type: 'newfield',
+    label: 'New Field',
+    icon: '📝'
+};
+
+// 3. Add properties panel configuration
+const properties = {
+    basic: ['label', 'placeholder'],
+    validation: ['required', 'pattern'],
+    advanced: ['customOption']
+};</pre>
+                </div>
+
+                <h3>Adding a New API Endpoint</h3>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// In server.js
+app.post('/api/new-endpoint', authenticateJWT, async (req, res) => {
+    try {
+        // Validation
+        const { param } = req.body;
+        if (!param) {
+            return res.status(400).json({ error: 'Missing parameter' });
+        }
+        
+        // Business logic
+        const result = await processRequest(param);
+        
+        // Response
+        res.json({ success: true, data: result });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});</pre>
+                </div>
+
+                <h2>Debugging</h2>
+                <h3>Enable Debug Mode</h3>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// Enable debug logging
+window.DEBUG = true;
+
+// Debug specific modules
+window.DEBUG_CONDITIONAL = true;
+window.DEBUG_SALESFORCE = true;</pre>
+                </div>
+
+                <h3>Browser Console Commands</h3>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// Access modules
+window.AppModules.formBuilder
+
+// Check form state
+window.formConfig
+
+// View variables
+window.formVariables
+
+// Trigger actions
+window.AppModules.formBuilder.saveForm()</pre>
+                </div>
+            </section>
+
+            <!-- Deployment Section -->
+            <section id="deployment" class="section">
+                <h1>Deployment Guide</h1>
+
+                <h2>Automated Deployment</h2>
+                <div class="alert alert-success">
+                    The application includes a comprehensive deployment script that automates the entire production setup process.
+                </div>
+
+                <div class="code-block">
+                    <span class="code-lang">bash</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre># Run the deployment script as root
+sudo ./deploy-production.sh</pre>
+                </div>
+
+                <h2>What the Script Does</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔧</div>
+                        <div class="feature-title">System Setup</div>
+                        <div class="feature-description">Updates packages, installs Node.js, PM2, Nginx</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔐</div>
+                        <div class="feature-title">Security Config</div>
+                        <div class="feature-description">SSL certificates, encryption keys, firewall</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <div class="feature-title">Web Server</div>
+                        <div class="feature-description">Nginx reverse proxy, caching, HTTP/2</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📧</div>
+                        <div class="feature-title">Email System</div>
+                        <div class="feature-description">Postfix, DKIM authentication, SPF</div>
+                    </div>
+                </div>
+
+                <h2>PM2 Configuration</h2>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// ecosystem.config.js
+module.exports = {
+    apps: [{
+        name: 'sfb-prod',
+        script: './server.js',
+        instances: 4,
+        exec_mode: 'cluster',
+        max_memory_restart: '2G',
+        env: {
+            NODE_ENV: 'production',
+            PORT: 8443
+        }
+    }]
+};</pre>
+                </div>
+
+                <h2>Management Commands</h2>
+                <div class="code-block">
+                    <span class="code-lang">bash</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre># Check application status
+pm2 status
+
+# View application logs
+pm2 logs sfb-prod
+
+# Restart application
+pm2 restart sfb-prod
+
+# Check email logs
+tail -f /var/log/mail.log
+
+# Test SSL configuration
+curl -I https://pilotforms.com</pre>
+                </div>
+            </section>
+
+            <!-- Troubleshooting Section -->
+            <section id="troubleshooting" class="section">
+                <h1>Troubleshooting</h1>
+
+                <h2>Common Issues</h2>
+
+                <div class="card">
+                    <div class="card-title">Form Not Loading</div>
+                    <div class="card-description">
+                        <ul>
+                            <li>Check console for errors</li>
+                            <li>Verify form ID in URL</li>
+                            <li>Check network tab for 404 errors</li>
+                            <li>Ensure user has permission to view form</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Salesforce Connection Failed</div>
+                    <div class="card-description">
+                        <ul>
+                            <li>Verify OAuth credentials in .env</li>
+                            <li>Check redirect URI matches Salesforce app</li>
+                            <li>Ensure user has API access in Salesforce</li>
+                            <li>Try reconnecting via org manager</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Email Not Sending</div>
+                    <div class="card-description">
+                        <ul>
+                            <li>Check email configuration in .env</li>
+                            <li>Verify SMTP credentials</li>
+                            <li>Check spam folder</li>
+                            <li>Review email logs: /var/log/mail.log</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">File Upload Issues</div>
+                    <div class="card-description">
+                        <ul>
+                            <li>Check file size (max 10MB)</li>
+                            <li>Verify allowed file types</li>
+                            <li>Check uploads directory permissions</li>
+                            <li>Review server logs for errors</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2>Performance Optimization</h2>
+                <h3>Database Queries</h3>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// Use indexed fields for queries
+// Implement pagination for large datasets
+// Cache frequently accessed data
+// Use connection pooling</pre>
+                </div>
+
+                <h3>Frontend Performance</h3>
+                <div class="code-block">
+                    <span class="code-lang">javascript</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>// Minimize DOM manipulations
+// Debounce user input events
+// Lazy load non-critical resources
+// Use CSS transforms for animations</pre>
+                </div>
+            </section>
+
+            <!-- Best Practices Section -->
+            <section id="best-practices" class="section">
+                <h1>Best Practices</h1>
+
+                <h2>Security</h2>
+                <div class="card">
+                    <ul>
+                        <li>Always use HTTPS in production</li>
+                        <li>Keep dependencies updated</li>
+                        <li>Validate all user input</li>
+                        <li>Use parameterized queries</li>
+                        <li>Implement rate limiting</li>
+                        <li>Regular security audits</li>
+                    </ul>
+                </div>
+
+                <h2>Code Quality</h2>
+                <div class="card">
+                    <ul>
+                        <li>Follow ES6 module pattern</li>
+                        <li>Use meaningful variable names</li>
+                        <li>Comment complex logic</li>
+                        <li>Handle errors gracefully</li>
+                        <li>Write unit tests</li>
+                        <li>Document API changes</li>
+                    </ul>
+                </div>
+
+                <h2>Performance</h2>
+                <div class="card">
+                    <ul>
+                        <li>Optimize database queries</li>
+                        <li>Implement caching strategies</li>
+                        <li>Use CDN for static assets</li>
+                        <li>Enable gzip compression</li>
+                        <li>Monitor memory usage</li>
+                        <li>Regular performance profiling</li>
+                    </ul>
+                </div>
+
+                <h2>User Experience</h2>
+                <div class="card">
+                    <ul>
+                        <li>Provide clear error messages</li>
+                        <li>Show loading indicators</li>
+                        <li>Implement auto-save</li>
+                        <li>Support keyboard navigation</li>
+                        <li>Ensure mobile responsiveness</li>
+                        <li>Test across browsers</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Changelog Section -->
+            <section id="changelog" class="section">
+                <h1>Changelog</h1>
+
+                <h2>Version 1.0.0 - January 2025</h2>
+                <div class="card">
+                    <div class="card-title">Latest Features</div>
+                    <div class="card-description">
+                        <ul>
+                            <li>🔧 <strong>Variables Management System</strong> - Centralized variable manager with real-time monitoring</li>
+                            <li>🔐 <strong>Login Building Block Conditional Visibility</strong> - Fixed login variable integration</li>
+                            <li>📝 <strong>Smart Dropdown Enhancements</strong> - RecordId variable picklist improvements</li>
+                            <li>⚡ <strong>Performance Optimizations</strong> - Auto-save optimization from 500ms to 3 seconds</li>
+                            <li>🛡️ <strong>Enhanced Security</strong> - Persistent encryption key, better error messages</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2>Previous Updates</h2>
+                <div class="card">
+                    <div class="card-title">Core Features</div>
+                    <div class="card-description">
+                        <ul>
+                            <li>Initial release with core form building functionality</li>
+                            <li>Salesforce OAuth integration</li>
+                            <li>Multi-page form support</li>
+                            <li>E-signature capabilities</li>
+                            <li>Email verification system</li>
+                            <li>Auto-save functionality</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Theme management
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.querySelector('.theme-toggle').textContent = isDark ? '☀️' : '🌙';
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.querySelector('.theme-toggle').textContent = '☀️';
+        }
+
+        // Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show selected section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Close mobile menu if open
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Search functionality
+        function searchContent(query) {
+            const sections = document.querySelectorAll('.section');
+            const lowerQuery = query.toLowerCase();
+
+            if (!query) {
+                // If no query, show overview
+                showSection('overview');
+                return;
+            }
+
+            sections.forEach(section => {
+                const content = section.textContent.toLowerCase();
+                if (content.includes(lowerQuery)) {
+                    // Highlight matching content
+                    const html = section.innerHTML;
+                    const regex = new RegExp(`(${query})`, 'gi');
+                    section.innerHTML = html.replace(regex, '<mark>$1</mark>');
+                }
+            });
+        }
+
+        // Copy code functionality
+        function copyCode(button) {
+            const codeBlock = button.parentElement.querySelector('pre');
+            const text = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // Handle keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Ctrl/Cmd + K for search
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    document.querySelector('.search-input').focus();
+                }
+
+                // Escape to close mobile menu
+                if (e.key === 'Escape' && window.innerWidth <= 768) {
+                    document.getElementById('sidebar').classList.remove('open');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

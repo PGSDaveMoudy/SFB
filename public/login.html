@@ -35,15 +35,44 @@
             margin-bottom: 30px;
         }
 
+        .login-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .login-logo-icon {
+            font-size: 32px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-3px);
+            }
+        }
+
         .auth-header h1 {
             color: #333;
             font-size: 28px;
-            margin-bottom: 10px;
+            margin: 0;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: -0.02em;
         }
 
         .auth-header p {
             color: #666;
             font-size: 14px;
+            margin-top: 8px;
         }
 
         .form-group {
@@ -190,30 +219,16 @@
             font-size: 13px;
         }
 
-        .salesforce-button {
-            width: 100%;
-            padding: 12px;
-            background: #00a1e0;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 10px;
-        }
-
-        .salesforce-button:hover {
-            background: #0087c3;
-        }
     </style>
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-header">
-            <h1>PilotForms</h1>
-            <p>Secure Form Builder for Salesforce</p>
+            <div class="login-logo">
+                <div class="login-logo-icon">🚀</div>
+                <h1>PilotForms</h1>
+            </div>
+            <p>Enterprise Form Builder for Salesforce</p>
         </div>
 
         <div class="tab-container">
@@ -236,13 +251,6 @@
                 <button type="submit" class="auth-button" id="loginButton">Login</button>
             </form>
             
-            <div class="divider">
-                <span>or</span>
-            </div>
-            
-            <button class="salesforce-button" onclick="connectWithSalesforce()">
-                Connect with Salesforce
-            </button>
         </div>
 
         <!-- Registration Form -->

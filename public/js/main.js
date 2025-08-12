@@ -253,6 +253,55 @@ function setupGlobalEventListeners() {
     window.addEventListener('resize', debounce(() => {
         document.dispatchEvent(new Event('windowResized'));
     }, 250));
+    
+    // Handle Salesforce disconnect button
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    if (disconnectBtn) {
+        disconnectBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/orgs/disconnect', {
+                    method: 'POST',
+                    headers: window.Auth.getHeaders()
+                });
+
+                if (response.ok) {
+                    // Update connection status
+                    const connectionStatus = document.getElementById('connectionStatus');
+                    const modernConnectionStatus = document.getElementById('modernConnectionStatus');
+                    
+                    if (connectionStatus) {
+                        connectionStatus.className = 'connection-status disconnected';
+                        connectionStatus.querySelector('.status-text').textContent = 'Not Connected';
+                    }
+                    
+                    if (modernConnectionStatus) {
+                        modernConnectionStatus.className = 'connection-indicator disconnected';
+                        modernConnectionStatus.querySelector('.status-text').textContent = 'Not Connected';
+                    }
+                    
+                    // Hide disconnect button
+                    disconnectBtn.style.display = 'none';
+                    
+                    // Clear any cached data
+                    if (window.AppModules && window.AppModules.salesforce) {
+                        window.AppModules.salesforce.clearCache();
+                    }
+                    
+                    // Show success message
+                    if (window.magicalPopups) {
+                        window.magicalPopups.showToast('Successfully disconnected from Salesforce', 'success');
+                    }
+                } else {
+                    throw new Error('Failed to disconnect');
+                }
+            } catch (error) {
+                console.error('Error disconnecting:', error);
+                if (window.magicalPopups) {
+                    window.magicalPopups.showToast('Error disconnecting from Salesforce', 'error');
+                }
+            }
+        });
+    }
 }
 
 // Check first visit
@@ -420,6 +469,71 @@ document.addEventListener('click', function(event) {
     }
 });
 
+// Publish/Unpublish functions for Actions menu
+window.publishCurrentForm = async function() {
+    const formStorage = window.AppModules.formStorage;
+    const formBuilder = window.AppModules.formBuilder;
+    
+    if (!formStorage || !formBuilder) {
+        alert('Form modules not loaded. Please try again.');
+        return;
+    }
+    
+    // Check if there's a current form
+    if (!formBuilder.currentForm || !formBuilder.currentForm.id) {
+        alert('Please save the form first before publishing.');
+        return;
+    }
+    
+    const formId = formBuilder.currentForm.id;
+    
+    try {
+        // Save the form first
+        await formStorage.saveForm();
+        
+        // Publish the form
+        const result = await formStorage.publishFormAction(formId);
+        if (result) {
+            // Close the actions dropdown
+            const dropdown = document.getElementById('actionsDropdown');
+            if (dropdown) dropdown.classList.remove('active');
+        }
+    } catch (error) {
+        console.error('Error publishing form:', error);
+        alert('Failed to publish form. Please try again.');
+    }
+};
+
+window.unpublishCurrentForm = async function() {
+    const formStorage = window.AppModules.formStorage;
+    const formBuilder = window.AppModules.formBuilder;
+    
+    if (!formStorage || !formBuilder) {
+        alert('Form modules not loaded. Please try again.');
+        return;
+    }
+    
+    // Check if there's a current form
+    if (!formBuilder.currentForm || !formBuilder.currentForm.id) {
+        alert('No form is currently loaded.');
+        return;
+    }
+    
+    const formId = formBuilder.currentForm.id;
+    
+    try {
+        const result = await formStorage.unpublishFormAction(formId);
+        if (result) {
+            // Close the actions dropdown
+            const dropdown = document.getElementById('actionsDropdown');
+            if (dropdown) dropdown.classList.remove('active');
+        }
+    } catch (error) {
+        console.error('Error unpublishing form:', error);
+        alert('Failed to unpublish form. Please try again.');
+    }
+};
+
 // Forms search and filter functions
 window.clearFormsSearch = function() {
     const searchInput = document.getElementById('formsSearchInput');
@@ -495,6 +609,30 @@ window.disconnectFromSalesforce = async function() {
     }
 };
 
+window.logoutUser = function() {
+    if (confirm('Are you sure you want to logout? Any unsaved changes will be lost.')) {
+        // Clear authentication
+        window.Auth.removeToken();
+        localStorage.removeItem('userInfo');
+        localStorage.clear(); // Clear all local storage for clean logout
+        
+        // Reset application state
+        window.AppState.salesforceConnected = false;
+        window.AppState.userInfo = null;
+        window.AppState.authToken = null;
+        window.AppState.currentForm = null;
+        window.AppState.selectedField = null;
+        
+        // Clear form variables
+        if (window.FormVariables) {
+            window.FormVariables.clear();
+        }
+        
+        // Redirect to login page
+        window.location.href = '/login.html';
+    }
+};
+
 // Utility functions
 function debounce(func, wait) {
     let timeout;
@@ -555,7 +693,9 @@ async function initializeOrgManagement() {
 // Load available organizations
 async function loadAvailableOrgs() {
     try {
-        const response = await fetch('/api/orgs');
+        const response = await fetch('/api/orgs', {
+            headers: window.Auth.getHeaders()
+        });
         const data = await response.json();
         
         if (data.success) {
@@ -570,7 +710,9 @@ async function loadAvailableOrgs() {
 // Check current org connection
 async function checkCurrentOrgConnection() {
     try {
-        const response = await fetch('/api/orgs/current');
+        const response = await fetch('/api/orgs/current', {
+            headers: window.Auth.getHeaders()
+        });
         const data = await response.json();
         
         if (data.connected && data.org) {
@@ -644,7 +786,9 @@ async function connectToSelectedOrg() {
     }
     
     try {
-        const response = await fetch(`/api/orgs/${selectedOrgId}/auth-url`);
+        const response = await fetch(`/api/orgs/${selectedOrgId}/auth-url`, {
+            headers: window.Auth.getHeaders()
+        });
         const data = await response.json();
         
         if (data.authUrl) {
@@ -663,7 +807,8 @@ async function connectToSelectedOrg() {
 async function disconnectFromOrg() {
     try {
         const response = await fetch('/api/orgs/disconnect', {
-            method: 'POST'
+            method: 'POST',
+            headers: window.Auth.getHeaders()
         });
         
         if (response.ok) {

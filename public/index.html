@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=1200, initial-scale=0.8">
     <title>PilotForms - Classic 3-Column Layout</title>
     <link rel="stylesheet" href="styles-notion-enhanced.css">
-    <link rel="stylesheet" href="styles-modern-redesign.css">
     <link rel="stylesheet" href="styles-unified-experience.css">
     <link rel="stylesheet" href="desktop-optimized.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -79,11 +78,22 @@
                 <button class="actions-item" onclick="previewForm()" title="Preview form">
                     👁️ Preview
                 </button>
+                <button class="actions-item" onclick="publishCurrentForm()" title="Publish current form">
+                    🚀 Publish
+                </button>
+                <button class="actions-item" onclick="unpublishCurrentForm()" title="Unpublish current form">
+                    🔒 Unpublish
+                </button>
+                <div class="actions-divider"></div>
                 <button class="actions-item" onclick="newForm()" title="Create new form">
                     ✨ New Form
                 </button>
                 <button class="actions-item" onclick="showOrgManager()" title="Manage Salesforce connections">
                     🏢 Connect Org
+                </button>
+                <div class="actions-divider"></div>
+                <button class="actions-item" onclick="logoutUser()" title="Sign out of PilotForms" style="color: #ef4444;">
+                    🚪 Logout
                 </button>
             </div>
         </div>
@@ -190,428 +200,6 @@
     </div>
 
 
-    <!-- Mobile Navigation (Only visible on mobile) -->
-    <div class="mobile-nav" style="display: none !important;">
-        <div class="mobile-nav-title">Form Builder</div>
-        <div class="mobile-nav-controls">
-            <button class="mobile-nav-btn" id="mobileSidebarBtn" title="Fields & Tools">
-                🧩
-            </button>
-            <button class="mobile-nav-btn" id="mobilePropertiesBtn" title="Properties">
-                ⚙️
-            </button>
-            <button class="mobile-nav-btn" id="mobilePreviewBtn" title="Preview">
-                👁️
-            </button>
-        </div>
-    </div>
-
-    <!-- Mobile Overlay -->
-    <div class="mobile-overlay" id="mobileOverlay"></div>
-
-    <!-- Top Header Bar -->
-    <header class="top-header">
-        <div class="header-left">
-            <h1 class="app-title">PilotForms</h1>
-            <span class="app-subtitle">Enterprise Edition</span>
-        </div>
-        
-        <div class="header-center">
-            <!-- Connection Status -->
-            <div id="connectionStatus" class="connection-status disconnected">
-                <span class="status-icon">●</span>
-                <span class="status-text">Not Connected</span>
-            </div>
-        </div>
-        
-        <div class="header-right">
-            
-        </div>
-    </header>
-
-    <!-- Modern App Shell -->
-    <div class="modern-app-shell" id="modernAppShell" style="display: none;">
-        <!-- Floating Navigation -->
-        <nav class="floating-nav">
-            <div class="app-logo">
-                <span>🚀</span>
-                <span>Form Builder</span>
-            </div>
-            
-            <div class="connection-indicator disconnected" id="modernConnectionStatus">
-                <span class="status-icon">●</span>
-                <span class="status-text">Not Connected</span>
-            </div>
-            
-            <div class="nav-actions">
-                <button class="nav-action-btn" onclick="toggleTheme()" title="Toggle Dark Mode">
-                    🌙
-                </button>
-                <button class="nav-action-btn" onclick="showMyForms()" title="My Forms">
-                    📋
-                </button>
-            </div>
-        </nav>
-
-        <!-- Main Workspace -->
-        <main class="main-workspace">
-            <!-- Floating Page Tabs -->
-            <div id="modernPageTabs" class="floating-page-tabs" style="display: none;">
-                <!-- Tabs will be dynamically added here -->
-            </div>
-
-            <!-- Modern Form Canvas -->
-            <div class="modern-form-canvas" id="modernFormCanvas">
-                <div class="empty-canvas-state">
-                    <div class="empty-canvas-icon">✨</div>
-                    <h2 class="empty-canvas-title">Start Building Your Form</h2>
-                    <p class="empty-canvas-description">
-                        Connect to Salesforce and use the floating action button to add fields, 
-                        or click the + button to access the field palette.
-                    </p>
-                </div>
-            </div>
-        </main>
-
-        <!-- Floating Action Buttons -->
-        <div class="fab-container" style="display: none;">
-            <div class="fab-menu" id="fabMenu">
-                <button class="fab-action" data-tooltip="Connect Org" onclick="showOrgManager()">
-                    🏢
-                </button>
-                <button class="fab-action" data-tooltip="Add Field" onclick="toggleFieldPalette()">
-                    🧩
-                </button>
-                <button class="fab-action" data-tooltip="Properties" onclick="togglePropertiesPanel()">
-                    ⚙️
-                </button>
-                <button class="fab-action" data-tooltip="Preview" onclick="previewForm()">
-                    👁️
-                </button>
-                <button class="fab-action" data-tooltip="Save" onclick="saveForm()">
-                    💾
-                </button>
-            </div>
-            <button class="main-fab" onclick="toggleFabMenu()">
-                <span>+</span>
-            </button>
-        </div>
-
-        <!-- Field Palette Drawer -->
-        <div class="field-palette-drawer" id="modernFieldPalette">
-            <div class="palette-header">
-                <h3 class="palette-title">Add Fields</h3>
-                <button class="palette-close" onclick="toggleFieldPalette()">
-                    ×
-                </button>
-            </div>
-            <div class="palette-content">
-                <div class="field-categories">
-                    <!-- Basic Fields -->
-                    <div class="field-category">
-                        <h4 class="category-title">
-                            <span>📝</span>
-                            Basic Fields
-                        </h4>
-                        <div class="field-grid">
-                            <div class="modern-field-block" data-field-type="text" onclick="addFieldFromModernPalette('text')">
-                                <span class="field-icon">📝</span>
-                                <div class="field-name">Text Field</div>
-                                <div class="field-description">Single line text input</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="email" onclick="addFieldFromModernPalette('email')">
-                                <span class="field-icon">✉️</span>
-                                <div class="field-name">Email</div>
-                                <div class="field-description">Email address input</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="phone" onclick="addFieldFromModernPalette('phone')">
-                                <span class="field-icon">📞</span>
-                                <div class="field-name">Phone</div>
-                                <div class="field-description">Phone number input</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="number" onclick="addFieldFromModernPalette('number')">
-                                <span class="field-icon">🔢</span>
-                                <div class="field-name">Number</div>
-                                <div class="field-description">Numeric input field</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="date" onclick="addFieldFromModernPalette('date')">
-                                <span class="field-icon">📅</span>
-                                <div class="field-name">Date</div>
-                                <div class="field-description">Date picker field</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="textarea" onclick="addFieldFromModernPalette('textarea')">
-                                <span class="field-icon">📄</span>
-                                <div class="field-name">Text Area</div>
-                                <div class="field-description">Multi-line text input</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Selection Fields -->
-                    <div class="field-category">
-                        <h4 class="category-title">
-                            <span>📋</span>
-                            Selection Fields
-                        </h4>
-                        <div class="field-grid">
-                            <div class="modern-field-block" data-field-type="select" onclick="addFieldFromModernPalette('select')">
-                                <span class="field-icon">📋</span>
-                                <div class="field-name">Dropdown</div>
-                                <div class="field-description">Select from options</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="radio" onclick="addFieldFromModernPalette('radio')">
-                                <span class="field-icon">⭕</span>
-                                <div class="field-name">Radio</div>
-                                <div class="field-description">Single choice options</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="checkbox" onclick="addFieldFromModernPalette('checkbox')">
-                                <span class="field-icon">✅</span>
-                                <div class="field-name">Checkbox</div>
-                                <div class="field-description">Yes/no or multiple choice</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="lookup" onclick="addFieldFromModernPalette('lookup')">
-                                <span class="field-icon">🔍</span>
-                                <div class="field-name">Lookup</div>
-                                <div class="field-description">Salesforce record lookup</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Advanced Fields -->
-                    <div class="field-category">
-                        <h4 class="category-title">
-                            <span>🔧</span>
-                            Advanced Fields
-                        </h4>
-                        <div class="field-grid">
-                            <div class="modern-field-block" data-field-type="file" onclick="addFieldFromModernPalette('file')">
-                                <span class="field-icon">📎</span>
-                                <div class="field-name">File Upload</div>
-                                <div class="field-description">Upload documents</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="signature" onclick="addFieldFromModernPalette('signature')">
-                                <span class="field-icon">✍️</span>
-                                <div class="field-name">E-Signature</div>
-                                <div class="field-description">Digital signature pad</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="richtext" onclick="addFieldFromModernPalette('richtext')">
-                                <span class="field-icon">✏️</span>
-                                <div class="field-name">Rich Text</div>
-                                <div class="field-description">Formatted text editor</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="display" onclick="addFieldFromModernPalette('display')">
-                                <span class="field-icon">ℹ️</span>
-                                <div class="field-name">Display Text</div>
-                                <div class="field-description">Information display</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="login" onclick="addFieldFromModernPalette('login')">
-                                <span class="field-icon">🔐</span>
-                                <div class="field-name">Login</div>
-                                <div class="field-description">User authentication</div>
-                            </div>
-                            <div class="modern-field-block" data-field-type="email-verify" onclick="addFieldFromModernPalette('email-verify')">
-                                <span class="field-icon">📧</span>
-                                <div class="field-name">Email Verify</div>
-                                <div class="field-description">OTP email verification</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Properties Panel -->
-        <div class="properties-card" id="modernPropertiesCard">
-            <div class="properties-header">
-                <div>
-                    <h3 class="properties-title">Properties</h3>
-                    <div class="properties-tabs">
-                        <button class="properties-tab active" data-tab="form">Form</button>
-                        <button class="properties-tab" data-tab="page">Page</button>
-                        <button class="properties-tab" data-tab="field">Field</button>
-                    </div>
-                </div>
-                <button class="palette-close" onclick="togglePropertiesPanel()">
-                    ×
-                </button>
-            </div>
-            <div class="properties-content" id="modernPropertiesContent">
-                <p>Select a field, page, or form to view properties</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Unified Experience Container -->
-    <div class="unified-container" id="unifiedContainer" style="display: none;">
-        <!-- Left Panel - Field Palette -->
-        <div class="unified-panel unified-panel-left" id="fieldPalettePanel">
-            <div class="unified-panel-header">
-                <h2 class="unified-panel-title">🧩 Field Palette</h2>
-                <button class="unified-panel-close" onclick="closeFieldPalette()">×</button>
-            </div>
-            <div class="unified-panel-content">
-                <div class="field-palette-unified" id="fieldPaletteUnified">
-                    <div class="field-block unified-card" data-field-type="text" onclick="addFieldFromPalette('text')">
-                        <span class="field-icon">📝</span>
-                        <span class="field-label">Text Field</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="email" onclick="addFieldFromPalette('email')">
-                        <span class="field-icon">📧</span>
-                        <span class="field-label">Email</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="phone" onclick="addFieldFromPalette('phone')">
-                        <span class="field-icon">📱</span>
-                        <span class="field-label">Phone</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="number" onclick="addFieldFromPalette('number')">
-                        <span class="field-icon">🔢</span>
-                        <span class="field-label">Number</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="date" onclick="addFieldFromPalette('date')">
-                        <span class="field-icon">📅</span>
-                        <span class="field-label">Date</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="select" onclick="addFieldFromPalette('select')">
-                        <span class="field-icon">📋</span>
-                        <span class="field-label">Select List</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="textarea" onclick="addFieldFromPalette('textarea')">
-                        <span class="field-icon">📄</span>
-                        <span class="field-label">Text Area</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="checkbox" onclick="addFieldFromPalette('checkbox')">
-                        <span class="field-icon">☑️</span>
-                        <span class="field-label">Checkbox</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="radio" onclick="addFieldFromPalette('radio')">
-                        <span class="field-icon">🔘</span>
-                        <span class="field-label">Radio Button</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="lookup" onclick="addFieldFromPalette('lookup')">
-                        <span class="field-icon">🔍</span>
-                        <span class="field-label">Lookup Field</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="richtext" onclick="addFieldFromPalette('richtext')">
-                        <span class="field-icon">📝</span>
-                        <span class="field-label">Rich Text</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="display" onclick="addFieldFromPalette('display')">
-                        <span class="field-icon">💬</span>
-                        <span class="field-label">Display Text</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="file" onclick="addFieldFromPalette('file')">
-                        <span class="field-icon">📎</span>
-                        <span class="field-label">File Upload</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="signature" onclick="addFieldFromPalette('signature')">
-                        <span class="field-icon">✍️</span>
-                        <span class="field-label">E-Signature</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="login" onclick="addFieldFromPalette('login')">
-                        <span class="field-icon">🔐</span>
-                        <span class="field-label">Login</span>
-                    </div>
-                    <div class="field-block unified-card" data-field-type="emailverify" onclick="addFieldFromPalette('emailverify')">
-                        <span class="field-icon">📧</span>
-                        <span class="field-label">Email Verify</span>
-                    </div>
-                </div>
-                
-                <!-- Connection Status in Palette -->
-                <div class="unified-card" style="margin-top: var(--space-6);">
-                    <div class="unified-card-header">
-                        <h3 style="margin: 0; font-size: var(--text-base);">Connection Status</h3>
-                    </div>
-                    <div class="unified-card-content">
-                        <div class="connection-status" id="connectionStatusUnified">
-                            <div class="status-indicator">
-                                <div class="status-dot"></div>
-                                <span class="status-text">Not Connected</span>
-                            </div>
-                        </div>
-                        <button class="unified-btn unified-btn-primary" onclick="showOrgManager()" style="width: 100%; margin-top: var(--space-3);">
-                            🏢 Connect Organization
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Canvas Area -->
-        <div class="unified-main">
-            <!-- Top Navigation Bar -->
-            <nav class="unified-nav-bar" style="display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-6); background: white; border-radius: var(--radius-2xl); box-shadow: var(--shadow-sm); margin-bottom: var(--space-6); border: 1px solid var(--gray-200);">
-                <div style="display: flex; align-items: center; gap: var(--space-4);">
-                    <h1 style="margin: 0; font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--gray-900);">📝 Form Builder</h1>
-                    <button id="themeToggleUnified" class="unified-btn unified-btn-secondary" title="Toggle Theme" style="min-height: auto; padding: var(--space-2);">
-                        🌙
-                    </button>
-                </div>
-                <div style="display: flex; gap: var(--space-3);">
-                    <button class="unified-btn unified-btn-secondary" onclick="previewForm()" title="Preview Form">
-                        👁️ Preview
-                    </button>
-                    <button class="unified-btn unified-btn-secondary" onclick="saveForm()" title="Save Form">
-                        💾 Save
-                    </button>
-                </div>
-            </nav>
-
-            <!-- Form Canvas -->
-            <div class="unified-canvas" id="formCanvasUnified">
-                <div class="empty-canvas-state">
-                    <div class="empty-canvas-icon" style="font-size: 4rem; margin-bottom: var(--space-6);">✨</div>
-                    <h2 style="font-size: var(--text-3xl); font-weight: var(--font-bold); color: var(--gray-800); margin-bottom: var(--space-4);">Start Building Your Form</h2>
-                    <p style="font-size: var(--text-lg); color: var(--gray-600); text-align: center; max-width: 500px;">
-                        Connect to Salesforce and use the floating action button to add fields. 
-                        Click the floating buttons to access tools and start building your amazing form!
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Panel - Properties -->
-        <div class="unified-panel unified-panel-right" id="propertiesPanelUnified">
-            <div class="unified-panel-header">
-                <h2 class="unified-panel-title">⚙️ Properties</h2>
-                <button class="unified-panel-close" onclick="closePropertiesPanel()">×</button>
-            </div>
-            <div class="unified-panel-content" id="propertiesPanelContentUnified">
-                <div style="text-align: center; padding: var(--space-8); color: var(--gray-500);">
-                    <div style="font-size: 3rem; margin-bottom: var(--space-4);">⚙️</div>
-                    <h3 style="margin-bottom: var(--space-3);">Select a Field</h3>
-                    <p>Select a field from your form to view and edit its properties.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Panel Backdrop -->
-    <div class="unified-panel-backdrop" id="panelBackdrop" onclick="closeAllPanels()"></div>
-
-    <!-- Unified Floating Action System -->
-    <div class="unified-fab-system" id="unifiedFabSystem" style="display: none;">
-        <div class="unified-fab-menu" id="unifiedFabMenu">
-            <button class="unified-fab-action" data-tooltip="Connect Org" onclick="showOrgManager()">
-                🏢
-            </button>
-            <button class="unified-fab-action" data-tooltip="Add Field" onclick="openFieldPalette()">
-                🧩
-            </button>
-            <button class="unified-fab-action" data-tooltip="Properties" onclick="openPropertiesPanel()">
-                ⚙️
-            </button>
-            <button class="unified-fab-action" data-tooltip="Preview" onclick="previewForm()">
-                👁️
-            </button>
-            <button class="unified-fab-action" data-tooltip="Save" onclick="saveForm()">
-                💾
-            </button>
-        </div>
-        <button class="unified-fab-main" id="unifiedFabMain" onclick="toggleUnifiedFabMenu()">
-            <span>+</span>
-        </button>
-    </div>
 
     <!-- Mobile Overlay -->
     <div class="mobile-overlay" onclick="closeMobilePanels()"></div>
@@ -622,7 +210,7 @@
         <aside class="sidebar">
             <div class="sidebar-content">
             <!-- Building Blocks -->
-            <div class="section" id="buildingBlocks" style="display: none;">
+            <div class="section" id="buildingBlocks">
                 <h3>Building Blocks</h3>
                 <div class="section-content">
                     <div class="field-palette">
@@ -712,16 +300,13 @@
         <!-- Main Content -->
         <main class="main-content">
             <!-- Page Tabs -->
-            <div id="pageTabs" class="page-tabs" style="display: none;">
+            <div id="pageTabs" class="page-tabs">
                 <!-- Tabs will be dynamically added here -->
             </div>
 
             <!-- Form Canvas -->
             <div id="formCanvas" class="form-canvas">
-                <div class="empty-state">
-                    <h2>Start Building Your Form</h2>
-                    <p>Connect to Salesforce and drag fields from the sidebar to begin</p>
-                </div>
+                <!-- Canvas content will be dynamically generated by formBuilder.js -->
             </div>
 
             <!-- Auto-save Indicator -->
@@ -1404,9 +989,7 @@
 
     <!-- Load JavaScript Modules -->
     <script src="js/debug.js"></script>
-    <script src="js/modern-interface.js"></script>
     <script src="js/unified-org-manager.js"></script>
-    <script src="js/unified-controller.js"></script>
     <script type="module" src="js/main.js"></script>
     
     <!-- Mobile/Desktop Detection Script -->

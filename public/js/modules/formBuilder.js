@@ -123,8 +123,19 @@ export class FormBuilder {
         if (!currentPage.fields || currentPage.fields.length === 0) {
             canvas.innerHTML = `
                 <div class="empty-state">
-                    <h2>Start Building Your Form</h2>
-                    <p>Drag fields from the sidebar to begin</p>
+                    <div class="pilotforms-logo">
+                        <div class="logo-icon">🚀</div>
+                        <h1 class="logo-text">PilotForms</h1>
+                        <div class="logo-tagline">Enterprise Form Builder</div>
+                    </div>
+                    <h2>✨ Start Building Your Form</h2>
+                    <p>🔗 Connect to Salesforce and 🎯 drag fields from the sidebar to begin creating your professional form!</p>
+                    <div class="canvas-features">
+                        <span class="feature-badge">📋 Multi-Page</span>
+                        <span class="feature-badge">✍️ E-Signatures</span>
+                        <span class="feature-badge">🔄 Conditional Logic</span>
+                        <span class="feature-badge">📱 Mobile Ready</span>
+                    </div>
                 </div>
             `;
         } else {
@@ -497,6 +508,10 @@ export class FormBuilder {
         
         document.dispatchEvent(new CustomEvent('fieldAdded', { detail: field }));
         
+        // Refresh conditional logic dropdowns if a field with conditional logic is selected
+        if (this.selectedField && this.selectedField.conditionalVisibility?.enabled) {
+            setTimeout(() => this.showFieldProperties(), 100);
+        }
         
         return field;
     }
@@ -525,6 +540,9 @@ export class FormBuilder {
             // Clear selection if this field was selected
             if (this.selectedField && this.selectedField.id === fieldId) {
                 this.deselectField();
+            } else if (this.selectedField && this.selectedField.conditionalVisibility?.enabled) {
+                // Refresh conditional logic dropdowns if a field with conditional logic is selected
+                setTimeout(() => this.showFieldProperties(), 100);
             }
         }
     }
@@ -1837,8 +1855,11 @@ export class FormBuilder {
     togglePicklist(enabled) {
         if (this.selectedField) {
             this.selectedField.usePicklist = enabled;
-            document.getElementById('picklistConfig').style.display = enabled ? 'block' : 'none';
-            document.getElementById('manualOptions').style.display = enabled ? 'none' : 'block';
+            const picklistConfig = document.getElementById('picklistConfig');
+            const manualOptions = document.getElementById('manualOptions');
+            
+            if (picklistConfig) picklistConfig.style.display = enabled ? 'block' : 'none';
+            if (manualOptions) manualOptions.style.display = enabled ? 'none' : 'block';
             
             if (enabled) {
                 this.loadPicklistObjects();
@@ -1955,6 +1976,71 @@ export class FormBuilder {
                 conditionalConfig.style.display = enabled ? 'block' : 'none';
             }
             this.markFormDirty();
+            
+            // Update the field and immediately re-evaluate all conditions
+            this.updateField(this.selectedField.id, { conditionalVisibility: this.selectedField.conditionalVisibility });
+            const conditionalLogic = window.AppModules.conditionalLogic;
+            if (conditionalLogic) {
+                conditionalLogic.setupConditionalLogic();
+            }
+        }
+    }
+    
+    updateConditionField(fieldId) {
+        if (this.selectedField) {
+            if (!this.selectedField.conditionalVisibility) {
+                this.selectedField.conditionalVisibility = {};
+            }
+            this.selectedField.conditionalVisibility.dependsOn = fieldId;
+            this.updateField(this.selectedField.id, { conditionalVisibility: this.selectedField.conditionalVisibility });
+            this.markFormDirty();
+            
+            // Re-evaluate conditions
+            const conditionalLogic = window.AppModules.conditionalLogic;
+            if (conditionalLogic) {
+                conditionalLogic.setupConditionalLogic();
+            }
+        }
+    }
+    
+    updateConditionOperator(operator) {
+        if (this.selectedField) {
+            if (!this.selectedField.conditionalVisibility) {
+                this.selectedField.conditionalVisibility = {};
+            }
+            this.selectedField.conditionalVisibility.condition = operator;
+            
+            // Show/hide value input based on operator
+            const valueGroup = document.getElementById('conditionValueGroup');
+            if (valueGroup) {
+                valueGroup.style.display = this.needsValueInput(operator) ? 'block' : 'none';
+            }
+            
+            this.updateField(this.selectedField.id, { conditionalVisibility: this.selectedField.conditionalVisibility });
+            this.markFormDirty();
+            
+            // Re-evaluate conditions
+            const conditionalLogic = window.AppModules.conditionalLogic;
+            if (conditionalLogic) {
+                conditionalLogic.setupConditionalLogic();
+            }
+        }
+    }
+    
+    updateConditionValue(value) {
+        if (this.selectedField) {
+            if (!this.selectedField.conditionalVisibility) {
+                this.selectedField.conditionalVisibility = {};
+            }
+            this.selectedField.conditionalVisibility.value = value;
+            this.updateField(this.selectedField.id, { conditionalVisibility: this.selectedField.conditionalVisibility });
+            this.markFormDirty();
+            
+            // Re-evaluate conditions
+            const conditionalLogic = window.AppModules.conditionalLogic;
+            if (conditionalLogic) {
+                conditionalLogic.setupConditionalLogic();
+            }
         }
     }
     
@@ -2617,8 +2703,11 @@ export class FormBuilder {
         debugInfo("FormBuilder", '📋 Form loaded, fieldIdCounter set to:', this.fieldIdCounter);
         
         // Show form builder UI
-        document.getElementById('buildingBlocks').style.display = 'block';
-        document.getElementById('bottomFooter').style.display = 'block';
+        const buildingBlocks = document.getElementById('buildingBlocks');
+        const bottomFooter = document.getElementById('bottomFooter');
+        
+        if (buildingBlocks) buildingBlocks.style.display = 'block';
+        if (bottomFooter) bottomFooter.style.display = 'block';
         
         this.renderFormCanvas();
         this.markFormDirty();
@@ -3661,6 +3750,14 @@ export class FormBuilder {
                     <label>Show When</label>
                     <select id="prop-conditionField" onchange="window.AppModules.formBuilder.updateConditionField(this.value)">
                         <option value="">Select Field...</option>
+                        ${(() => {
+                            const availableFields = this.getAvailableFields(this.currentForm, this.getCurrentPage(), field);
+                            return availableFields.map(f => `
+                                <option value="${f.id}" ${field.conditionalVisibility?.dependsOn === f.id ? 'selected' : ''}>
+                                    ${f.label}
+                                </option>
+                            `).join('');
+                        })()}
                     </select>
                     <div class="help-text">Field to check</div>
                 </div>
@@ -3669,14 +3766,23 @@ export class FormBuilder {
                     <div class="property-group-compact">
                         <label>Condition</label>
                         <select id="prop-conditionOperator" onchange="window.AppModules.formBuilder.updateConditionOperator(this.value)">
-                            <option value="equals">Equals</option>
-                            <option value="not_equals">Not Equals</option>
-                            <option value="contains">Contains</option>
+                            <option value="equals" ${field.conditionalVisibility?.condition === 'equals' ? 'selected' : ''}>Equals</option>
+                            <option value="not_equals" ${field.conditionalVisibility?.condition === 'not_equals' ? 'selected' : ''}>Not Equals</option>
+                            <option value="contains" ${field.conditionalVisibility?.condition === 'contains' ? 'selected' : ''}>Contains</option>
+                            <option value="not_contains" ${field.conditionalVisibility?.condition === 'not_contains' ? 'selected' : ''}>Does not contain</option>
+                            <option value="starts_with" ${field.conditionalVisibility?.condition === 'starts_with' ? 'selected' : ''}>Starts with</option>
+                            <option value="ends_with" ${field.conditionalVisibility?.condition === 'ends_with' ? 'selected' : ''}>Ends with</option>
+                            <option value="is_empty" ${field.conditionalVisibility?.condition === 'is_empty' ? 'selected' : ''}>Is empty</option>
+                            <option value="is_not_empty" ${field.conditionalVisibility?.condition === 'is_not_empty' ? 'selected' : ''}>Is not empty</option>
+                            <option value="greater_than" ${field.conditionalVisibility?.condition === 'greater_than' ? 'selected' : ''}>Greater than</option>
+                            <option value="less_than" ${field.conditionalVisibility?.condition === 'less_than' ? 'selected' : ''}>Less than</option>
+                            <option value="greater_equal" ${field.conditionalVisibility?.condition === 'greater_equal' ? 'selected' : ''}>Greater or equal</option>
+                            <option value="less_equal" ${field.conditionalVisibility?.condition === 'less_equal' ? 'selected' : ''}>Less or equal</option>
                         </select>
                         <div class="help-text">Comparison type</div>
                     </div>
                     
-                    <div class="property-group-compact">
+                    <div class="property-group-compact" id="conditionValueGroup" style="display: ${this.needsValueInput(field.conditionalVisibility?.condition) ? 'block' : 'none'}">
                         <label>Value</label>
                         <input type="text" id="prop-conditionValue" value="${field.conditionalVisibility?.value || ''}"
                                onchange="window.AppModules.formBuilder.updateConditionValue(this.value)">
@@ -4867,7 +4973,17 @@ export class FormBuilder {
                                 </select>
                             </div>
                             <div class="property-group-compact">
-                                <label>Equals</label>
+                                <label>Condition</label>
+                                <select id="next-condition-operator" onchange="window.AppModules.formBuilder.updateNavigationCondition('nextButton', 'operator', this.value)">
+                                    <option value="equals" ${page.navigationConfig?.nextButton?.conditionalVisibility?.operator === 'equals' || !page.navigationConfig?.nextButton?.conditionalVisibility?.operator ? 'selected' : ''}>Equals</option>
+                                    <option value="not_equals" ${page.navigationConfig?.nextButton?.conditionalVisibility?.operator === 'not_equals' ? 'selected' : ''}>Not Equals</option>
+                                    <option value="contains" ${page.navigationConfig?.nextButton?.conditionalVisibility?.operator === 'contains' ? 'selected' : ''}>Contains</option>
+                                    <option value="is_empty" ${page.navigationConfig?.nextButton?.conditionalVisibility?.operator === 'is_empty' ? 'selected' : ''}>Is Empty</option>
+                                    <option value="is_not_empty" ${page.navigationConfig?.nextButton?.conditionalVisibility?.operator === 'is_not_empty' ? 'selected' : ''}>Is Not Empty</option>
+                                </select>
+                            </div>
+                            <div class="property-group-compact" id="next-condition-value-group" style="display: ${this.needsValueInput(page.navigationConfig?.nextButton?.conditionalVisibility?.operator || 'equals') ? 'block' : 'none'}">
+                                <label>Value</label>
                                 <input type="text" id="next-condition-value" value="${page.navigationConfig?.nextButton?.conditionalVisibility?.value || ''}"
                                        onchange="window.AppModules.formBuilder.updateNavigationCondition('nextButton', 'value', this.value)">
                             </div>
@@ -4894,7 +5010,17 @@ export class FormBuilder {
                                 </select>
                             </div>
                             <div class="property-group-compact">
-                                <label>Equals</label>
+                                <label>Condition</label>
+                                <select id="submit-condition-operator" onchange="window.AppModules.formBuilder.updateNavigationCondition('submitButton', 'operator', this.value)">
+                                    <option value="equals" ${page.navigationConfig?.submitButton?.conditionalVisibility?.operator === 'equals' || !page.navigationConfig?.submitButton?.conditionalVisibility?.operator ? 'selected' : ''}>Equals</option>
+                                    <option value="not_equals" ${page.navigationConfig?.submitButton?.conditionalVisibility?.operator === 'not_equals' ? 'selected' : ''}>Not Equals</option>
+                                    <option value="contains" ${page.navigationConfig?.submitButton?.conditionalVisibility?.operator === 'contains' ? 'selected' : ''}>Contains</option>
+                                    <option value="is_empty" ${page.navigationConfig?.submitButton?.conditionalVisibility?.operator === 'is_empty' ? 'selected' : ''}>Is Empty</option>
+                                    <option value="is_not_empty" ${page.navigationConfig?.submitButton?.conditionalVisibility?.operator === 'is_not_empty' ? 'selected' : ''}>Is Not Empty</option>
+                                </select>
+                            </div>
+                            <div class="property-group-compact" id="submit-condition-value-group" style="display: ${this.needsValueInput(page.navigationConfig?.submitButton?.conditionalVisibility?.operator || 'equals') ? 'block' : 'none'}">
+                                <label>Value</label>
                                 <input type="text" id="submit-condition-value" value="${page.navigationConfig?.submitButton?.conditionalVisibility?.value || ''}"
                                        onchange="window.AppModules.formBuilder.updateNavigationCondition('submitButton', 'value', this.value)">
                             </div>
@@ -5236,20 +5362,24 @@ export class FormBuilder {
             }
         };
         
-        // Get fields from all previous pages (pages before current page)
-        for (let i = 0; i < currentPageIndex; i++) {
-            const prevPage = this.currentForm.pages[i];
-            prevPage.fields.forEach(field => {
+        // Get fields from ALL pages in the form
+        this.currentForm.pages.forEach((p, pageIdx) => {
+            p.fields.forEach(field => {
                 if (field.type !== 'display') {
+                    // Add page context if it's not the current page
+                    const label = pageIdx === currentPageIndex 
+                        ? field.label 
+                        : `${field.label} (${p.name || `Page ${pageIdx + 1}`})`;
+                    
                     addVariable(
                         field.id,
-                        `${field.label} (${prevPage.name})`,
-                        prevPage.name,
+                        label,
+                        p.name || `Page ${pageIdx + 1}`,
                         'Field'
                     );
                 }
             });
-        }
+        })
         
         // Add global variables
         debugInfo("FormBuilder", '🔍 PAGE CONDITIONS: Checking FormVariables availability...');
@@ -5264,7 +5394,7 @@ export class FormBuilder {
                     Object.entries(globalVars).forEach(([varName, value]) => {
                         addVariable(
                             varName,
-                            `${varName} (${typeof value})`,
+                            `${varName} (Variable)`,
                             'Global Variables',
                             'Global'
                         );
@@ -5277,7 +5407,7 @@ export class FormBuilder {
                         window.FormVariables.variables.forEach((value, varName) => {
                             addVariable(
                                 varName,
-                                `${varName} (${typeof value})`,
+                                `${varName} (Variable)`,
                                 'Global Variables',
                                 'Global'
                             );
@@ -5947,14 +6077,41 @@ export class FormBuilder {
         
         currentPage.conditionalVisibility.conditions[index][property] = value;
         this.markFormDirty();
+        
+        // Re-evaluate page conditions immediately
+        const conditionalLogic = window.AppModules?.conditionalLogic;
+        if (conditionalLogic) {
+            conditionalLogic.setupConditionalLogic();
+        }
     }
 
     updateNavigationCondition(buttonType, property, value) {
         const currentPage = this.getCurrentPage();
         if (!currentPage.navigationConfig || !currentPage.navigationConfig[buttonType]) return;
         
+        // Ensure conditionalVisibility exists
+        if (!currentPage.navigationConfig[buttonType].conditionalVisibility) {
+            currentPage.navigationConfig[buttonType].conditionalVisibility = {};
+        }
+        
         currentPage.navigationConfig[buttonType].conditionalVisibility[property] = value;
+        
+        // Handle operator change - show/hide value field
+        if (property === 'operator') {
+            const valueGroupId = buttonType === 'nextButton' ? 'next-condition-value-group' : 'submit-condition-value-group';
+            const valueGroup = document.getElementById(valueGroupId);
+            if (valueGroup) {
+                valueGroup.style.display = this.needsValueInput(value) ? 'block' : 'none';
+            }
+        }
+        
         this.markFormDirty();
+        
+        // Re-evaluate conditions immediately
+        const multiPage = window.AppModules?.multiPage;
+        if (multiPage) {
+            multiPage.updateNavigationButtons();
+        }
     }
 
     updatePageConditionalProperty(property, value) {
@@ -6128,32 +6285,58 @@ export class FormBuilder {
 
     getAvailableFields(form, currentPage, excludeField) {
         const fields = [];
-
-        // Get fields from current page (excluding the current field)
-        currentPage.fields.forEach(field => {
-            if (field.id !== excludeField.id && field.type !== 'display') {
-                fields.push({
-                    id: field.id,
-                    label: field.label,
-                    page: currentPage.name
-                });
-            }
-        });
-
-        // Get fields from previous pages
         const currentPageIndex = form.pages.indexOf(currentPage);
-        for (let i = 0; i < currentPageIndex; i++) {
-            const page = form.pages[i];
+
+        // Get fields from ALL pages in the form
+        form.pages.forEach((page, pageIndex) => {
             page.fields.forEach(field => {
-                if (field.type !== 'display') {
+                // Exclude the current field being edited and display-only fields
+                if (field.id !== excludeField?.id && field.type !== 'display') {
+                    // Add page context if it's not the current page
+                    const label = pageIndex === currentPageIndex 
+                        ? field.label 
+                        : `${field.label} (${page.name || `Page ${pageIndex + 1}`})`;
+                    
                     fields.push({
                         id: field.id,
-                        label: `${field.label} (${page.name})`,
-                        page: page.name
+                        label: label,
+                        page: page.name,
+                        pageIndex: pageIndex,
+                        type: field.type
                     });
                 }
             });
+        });
+
+        // Also include global variables if available
+        try {
+            if (window.FormVariables && typeof window.FormVariables.getAll === 'function') {
+                const variables = window.FormVariables.getAll();
+                for (const [key, value] of variables) {
+                    // Only add variables that aren't already field IDs
+                    if (!fields.some(f => f.id === key)) {
+                        fields.push({
+                            id: key,
+                            label: `${key} (Variable)`,
+                            page: 'Global',
+                            pageIndex: -1,
+                            type: 'variable'
+                        });
+                    }
+                }
+            }
+        } catch (error) {
+            debugWarn("FormBuilder", 'Error accessing FormVariables in getAvailableFields:', error);
         }
+
+        // Sort fields: current page first, then by page order, then variables
+        fields.sort((a, b) => {
+            if (a.pageIndex === currentPageIndex && b.pageIndex !== currentPageIndex) return -1;
+            if (b.pageIndex === currentPageIndex && a.pageIndex !== currentPageIndex) return 1;
+            if (a.pageIndex === -1 && b.pageIndex !== -1) return 1;
+            if (b.pageIndex === -1 && a.pageIndex !== -1) return -1;
+            return a.pageIndex - b.pageIndex;
+        });
 
         return fields;
     }
@@ -6330,7 +6513,8 @@ export class FormBuilder {
                 if (e.target.value) {
                     this.showFieldMapping();
                 } else {
-                    document.getElementById('field-mapping-section').style.display = 'none';
+                    const fieldMappingSection = document.getElementById('field-mapping-section');
+                    if (fieldMappingSection) fieldMappingSection.style.display = 'none';
                 }
             }
         });
@@ -6356,9 +6540,11 @@ export class FormBuilder {
                 this.markFormDirty();
                 if (e.target.value) {
                     this.loadParentFields(e.target.value);
-                    document.getElementById('parent-field-section').style.display = 'block';
+                    const parentFieldSection = document.getElementById('parent-field-section');
+                    if (parentFieldSection) parentFieldSection.style.display = 'block';
                 } else {
-                    document.getElementById('parent-field-section').style.display = 'none';
+                    const parentFieldSection = document.getElementById('parent-field-section');
+                    if (parentFieldSection) parentFieldSection.style.display = 'none';
                 }
             }
         });
@@ -6378,7 +6564,8 @@ export class FormBuilder {
             if (currentPage) {
                 if (!currentPage.conditionalVisibility) currentPage.conditionalVisibility = {};
                 currentPage.conditionalVisibility.enabled = e.target.checked;
-                document.getElementById('page-conditional-options').style.display = e.target.checked ? 'block' : 'none';
+                const pageConditionalOptions = document.getElementById('page-conditional-options');
+                if (pageConditionalOptions) pageConditionalOptions.style.display = e.target.checked ? 'block' : 'none';
                 this.markFormDirty();
             }
         });
@@ -6413,7 +6600,8 @@ export class FormBuilder {
             if (currentPage) {
                 if (!currentPage.conditionalVisibility) currentPage.conditionalVisibility = {};
                 currentPage.conditionalVisibility.condition = e.target.value;
-                document.getElementById('page-conditional-value-group').style.display = this.needsValueInput(e.target.value) ? 'block' : 'none';
+                const pageConditionalValueGroup = document.getElementById('page-conditional-value-group');
+                if (pageConditionalValueGroup) pageConditionalValueGroup.style.display = this.needsValueInput(e.target.value) ? 'block' : 'none';
                 this.markFormDirty();
             }
         });
@@ -6434,7 +6622,8 @@ export class FormBuilder {
             if (currentPage) {
                 if (!currentPage.repeatConfig) currentPage.repeatConfig = {};
                 currentPage.repeatConfig.enabled = e.target.checked;
-                document.getElementById('repeat-options').style.display = e.target.checked ? 'block' : 'none';
+                const repeatOptions = document.getElementById('repeat-options');
+                if (repeatOptions) repeatOptions.style.display = e.target.checked ? 'block' : 'none';
                 this.markFormDirty();
             }
         });
@@ -6510,11 +6699,12 @@ export class FormBuilder {
         });
         
         // If a parent page is selected, load the relationship fields and show the field section
+        const parentFieldSection = document.getElementById('parent-field-section');
         if (currentPage && currentPage.parentPageId) {
             this.loadParentFields(currentPage.parentPageId);
-            document.getElementById('parent-field-section').style.display = 'block';
+            if (parentFieldSection) parentFieldSection.style.display = 'block';
         } else {
-            document.getElementById('parent-field-section').style.display = 'none';
+            if (parentFieldSection) parentFieldSection.style.display = 'none';
         }
     }
 
