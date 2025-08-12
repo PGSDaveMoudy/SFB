@@ -87,11 +87,20 @@ export class ConditionalLogic {
             // Setup page-level conditional logic
             if (page.conditionalVisibility?.enabled) {
                 this.registerPageCondition(page, pageIndex);
+                debugInfo("ConditionalLogic", `🔄 CONDITIONAL: Registered page condition for ${page.id}:`, page.conditionalVisibility);
             }
         });
         
         // Initial evaluation
         this.evaluateAllConditions();
+        
+        // IMPORTANT: Update navigation buttons after conditional logic is set up
+        // This ensures navigation reflects the current visibility state
+        const multiPage = window.AppModules?.multiPage;
+        if (multiPage) {
+            debugInfo("ConditionalLogic", '🔄 CONDITIONAL: Updating navigation buttons after conditional logic setup');
+            multiPage.updateNavigationButtons();
+        }
     }
     
     registerFieldCondition(field, pageIndex) {
@@ -154,6 +163,8 @@ export class ConditionalLogic {
     }
 
     evaluateConditionsForField(changedFieldId) {
+        debugInfo("ConditionalLogic", `🔄 CONDITIONAL: Field changed: ${changedFieldId}, evaluating dependent conditions`);
+        
         // Evaluate field conditions
         for (const [fieldId, condition] of this.conditions) {
             if (condition.dependsOn === changedFieldId) {
@@ -164,15 +175,21 @@ export class ConditionalLogic {
         // Evaluate page conditions
         for (const [pageId, pageConditionConfig] of this.pageConditions) {
             // Check if any of the page's conditions depend on the changed field
-            const dependsOnChangedField = pageConditionConfig.conditions.some(cond => cond.dependsOn === changedFieldId);
+            // Support both 'dependsOn' and 'field' property names
+            const dependsOnChangedField = pageConditionConfig.conditions.some(cond => 
+                cond.dependsOn === changedFieldId || cond.field === changedFieldId
+            );
             if (dependsOnChangedField) {
+                debugInfo("ConditionalLogic", `🔄 CONDITIONAL: Page ${pageId} depends on changed field ${changedFieldId}, evaluating`);
                 this.evaluatePageCondition(pageId, pageConditionConfig);
             }
         }
         
-        // Update navigation button visibility when field changes
+        // ALWAYS update navigation button visibility when ANY field changes
+        // This ensures cross-page conditions are properly evaluated
         const multiPage = window.AppModules?.multiPage;
         if (multiPage) {
+            debugInfo("ConditionalLogic", `🔄 CONDITIONAL: Updating navigation buttons after field change: ${changedFieldId}`);
             multiPage.updateNavigationButtons();
         }
     }
@@ -207,31 +224,44 @@ export class ConditionalLogic {
             shouldShow = true;
         } else {
             const results = conditions.map(condition => {
+                // Support both 'dependsOn' and 'field' property names
+                const fieldToCheck = condition.dependsOn || condition.field;
+                const operator = condition.condition || condition.operator || 'equals';
+                const targetValue = condition.value;
+                
                 let dependentValue = null;
 
                 // PRIORITY 1: Check global variables first
-                if (window.FormVariables?.has(condition.dependsOn)) {
-                    dependentValue = window.FormVariables.get(condition.dependsOn);
+                if (window.FormVariables?.has(fieldToCheck)) {
+                    dependentValue = window.FormVariables.get(fieldToCheck);
                 }
 
                 // PRIORITY 2: Check field values as fallback
                 if (dependentValue === null || dependentValue === undefined) {
-                    dependentValue = this.fieldValues.get(condition.dependsOn);
+                    dependentValue = this.fieldValues.get(fieldToCheck);
                 }
 
-                // PRIORITY 3: Check multiPage module as final fallback
+                // PRIORITY 3: Try to get value directly from DOM (for cross-page access)
+                if (dependentValue === null || dependentValue === undefined) {
+                    const fieldElement = document.querySelector(`[name="${fieldToCheck}"], [id="${fieldToCheck}"]`);
+                    if (fieldElement) {
+                        dependentValue = this.getFieldValue(fieldElement);
+                    }
+                }
+
+                // PRIORITY 4: Check multiPage module as final fallback
                 if (dependentValue === null || dependentValue === undefined) {
                     const multiPage = window.AppModules.multiPage;
                     if (multiPage) {
-                        dependentValue = multiPage.getVariable(condition.dependsOn);
+                        dependentValue = multiPage.getVariable(fieldToCheck);
                     }
                 }
 
                 // Check if this is a Login variable (format: fieldId_variableName)
-                if (!dependentValue && condition.dependsOn.includes('_')) {
+                if (!dependentValue && fieldToCheck && typeof fieldToCheck === 'string' && fieldToCheck.includes('_')) {
                     const flowLogic = window.AppModules.flowLogic;
                     if (flowLogic) {
-                        const flowState = flowLogic.getFlowState(condition.dependsOn);
+                        const flowState = flowLogic.getFlowState(fieldToCheck);
                         if (flowState && flowState.state === 'variable_set') {
                             dependentValue = flowState.data.value;
                         } else if (flowState && flowState.state === 'login_complete') {
@@ -240,8 +270,8 @@ export class ConditionalLogic {
                     }
                 }
 
-                const result = this.evaluateSingleCondition(dependentValue, condition.condition, condition.value);
-                debugInfo("ConditionalLogic", `  Condition: ${condition.dependsOn} ${condition.condition} ${condition.value} -> Value: ${dependentValue} -> Result: ${result}`);
+                const result = this.evaluateSingleCondition(dependentValue, operator, targetValue);
+                debugInfo("ConditionalLogic", `  Page Condition: ${fieldToCheck} ${operator} ${targetValue} -> Value: ${dependentValue} -> Result: ${result}`);
                 return result;
             });
 
@@ -334,7 +364,7 @@ export class ConditionalLogic {
             }
 
             // Check if this is a Login variable (format: fieldId_variableName)
-            if (!dependentValue && condition.dependsOn.includes('_')) {
+            if (!dependentValue && condition.dependsOn && typeof condition.dependsOn === 'string' && condition.dependsOn.includes('_')) {
                 const flowLogic = window.AppModules.flowLogic;
                 if (flowLogic) {
                     const flowState = flowLogic.getFlowState(condition.dependsOn);
@@ -657,7 +687,15 @@ export class ConditionalLogic {
             field.addEventListener('change', (e) => this.handleFieldChange(e.target));
         });
 
-        // Don't call setupConditionalLogic here - it will be called separately
+        // IMPORTANT: After capturing initial values, ensure navigation is updated
+        setTimeout(() => {
+            const multiPage = window.AppModules?.multiPage;
+            if (multiPage) {
+                debugInfo("ConditionalLogic", '🔄 CONDITIONAL: Updating navigation after initial field value capture');
+                multiPage.updateNavigationButtons();
+            }
+        }, 100); // Small delay to ensure all modules are ready
+
         debugInfo("ConditionalLogic", '🔄 CONDITIONAL: Preview initialization complete');
     }
 
@@ -756,6 +794,58 @@ export class ConditionalLogic {
     
     // Method to evaluate a condition group (for navigation buttons)
     evaluateConditionGroup(conditionGroup) {
+        // Handle simple navigation button conditions (single condition)
+        if (conditionGroup && conditionGroup.field) {
+            debugInfo("ConditionalLogic", '🔄 CONDITIONAL: Evaluating single navigation condition:', conditionGroup);
+            
+            // Get the field to check (using 'field' property for navigation conditions)
+            const fieldToCheck = conditionGroup.field;
+            const operator = conditionGroup.operator || 'equals';
+            const targetValue = conditionGroup.value;
+            
+            // Get field value using the same priority system
+            let dependentValue = null;
+            
+            // PRIORITY 1: Check global variables first
+            if (window.FormVariables?.has(fieldToCheck)) {
+                dependentValue = window.FormVariables.get(fieldToCheck);
+                debugInfo("ConditionalLogic", `  Found in FormVariables: ${fieldToCheck} = ${dependentValue}`);
+            }
+            
+            // PRIORITY 2: Check field values as fallback
+            if (dependentValue === null || dependentValue === undefined) {
+                dependentValue = this.fieldValues.get(fieldToCheck);
+                if (dependentValue !== null && dependentValue !== undefined) {
+                    debugInfo("ConditionalLogic", `  Found in fieldValues: ${fieldToCheck} = ${dependentValue}`);
+                }
+            }
+            
+            // PRIORITY 3: Try to get value directly from DOM (for cross-page access)
+            if (dependentValue === null || dependentValue === undefined) {
+                const fieldElement = document.querySelector(`[name="${fieldToCheck}"], [id="${fieldToCheck}"]`);
+                if (fieldElement) {
+                    dependentValue = this.getFieldValue(fieldElement);
+                    debugInfo("ConditionalLogic", `  Found in DOM: ${fieldToCheck} = ${dependentValue}`);
+                }
+            }
+            
+            // PRIORITY 4: Check multiPage module as final fallback
+            if (dependentValue === null || dependentValue === undefined) {
+                const multiPage = window.AppModules.multiPage;
+                if (multiPage) {
+                    dependentValue = multiPage.getVariable(fieldToCheck);
+                    if (dependentValue !== null && dependentValue !== undefined) {
+                        debugInfo("ConditionalLogic", `  Found in multiPage variables: ${fieldToCheck} = ${dependentValue}`);
+                    }
+                }
+            }
+            
+            const result = this.evaluateSingleCondition(dependentValue, operator, targetValue);
+            debugInfo("ConditionalLogic", `  Navigation Condition: ${fieldToCheck} ${operator} ${targetValue} -> Value: ${dependentValue} -> Result: ${result}`);
+            return result;
+        }
+        
+        // Handle complex condition groups (multiple conditions with AND/OR logic)
         if (!conditionGroup || !conditionGroup.conditions || conditionGroup.conditions.length === 0) {
             return true; // Show by default if no conditions
         }
@@ -763,43 +853,43 @@ export class ConditionalLogic {
         debugInfo("ConditionalLogic", '🔄 CONDITIONAL: Evaluating condition group:', conditionGroup);
         
         const results = conditionGroup.conditions.map(condition => {
-            // Get field value using the same priority system as other evaluation methods
+            // Support both 'dependsOn' and 'field' property names
+            const fieldToCheck = condition.dependsOn || condition.field;
+            const operator = condition.condition || condition.operator || 'equals';
+            const targetValue = condition.value;
+            
+            // Get field value using the same priority system as above
             let dependentValue = null;
             
             // PRIORITY 1: Check global variables first
-            if (window.FormVariables?.has(condition.dependsOn)) {
-                dependentValue = window.FormVariables.get(condition.dependsOn);
+            if (window.FormVariables?.has(fieldToCheck)) {
+                dependentValue = window.FormVariables.get(fieldToCheck);
             }
             
             // PRIORITY 2: Check field values as fallback
             if (dependentValue === null || dependentValue === undefined) {
-                dependentValue = this.fieldValues.get(condition.dependsOn);
+                dependentValue = this.fieldValues.get(fieldToCheck);
             }
             
-            // PRIORITY 3: Check multiPage module as final fallback
+            // PRIORITY 3: Try to get value directly from DOM
+            if (dependentValue === null || dependentValue === undefined) {
+                const fieldElement = document.querySelector(`[name="${fieldToCheck}"], [id="${fieldToCheck}"]`);
+                if (fieldElement) {
+                    dependentValue = this.getFieldValue(fieldElement);
+                }
+            }
+            
+            // PRIORITY 4: Check multiPage module as final fallback
             if (dependentValue === null || dependentValue === undefined) {
                 const multiPage = window.AppModules.multiPage;
                 if (multiPage) {
-                    dependentValue = multiPage.getVariable(condition.dependsOn);
+                    dependentValue = multiPage.getVariable(fieldToCheck);
                 }
             }
             
-            // Check if this is a Login variable (format: fieldId_variableName)
-            if (!dependentValue && condition.dependsOn.includes('_')) {
-                const flowLogic = window.AppModules.flowLogic;
-                if (flowLogic) {
-                    const flowState = flowLogic.getFlowState(condition.dependsOn);
-                    if (flowState && flowState.state === 'variable_set') {
-                        dependentValue = flowState.data.value;
-                    } else if (flowState && flowState.state === 'login_complete') {
-                        dependentValue = 'true';
-                    }
-                }
-            }
+            const result = this.evaluateSingleCondition(dependentValue, operator, targetValue);
             
-            const result = this.evaluateSingleCondition(dependentValue, condition.condition, condition.value);
-            
-            debugInfo("ConditionalLogic", `  Condition: ${condition.dependsOn} ${condition.condition} ${condition.value} -> Value: ${dependentValue} -> Result: ${result}`);
+            debugInfo("ConditionalLogic", `  Condition: ${fieldToCheck} ${operator} ${targetValue} -> Value: ${dependentValue} -> Result: ${result}`);
             return result;
         });
         

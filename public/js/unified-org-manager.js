@@ -102,12 +102,11 @@ async function loadOrganizations() {
 // Check current connection status
 async function checkCurrentConnection() {
     try {
+        const headers = window.Auth ? window.Auth.getHeaders() : { 'Content-Type': 'application/json' };
         const response = await fetch('/api/orgs/current', {
             method: 'GET',
             credentials: 'same-origin', // Include session cookies
-            headers: {
-                'Content-Type': 'application/json',
-            }
+            headers: headers
         });
         
         if (!response.ok) {
@@ -292,7 +291,9 @@ window.quickConnect = async function() {
 window.connectToOrg = async function(orgId) {
     try {
         // Get OAuth URL for the org
+        const headers = window.Auth ? window.Auth.getHeaders() : { 'Content-Type': 'application/json' };
         const response = await fetch(`/api/orgs/${orgId}/auth-url`, {
+            headers: headers,
             credentials: 'same-origin'
         });
         const data = await response.json();
@@ -314,8 +315,10 @@ window.connectToOrg = async function(orgId) {
 // Switch to a different connected org
 window.switchToOrg = async function(orgId) {
     try {
+        const headers = window.Auth ? window.Auth.getHeaders() : { 'Content-Type': 'application/json' };
         const response = await fetch(`/api/orgs/${orgId}/connect`, {
             method: 'POST',
+            headers: headers,
             credentials: 'same-origin'
         });
         
@@ -341,8 +344,10 @@ window.deleteOrg = async function(orgId) {
     }
     
     try {
+        const headers = window.Auth ? window.Auth.getHeaders() : { 'Content-Type': 'application/json' };
         const response = await fetch(`/api/orgs/${orgId}`, {
             method: 'DELETE',
+            headers: headers,
             credentials: 'same-origin'
         });
         

@@ -1,0 +1,246 @@
+/* Layout Fix for Header Overlap and Properties Panel Width */
+/* This file fixes the header overlap issue and increases properties panel width */
+
+/* Fix container positioning to prevent header overlap */
+.container {
+    display: grid !important;
+    grid-template-columns: 320px 1fr 440px !important; /* Increased properties panel from 380px to 440px (15% wider) */
+    height: 100vh !important; /* Full viewport height */
+    position: relative !important;
+    top: 0 !important; /* Remove any top offset */
+    padding-top: 0 !important; /* Remove padding that causes overlap */
+    background: var(--notion-gray-50);
+    gap: 0;
+}
+
+/* Ensure sidebar and properties panel fill the full height without overlap */
+.sidebar {
+    background: var(--notion-white);
+    border-right: 1px solid var(--notion-gray-200);
+    display: flex;
+    flex-direction: column;
+    height: 100vh !important; /* Full viewport height */
+    overflow: hidden;
+    position: relative;
+    padding-top: 0 !important; /* Remove any top padding */
+}
+
+.properties-panel {
+    background: var(--notion-white);
+    border-left: 1px solid var(--notion-gray-200);
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    height: 100vh !important; /* Full viewport height */
+    overflow: hidden;
+    position: relative;
+    min-height: 0;
+    padding-top: 0 !important; /* Remove any top padding */
+    width: 100%; /* Use full width of grid column */
+}
+
+/* Ensure main content area uses full height */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    height: 100vh !important;
+    overflow: hidden;
+    padding-top: 0 !important;
+}
+
+/* Responsive adjustments for wider properties panel */
+@media (max-width: 1400px) {
+    .container {
+        grid-template-columns: 300px 1fr 420px !important; /* Slightly smaller on medium screens */
+    }
+}
+
+@media (max-width: 1200px) {
+    .container {
+        grid-template-columns: 280px 1fr 380px !important; /* Proportionally smaller */
+    }
+}
+
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 260px 1fr 340px !important; /* Proportionally smaller */
+    }
+}
+
+/* Remove any body padding that might cause issues */
+body {
+    padding-top: 0 !important;
+    margin: 0;
+    overflow: hidden; /* Prevent body scrolling */
+}
+
+/* Ensure header doesn't overlap content if present */
+.nav-container,
+.header {
+    position: relative !important; /* Change from fixed/absolute to relative */
+    z-index: 1000;
+}
+
+/* Alternative: If header must be fixed, adjust container accordingly */
+body.has-fixed-header .container {
+    height: calc(100vh - 60px) !important; /* Adjust for 60px header */
+    margin-top: 60px !important;
+}
+
+/* Ensure form canvas area doesn't have unwanted padding */
+.form-canvas {
+    padding-top: var(--space-4) !important; /* Reasonable top padding */
+}
+
+/* Fix for desktop-optimized override */
+@media (min-width: 1025px) {
+    .container {
+        position: relative !important; /* Override absolute positioning */
+        top: 0 !important;
+        height: 100vh !important;
+        grid-template-columns: 320px 1fr 440px !important; /* Maintain wider properties panel */
+    }
+}
+
+/* Ensure field palette and properties content don't get cut off */
+.field-palette,
+.properties-content {
+    padding-top: var(--space-3);
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Sidebar content should start at the top */
+.sidebar-content {
+    padding-top: var(--space-3) !important;
+    overflow-y: auto;
+}
+
+/* Properties tabs should be visible */
+.property-tabs {
+    position: sticky;
+    top: 0;
+    background: var(--notion-white);
+    z-index: 10;
+    padding-top: var(--space-2);
+}
+
+/* Fix for property sub-tabs to prevent cutoff */
+.property-sub-tabs {
+    display: flex !important;
+    flex-wrap: wrap !important; /* Allow tabs to wrap to next line if needed */
+    gap: 4px !important;
+    padding: 8px !important;
+    background: var(--notion-gray-50);
+    border-bottom: 1px solid var(--notion-gray-200);
+    overflow-x: auto !important; /* Allow horizontal scroll if needed */
+    overflow-y: hidden !important;
+    flex-shrink: 0;
+    min-height: fit-content !important;
+}
+
+/* Adjust individual tab styling for better fit */
+.property-sub-tab {
+    flex: 0 0 auto !important; /* Don't grow or shrink, use natural width */
+    padding: 6px 10px !important; /* Smaller padding */
+    font-size: 12px !important; /* Slightly smaller font */
+    white-space: nowrap !important;
+    min-width: fit-content !important;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Ensure active tab remains visible */
+.property-sub-tab.active {
+    background: var(--make-purple-100) !important;
+    color: var(--make-purple-700) !important;
+    border-color: var(--make-purple-200) !important;
+    font-weight: 600;
+}
+
+.property-sub-tab:hover {
+    background: var(--notion-gray-100);
+    color: var(--notion-gray-800);
+}
+
+/* Alternative layout for Page Properties with 6 tabs - Compact single row */
+#pageProperties .property-sub-tabs,
+.property-section .property-sub-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important; /* Keep in single row */
+    gap: 2px !important;
+    padding: 6px 4px !important;
+    max-width: 100% !important;
+    overflow-x: auto !important; /* Allow horizontal scroll */
+    overflow-y: hidden !important;
+}
+
+/* Even more compact tabs for page properties */
+#pageProperties .property-sub-tab,
+.property-section .property-sub-tab {
+    flex: 0 0 auto !important;
+    padding: 5px 8px !important; /* Reduced padding */
+    font-size: 11px !important; /* Smaller font */
+    min-width: auto !important;
+}
+
+/* Option 2: Two-row grid layout (uncomment if preferred) */
+/*
+#pageProperties .property-sub-tabs,
+.property-section .property-sub-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+    padding: 8px !important;
+}
+*/
+
+/* Ensure the properties panel content doesn't overflow */
+#pageProperties,
+.property-section {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Make sure the sub-tab content area has enough space */
+.property-sub-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-3);
+    min-height: 0;
+}
+
+/* Fix for checkbox labels not visible in Form->Styles */
+.checkbox-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--space-2) !important;
+}
+
+.checkbox-list .form-checkbox {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-2) !important;
+    margin: var(--space-1) 0 !important;
+}
+
+.checkbox-list .form-checkbox label {
+    display: block !important;
+    font-size: 14px !important;
+    color: var(--notion-gray-900) !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    font-weight: 500 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.checkbox-list .form-checkbox input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+}

@@ -242,7 +242,12 @@ export class FlowLogic {
             });
             
             if (!response.ok) {
-                throw new Error('Failed to send OTP');
+                const errorData = await response.json().catch(() => ({}));
+                if (response.status === 429) {
+                    // Rate limited - show specific message
+                    throw new Error(errorData.message || 'Please wait before requesting another OTP');
+                }
+                throw new Error(errorData.message || 'Failed to send OTP');
             }
             
             const result = await response.json();
@@ -370,6 +375,13 @@ export class FlowLogic {
         }
         
         // Note: Conditional logic evaluation is now automatically triggered by FormVariables.set()
+        
+        // Explicitly trigger navigation button update to ensure next button appears
+        const multiPage = window.AppModules.multiPage;
+        if (multiPage) {
+            debugInfo('FlowLogic', '🔐 OTP SUCCESS: Triggering navigation button update');
+            multiPage.updateNavigationButtons();
+        }
         
         // Clean up
         this.pendingOTPs.delete(email);

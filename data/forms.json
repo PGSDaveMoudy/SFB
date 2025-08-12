@@ -3471,161 +3471,6 @@
       "createdAt": "2025-08-10T04:34:15.262Z",
       "creatorConnection": {}
     },
-    "1f4f2615-09a2-4f6f-a3a2-656a11ad1c45": {
-      "id": "1f4f2615-09a2-4f6f-a3a2-656a11ad1c45",
-      "name": "Account + Contact",
-      "description": "",
-      "pages": [
-        {
-          "id": "page_1",
-          "name": "Page 1",
-          "fields": [
-            {
-              "id": "field_1",
-              "type": "text",
-              "label": "Text Field",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": "Name",
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "styling": {}
-            }
-          ],
-          "salesforceObject": "Account",
-          "actionType": "create",
-          "hiddenFields": [],
-          "conditionalVisibility": {
-            "enabled": false,
-            "conditions": [],
-            "logic": "AND"
-          },
-          "repeatConfig": null,
-          "variables": {},
-          "navigationConfig": {
-            "next": {
-              "conditionalVisibility": {
-                "enabled": false,
-                "conditions": [],
-                "logic": "AND"
-              }
-            },
-            "submit": {
-              "conditionalVisibility": {
-                "enabled": false,
-                "conditions": [],
-                "logic": "AND"
-              }
-            }
-          }
-        },
-        {
-          "id": "page_1754800477642",
-          "name": "Page 2",
-          "fields": [
-            {
-              "id": "field_2",
-              "type": "text",
-              "label": "Text Field",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": "FirstName",
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "styling": {}
-            },
-            {
-              "id": "field_3",
-              "type": "text",
-              "label": "Text Field",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": "LastName",
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "styling": {}
-            }
-          ],
-          "salesforceObject": "Contact",
-          "actionType": "create",
-          "hiddenFields": [],
-          "conditionalVisibility": {
-            "enabled": false,
-            "dependsOn": null,
-            "condition": "equals",
-            "value": "",
-            "dependsOnPage": 0
-          },
-          "repeatConfig": {
-            "enabled": true,
-            "minInstances": 1,
-            "maxInstances": 10,
-            "addButtonText": "Add Another",
-            "removeButtonText": "Remove",
-            "relationshipField": null,
-            "parentPage": null
-          },
-          "variables": {},
-          "styling": {
-            "backgroundColor": "",
-            "backgroundImage": "",
-            "padding": "20px",
-            "margin": "0px",
-            "borderRadius": "0px",
-            "boxShadow": "",
-            "customCSS": "",
-            "containerMaxWidth": "100%",
-            "textAlign": "left",
-            "fontFamily": "",
-            "fontSize": "",
-            "lineHeight": "1.5"
-          },
-          "recordLinking": {
-            "enabled": true,
-            "parentSource": "page_0",
-            "relationshipField": "AccountId"
-          }
-        }
-      ],
-      "settings": {
-        "submitButtonText": "Submit",
-        "successMessage": "Thank you for your submission!",
-        "redirectUrl": "",
-        "requireAuth": false,
-        "customCSS": "",
-        "theme": "light"
-      },
-      "userId": "005gK000002NvXVQA0",
-      "organizationId": "00DgK000002zFFXUA2",
-      "updatedAt": "2025-08-10T04:36:14.203Z",
-      "createdAt": "2025-08-10T04:34:15.262Z",
-      "creatorConnection": {
-        "accessToken": "00DgK000002zFFX!AQEAQFZURSShM6OoCGiZv8PUyDj7h7V6ksRaeBSxa5qBH5vI5DSLlu787cqkpEPChxSca.tR.SWN5SAgKRkf8D0csTJjukDv",
-        "refreshToken": "5Aep8612EC5NxGKVYoul8IfhxVzLA88xkDKwrMADfvvPRBtHJaEKc0P3eSwcAQ2HSeoE2zLWZhsntCHhHVfr5gD",
-        "instanceUrl": "https://orgfarm-0c2ca516c4-dev-ed.develop.my.salesforce.com",
-        "userId": "005gK000002NvXVQA0",
-        "organizationId": "00DgK000002zFFXUA2"
-      },
-      "published": true,
-      "publishedAt": "2025-08-10T04:36:24.244Z",
-      "publicUrl": "https://pilotforms.com/form/1f4f2615-09a2-4f6f-a3a2-656a11ad1c45",
-      "isDraft": false
-    },
     "draft_anonymous_1754801533858": {
       "id": "draft_anonymous_1754801533858",
       "name": "Untitled Form",
@@ -3678,9 +3523,9 @@
       "publicUrl": null,
       "creatorConnection": null
     },
-    "draft_005gK000002NvXVQA0_1754801657377": {
-      "id": "draft_005gK000002NvXVQA0_1754801657377",
-      "name": "Account Contact",
+    "draft_anonymous_1754939610434": {
+      "id": "draft_anonymous_1754939610434",
+      "name": "Untitled Form",
       "description": "",
       "pages": [
         {
@@ -3702,152 +3547,11 @@
                 "value": ""
               },
               "styling": {}
-            }
-          ],
-          "salesforceObject": "Account",
-          "actionType": "create",
-          "hiddenFields": [],
-          "conditionalVisibility": {
-            "enabled": false,
-            "conditions": [],
-            "logic": "AND"
-          },
-          "repeatConfig": null,
-          "variables": {},
-          "navigationConfig": {
-            "next": {
-              "conditionalVisibility": {
-                "enabled": false,
-                "conditions": [],
-                "logic": "AND"
-              }
-            },
-            "submit": {
-              "conditionalVisibility": {
-                "enabled": false,
-                "conditions": [],
-                "logic": "AND"
-              }
-            }
-          }
-        },
-        {
-          "id": "page_1754801725689",
-          "name": "Page 2",
-          "fields": [
-            {
-              "id": "FirstName",
-              "type": "text",
-              "label": "First Name",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": "FirstName",
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "styling": {}
             },
             {
-              "id": "LastName",
-              "type": "text",
-              "label": "Last Name",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": "LastName",
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "styling": {}
-            }
-          ],
-          "salesforceObject": "Contact",
-          "actionType": "create",
-          "hiddenFields": [],
-          "conditionalVisibility": {
-            "enabled": false,
-            "dependsOn": null,
-            "condition": "equals",
-            "value": "",
-            "dependsOnPage": 0
-          },
-          "repeatConfig": {
-            "enabled": true,
-            "minInstances": 1,
-            "maxInstances": 10,
-            "addButtonText": "Add Another",
-            "removeButtonText": "Remove",
-            "relationshipField": null,
-            "parentPage": null
-          },
-          "variables": {},
-          "styling": {
-            "backgroundColor": "",
-            "backgroundImage": "",
-            "padding": "20px",
-            "margin": "0px",
-            "borderRadius": "0px",
-            "boxShadow": "",
-            "customCSS": "",
-            "containerMaxWidth": "100%",
-            "textAlign": "left",
-            "fontFamily": "",
-            "fontSize": "",
-            "lineHeight": "1.5"
-          },
-          "recordLinking": {
-            "enabled": true,
-            "parentSource": "page_0",
-            "relationshipField": "AccountId"
-          }
-        }
-      ],
-      "settings": {
-        "submitButtonText": "Submit",
-        "successMessage": "Thank you for your submission!",
-        "redirectUrl": "",
-        "requireAuth": false,
-        "customCSS": "",
-        "theme": "light",
-        "emailPass": "98C3CF6FFC6D6612A9D10D47FB21F6694B8447AD04DB03EB44299030EF78DF3A"
-      },
-      "userId": "005gK000002NvXVQA0",
-      "organizationId": "00DgK000002zFFXUA2",
-      "isDraft": true,
-      "title": "Untitled Draft",
-      "updatedAt": "2025-08-10T05:26:31.922Z",
-      "createdAt": "2025-08-10T04:54:17.386Z",
-      "published": true,
-      "publishedAt": "2025-08-10T04:58:43.929Z",
-      "publicUrl": "https://pilotforms.com/form/51742ea4-d642-4679-90e1-f5b85828ee4f",
-      "creatorConnection": {
-        "accessToken": "00DgK000002zFFX!AQEAQOmlRG5homEApq6EwlnCJm1mGxltkmsv8h5UJyisYUHYtBabUoK4VNIWBD4v86E9vkNZ62SEcNJx6eV7MEA1kCJiAday",
-        "refreshToken": "5Aep8612EC5NxGKVYoul8IfhxVzLA88xkDKwrMADfvvPRBtHJYPfguF2hWHUmBfyAkn3bqJBg6yq6FkjKXWoOV7",
-        "instanceUrl": "https://orgfarm-0c2ca516c4-dev-ed.develop.my.salesforce.com",
-        "userId": "005gK000002NvXVQA0",
-        "organizationId": "00DgK000002zFFXUA2"
-      }
-    },
-    "51742ea4-d642-4679-90e1-f5b85828ee4f": {
-      "id": "51742ea4-d642-4679-90e1-f5b85828ee4f",
-      "name": "Account Contact",
-      "description": "",
-      "pages": [
-        {
-          "id": "page_1",
-          "name": "Page 1",
-          "fields": [
-            {
-              "id": "AccountName",
-              "type": "text",
-              "label": "Account Name",
+              "id": "field_2",
+              "type": "file",
+              "label": "File Upload",
               "placeholder": "",
               "required": false,
               "helpText": "",
@@ -3858,166 +3562,13 @@
                 "condition": "equals",
                 "value": ""
               },
+              "maxFileSize": 10485760,
+              "allowedTypes": ".pdf,.doc,.docx,.jpg,.jpeg,.png",
+              "multiple": false,
               "styling": {}
             }
           ],
-          "salesforceObject": "Account",
-          "actionType": "create",
-          "hiddenFields": [],
-          "conditionalVisibility": {
-            "enabled": false,
-            "conditions": [],
-            "logic": "AND"
-          },
-          "repeatConfig": null,
-          "variables": {},
-          "navigationConfig": {
-            "next": {
-              "conditionalVisibility": {
-                "enabled": false,
-                "conditions": [],
-                "logic": "AND"
-              }
-            },
-            "submit": {
-              "conditionalVisibility": {
-                "enabled": false,
-                "conditions": [],
-                "logic": "AND"
-              }
-            }
-          }
-        },
-        {
-          "id": "page_1754801725689",
-          "name": "Page 2",
-          "fields": [
-            {
-              "id": "FirstName",
-              "type": "text",
-              "label": "First Name",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": "FirstName",
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "styling": {}
-            },
-            {
-              "id": "LastName",
-              "type": "text",
-              "label": "Last Name",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": "LastName",
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "styling": {}
-            }
-          ],
-          "salesforceObject": "Contact",
-          "actionType": "create",
-          "hiddenFields": [],
-          "conditionalVisibility": {
-            "enabled": false,
-            "dependsOn": null,
-            "condition": "equals",
-            "value": "",
-            "dependsOnPage": 0
-          },
-          "repeatConfig": {
-            "enabled": true,
-            "minInstances": 1,
-            "maxInstances": 10,
-            "addButtonText": "Add Another",
-            "removeButtonText": "Remove",
-            "relationshipField": null,
-            "parentPage": null
-          },
-          "variables": {},
-          "styling": {
-            "backgroundColor": "",
-            "backgroundImage": "",
-            "padding": "20px",
-            "margin": "0px",
-            "borderRadius": "0px",
-            "boxShadow": "",
-            "customCSS": "",
-            "containerMaxWidth": "100%",
-            "textAlign": "left",
-            "fontFamily": "",
-            "fontSize": "",
-            "lineHeight": "1.5"
-          },
-          "recordLinking": {
-            "enabled": true,
-            "parentSource": "page_0",
-            "relationshipField": "AccountId"
-          }
-        }
-      ],
-      "settings": {
-        "submitButtonText": "Submit",
-        "successMessage": "Thank you for your submission!",
-        "redirectUrl": "",
-        "requireAuth": false,
-        "customCSS": "",
-        "theme": "light",
-        "emailPass": "98C3CF6FFC6D6612A9D10D47FB21F6694B8447AD04DB03EB44299030EF78DF3A"
-      },
-      "userId": "005gK000002NvXVQA0",
-      "organizationId": "00DgK000002zFFXUA2",
-      "updatedAt": "2025-08-10T04:58:33.592Z",
-      "createdAt": "2025-08-10T04:54:17.386Z",
-      "creatorConnection": {
-        "accessToken": "00DgK000002zFFX!AQEAQOmlRG5homEApq6EwlnCJm1mGxltkmsv8h5UJyisYUHYtBabUoK4VNIWBD4v86E9vkNZ62SEcNJx6eV7MEA1kCJiAday",
-        "refreshToken": "5Aep8612EC5NxGKVYoul8IfhxVzLA88xkDKwrMADfvvPRBtHJYPfguF2hWHUmBfyAkn3bqJBg6yq6FkjKXWoOV7",
-        "instanceUrl": "https://orgfarm-0c2ca516c4-dev-ed.develop.my.salesforce.com",
-        "userId": "005gK000002NvXVQA0",
-        "organizationId": "00DgK000002zFFXUA2"
-      },
-      "published": true,
-      "publishedAt": "2025-08-10T04:58:43.929Z",
-      "publicUrl": "https://pilotforms.com/form/51742ea4-d642-4679-90e1-f5b85828ee4f",
-      "isDraft": false
-    },
-    "draft_005gK000002NvXVQA0_1754803005606": {
-      "id": "draft_005gK000002NvXVQA0_1754803005606",
-      "name": "Untitled Form",
-      "description": "",
-      "pages": [
-        {
-          "id": "page_1",
-          "name": "Page 1",
-          "fields": [
-            {
-              "id": "field_1",
-              "type": "text",
-              "label": "Text Field",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": "Name",
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "styling": {}
-            }
-          ],
-          "salesforceObject": "Account",
+          "salesforceObject": null,
           "actionType": "create",
           "hiddenFields": [],
           "conditionalVisibility": {
@@ -4048,353 +3599,112 @@
       "settings": {
         "submitButtonText": "Submit",
         "successMessage": "Thank you for your submission!",
-        "redirectUrl": "3MVG9rZjd7MXFdLgxaMZUqPLjxNtkCfOGsWxYg0SBaBX4TzOc8wL91FZikEZpzXfMoYHwT1Afb1RDMUv5vWzU",
+        "redirectUrl": "davemoudy@gmail.com",
         "requireAuth": false,
         "customCSS": "",
         "theme": "light",
-        "emailPass": "98C3CF6FFC6D6612A9D10D47FB21F6694B8447AD04DB03EB44299030EF78DF3A"
+        "emailPass": "Wicked15"
       },
-      "userId": "005gK000002NvXVQA0",
-      "organizationId": "00DgK000002zFFXUA2",
+      "userId": "anonymous",
+      "organizationId": "unknown",
       "isDraft": true,
       "title": "Untitled Draft",
-      "updatedAt": "2025-08-10T05:17:27.512Z",
-      "createdAt": "2025-08-10T05:16:45.610Z",
-      "published": true,
-      "publishedAt": "2025-08-10T05:17:23.295Z",
-      "publicUrl": "https://pilotforms.com/form/510afa85-f24f-4273-b2e3-91381368234b",
-      "creatorConnection": {
-        "accessToken": "00DgK000002zFFX!AQEAQOmlRG5homEApq6EwlnCJm1mGxltkmsv8h5UJyisYUHYtBabUoK4VNIWBD4v86E9vkNZ62SEcNJx6eV7MEA1kCJiAday",
-        "refreshToken": "5Aep8612EC5NxGKVYoul8IfhxVzLA88xkDKwrMADfvvPRBtHJYPfguF2hWHUmBfyAkn3bqJBg6yq6FkjKXWoOV7",
-        "instanceUrl": "https://orgfarm-0c2ca516c4-dev-ed.develop.my.salesforce.com",
-        "userId": "005gK000002NvXVQA0",
-        "organizationId": "00DgK000002zFFXUA2"
-      }
-    },
-    "510afa85-f24f-4273-b2e3-91381368234b": {
-      "id": "510afa85-f24f-4273-b2e3-91381368234b",
-      "name": "Untitled Form",
-      "description": "",
-      "pages": [
-        {
-          "id": "page_1",
-          "name": "Page 1",
-          "fields": [
-            {
-              "id": "field_1",
-              "type": "text",
-              "label": "Text Field",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": "Name",
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "styling": {}
-            }
-          ],
-          "salesforceObject": "Account",
-          "actionType": "create",
-          "hiddenFields": [],
-          "conditionalVisibility": {
-            "enabled": false,
-            "conditions": [],
-            "logic": "AND"
-          },
-          "repeatConfig": null,
-          "variables": {},
-          "navigationConfig": {
-            "next": {
-              "conditionalVisibility": {
-                "enabled": false,
-                "conditions": [],
-                "logic": "AND"
-              }
-            },
-            "submit": {
-              "conditionalVisibility": {
-                "enabled": false,
-                "conditions": [],
-                "logic": "AND"
-              }
-            }
-          }
-        }
-      ],
-      "settings": {
-        "submitButtonText": "Submit",
-        "successMessage": "Thank you for your submission!",
-        "redirectUrl": "3MVG9rZjd7MXFdLgxaMZUqPLjxNtkCfOGsWxYg0SBaBX4TzOc8wL91FZikEZpzXfMoYHwT1Afb1RDMUv5vWzU",
-        "requireAuth": false,
-        "customCSS": "",
-        "theme": "light",
-        "emailPass": "98C3CF6FFC6D6612A9D10D47FB21F6694B8447AD04DB03EB44299030EF78DF3A"
-      },
-      "userId": "005gK000002NvXVQA0",
-      "organizationId": "00DgK000002zFFXUA2",
-      "updatedAt": "2025-08-10T05:17:16.235Z",
-      "createdAt": "2025-08-10T05:16:45.610Z",
-      "creatorConnection": {
-        "accessToken": "00DgK000002zFFX!AQEAQOmlRG5homEApq6EwlnCJm1mGxltkmsv8h5UJyisYUHYtBabUoK4VNIWBD4v86E9vkNZ62SEcNJx6eV7MEA1kCJiAday",
-        "refreshToken": "5Aep8612EC5NxGKVYoul8IfhxVzLA88xkDKwrMADfvvPRBtHJYPfguF2hWHUmBfyAkn3bqJBg6yq6FkjKXWoOV7",
-        "instanceUrl": "https://orgfarm-0c2ca516c4-dev-ed.develop.my.salesforce.com",
-        "userId": "005gK000002NvXVQA0",
-        "organizationId": "00DgK000002zFFXUA2"
-      },
-      "published": true,
-      "publishedAt": "2025-08-10T05:17:23.295Z",
-      "publicUrl": "https://pilotforms.com/form/510afa85-f24f-4273-b2e3-91381368234b",
-      "isDraft": false
-    },
-    "c38e60b7-9dc7-4a58-9884-d588c01ec2b5": {
-      "id": "c38e60b7-9dc7-4a58-9884-d588c01ec2b5",
-      "name": "Untitled Form (Copy)",
-      "description": "",
-      "pages": [
-        {
-          "id": "page_1",
-          "name": "\n                    Page 1\n                ",
-          "fields": [
-            {
-              "id": "field_1",
-              "type": "text",
-              "label": "Text Field",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": "Name",
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "styling": {}
-            }
-          ],
-          "salesforceObject": "Account",
-          "actionType": "create",
-          "hiddenFields": [],
-          "conditionalVisibility": {
-            "enabled": false,
-            "conditions": [],
-            "logic": "AND"
-          },
-          "repeatConfig": null,
-          "variables": {},
-          "navigationConfig": {
-            "next": {
-              "conditionalVisibility": {
-                "enabled": false,
-                "conditions": [],
-                "logic": "AND"
-              }
-            },
-            "submit": {
-              "conditionalVisibility": {
-                "enabled": false,
-                "conditions": [],
-                "logic": "AND"
-              }
-            }
-          }
-        },
-        {
-          "id": "page_1754803154813",
-          "name": "\n                    \n                    Page 2\n                \n                ",
-          "fields": [
-            {
-              "id": "FirstName",
-              "type": "text",
-              "label": "First Name",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": "FirstName",
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "styling": {}
-            },
-            {
-              "id": "LastName",
-              "type": "text",
-              "label": "Last Name",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": "LastName",
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "styling": {}
-            }
-          ],
-          "salesforceObject": "Contact",
-          "actionType": "create",
-          "hiddenFields": [],
-          "conditionalVisibility": {
-            "enabled": false,
-            "dependsOn": null,
-            "condition": "equals",
-            "value": "",
-            "dependsOnPage": 0
-          },
-          "repeatConfig": {
-            "enabled": true,
-            "minInstances": 1,
-            "maxInstances": 10,
-            "addButtonText": "Add Another",
-            "removeButtonText": "Remove",
-            "relationshipField": null,
-            "parentPage": null
-          },
-          "variables": {},
-          "styling": {
-            "backgroundColor": "",
-            "backgroundImage": "",
-            "padding": "20px",
-            "margin": "0px",
-            "borderRadius": "0px",
-            "boxShadow": "",
-            "customCSS": "",
-            "containerMaxWidth": "100%",
-            "textAlign": "left",
-            "fontFamily": "",
-            "fontSize": "",
-            "lineHeight": "1.5"
-          },
-          "recordLinking": {
-            "enabled": true,
-            "parentSource": "page_0",
-            "relationshipField": "AccountId"
-          }
-        }
-      ],
-      "settings": {
-        "submitButtonText": "Submit",
-        "successMessage": "Thank you for your submission!",
-        "redirectUrl": "",
-        "requireAuth": false,
-        "customCSS": "",
-        "theme": "light",
-        "emailPass": "98C3CF6FFC6D6612A9D10D47FB21F6694B8447AD04DB03EB44299030EF78DF3A"
-      },
-      "userId": "005gK000002NvXVQA0",
-      "organizationId": "00DgK000002zFFXUA2",
-      "updatedAt": "2025-08-10T06:00:11.120Z",
-      "createdAt": "2025-08-10T05:17:56.736Z",
-      "creatorConnection": {
-        "userId": "005gK000002NvXVQA0",
-        "organizationId": "00DgK000002zFFXUA2"
-      },
-      "published": true,
-      "publishedAt": "2025-08-10T05:26:22.547Z",
-      "publicUrl": "https://pilotforms.com/form/c38e60b7-9dc7-4a58-9884-d588c01ec2b5",
-      "isDraft": true,
-      "title": "Untitled Draft"
-    },
-    "draft_005gK000002NvXVQA0_1754809012522": {
-      "id": "draft_005gK000002NvXVQA0_1754809012522",
-      "name": "email verification",
-      "description": "",
-      "pages": [
-        {
-          "id": "page_1",
-          "name": "Page 1",
-          "fields": [
-            {
-              "id": "field_1",
-              "type": "email-verify",
-              "label": "Email Verification",
-              "placeholder": "",
-              "required": false,
-              "helpText": "",
-              "salesforceField": null,
-              "conditionalVisibility": {
-                "enabled": false,
-                "dependsOn": null,
-                "condition": "equals",
-                "value": ""
-              },
-              "verifyConfig": {
-                "title": "Email Verification",
-                "instructions": "Enter your email address and click verify to continue.",
-                "buttonText": "Verify Email",
-                "successMessage": "Email verified successfully!",
-                "resendText": "Resend Code",
-                "requiredToSubmit": true,
-                "enableContactLookup": false,
-                "requireExistingContact": false,
-                "contactNotFoundMessage": "No account found with this email address.",
-                "setVariables": {
-                  "emailVerified": "true",
-                  "verifiedEmail": "{{email}}"
-                }
-              },
-              "styling": {}
-            }
-          ],
-          "salesforceObject": "Account",
-          "actionType": "create",
-          "hiddenFields": [],
-          "conditionalVisibility": {
-            "enabled": false,
-            "conditions": [],
-            "logic": "AND"
-          },
-          "repeatConfig": null,
-          "variables": {},
-          "navigationConfig": {
-            "next": {
-              "conditionalVisibility": {
-                "enabled": false,
-                "conditions": [],
-                "logic": "AND"
-              }
-            },
-            "submit": {
-              "conditionalVisibility": {
-                "enabled": false,
-                "conditions": [],
-                "logic": "AND"
-              }
-            }
-          }
-        }
-      ],
-      "settings": {
-        "submitButtonText": "Submit",
-        "successMessage": "Thank you for your submission!",
-        "redirectUrl": "3MVG9rZjd7MXFdLgxaMZUqPLjxNtkCfOGsWxYg0SBaBX4TzOc8wL91FZikEZpzXfMoYHwT1Afb1RDMUv5vWzU",
-        "requireAuth": false,
-        "customCSS": "",
-        "theme": "light",
-        "emailPass": "98C3CF6FFC6D6612A9D10D47FB21F6694B8447AD04DB03EB44299030EF78DF3A"
-      },
-      "userId": "005gK000002NvXVQA0",
-      "organizationId": "00DgK000002zFFXUA2",
-      "isDraft": true,
-      "title": "Untitled Draft",
-      "updatedAt": "2025-08-10T17:00:04.403Z",
-      "createdAt": "2025-08-10T06:56:52.529Z",
+      "updatedAt": "2025-08-11T19:14:26.363Z",
+      "createdAt": "2025-08-11T19:13:30.439Z",
       "published": false,
       "publishedAt": null,
       "publicUrl": null,
-      "creatorConnection": {
-        "userId": "005gK000002NvXVQA0",
-        "organizationId": "00DgK000002zFFXUA2"
-      }
+      "creatorConnection": null
+    },
+    "draft_005gK000002NvXVQA0_1755018539951": {
+      "id": "draft_005gK000002NvXVQA0_1755018539951",
+      "name": "Untitled Form",
+      "description": "",
+      "pages": [
+        {
+          "id": "page_1",
+          "name": "Page 1",
+          "fields": [
+            {
+              "id": "field_1",
+              "type": "text",
+              "label": "Text Field",
+              "placeholder": "",
+              "required": false,
+              "helpText": "",
+              "salesforceField": null,
+              "conditionalVisibility": {
+                "enabled": false,
+                "dependsOn": null,
+                "condition": "equals",
+                "value": ""
+              },
+              "styling": {
+                "preset": "minimal",
+                "borderRadius": "0",
+                "borderWidth": "0 0 1px 0",
+                "borderColor": "#e5e7eb",
+                "padding": "8px 0",
+                "fontSize": "14px",
+                "boxShadow": "none"
+              }
+            }
+          ],
+          "salesforceObject": null,
+          "actionType": "create",
+          "hiddenFields": [],
+          "conditionalVisibility": {
+            "enabled": false,
+            "conditions": [],
+            "logic": "AND"
+          },
+          "repeatConfig": null,
+          "variables": {},
+          "navigationConfig": {
+            "next": {
+              "conditionalVisibility": {
+                "enabled": false,
+                "conditions": [],
+                "logic": "AND"
+              }
+            },
+            "submit": {
+              "conditionalVisibility": {
+                "enabled": false,
+                "conditions": [],
+                "logic": "AND"
+              }
+            }
+          },
+          "styleSettings": {
+            "width": "full",
+            "columns": "1",
+            "backgroundColor": "#ffffff",
+            "headerColor": "#1f2937",
+            "borderColor": "#e5e7eb",
+            "customCSS": "/* Page Container Styling */\n.page-container  {\n    \n    background: #ffffff;\n    \n    padding: 2rem;\n    \n    border-radius: 8px;\n    \n    max-width: 800px;\n    \n    margin: 2rem auto;\n    \n    box-shadow: 0 4px 6px rgba(0,\n0,\n0,\n0.1);\n}\n\n/* Page Header */\n.page-header  {\n    \n    text-align: center;\n    \n    margin-bottom: 2rem;\n    \n    padding-bottom: 1rem;\n    \n    border-bottom: 2px solid #8b5cf6;\n}\n\n/* Page Content Area */\n.page-content  {\n    \n    display: flex;\n    \n    flex-direction: column;\n    \n    gap: 1.5rem;\n}\n\n/* Responsive Design */\n@media (max-width: 768px)  {\n    \n    .page-container  {\n    \n        padding: 1rem;\n    \n        margin: 1rem;\n}\n\n}"
+          }
+        }
+      ],
+      "settings": {
+        "submitButtonText": "Submit",
+        "successMessage": "Thank you for your submission!",
+        "redirectUrl": "davemoudy@gmail.com",
+        "requireAuth": false,
+        "customCSS": "/* Gradient Background */\n.form-container {\n    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n    color: white;\n}",
+        "theme": "light",
+        "emailPass": "Wicked15"
+      },
+      "userId": "005gK000002NvXVQA0",
+      "organizationId": "00DgK000002zFFXUA2",
+      "isDraft": true,
+      "title": "Untitled Draft",
+      "updatedAt": "2025-08-12T17:10:16.765Z",
+      "createdAt": "2025-08-12T17:10:16.765Z",
+      "published": false,
+      "publishedAt": null,
+      "publicUrl": null,
+      "creatorConnection": null
     }
   }
 }

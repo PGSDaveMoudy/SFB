@@ -113,6 +113,9 @@ export class FormBuilder {
         const canvas = document.getElementById('formCanvas');
         const currentPage = this.getCurrentPage();
         
+        // Apply page styles before rendering content
+        this.applyPageStyles(currentPage);
+        
         // Debug: Log current DOM state before render
         const existingColumns = document.querySelectorAll('.column-dropzone');
         debugInfo('FormBuilder', '📊 Before render - existing columns in DOM:', existingColumns.length);
@@ -2409,7 +2412,6 @@ export class FormBuilder {
             display: 'Display Text',
             login: 'Contact Login',
             'email-verify': 'Email Verification',
-            datatable: 'Data Table',
             section: 'Section Container',
             columns: 'Column Layout'
         };
@@ -3508,6 +3510,31 @@ export class FormBuilder {
                 `;
                 break;
 
+            case 'display':
+                content = `
+                    <div class="property-group-compact">
+                        <label>Display Content</label>
+                        <div id="display-content-editor-container" style="min-height: 200px; border: 1px solid var(--border-color); border-radius: 6px;">
+                            <div id="display-content-editor" style="min-height: 200px;"></div>
+                        </div>
+                        <input type="hidden" id="prop-displayContent" value="${field.displayContent || '<p>Enter your display text...</p>'}">
+                        <div class="help-text">Rich text content that will be displayed. You can use formatting, links, and images.</div>
+                    </div>
+                    
+                    <div class="property-group-compact">
+                        <label>Template Variables</label>
+                        <div class="help-text">Use {{variableName}} to insert dynamic values. Common variables:</div>
+                        <div class="variable-examples" style="font-family: monospace; font-size: 12px; background: var(--bg-secondary); padding: 8px; border-radius: 4px; margin-top: 4px;">
+                            {{userName}} - User's name<br>
+                            {{userEmail}} - User's email<br>
+                            {{Contact.Name}} - Contact name from Salesforce<br>
+                            {{today}} - Today's date<br>
+                            {{formName}} - Current form name
+                        </div>
+                    </div>
+                `;
+                break;
+                
             case 'datatable':
                 const dataTableConfig = field.dataTableConfig || {};
                 content = `
@@ -3626,6 +3653,18 @@ export class FormBuilder {
     }
 
     renderFieldSalesforceTab(field) {
+        // Skip Salesforce tab for fields that don't map to Salesforce
+        if (field.type === 'display' || field.type === 'richtext' || field.type === 'signature' || field.type === 'login' || field.type === 'email-verify') {
+            return `
+                <div class="salesforce-mapping">
+                    <div class="info-message">
+                        <h4>📝 This field type doesn't map to Salesforce</h4>
+                        <p>This field is for display/interaction purposes only and doesn't store data in Salesforce.</p>
+                    </div>
+                </div>
+            `;
+        }
+        
         // Enhanced Salesforce field mapping for all field types
         if (field.type === 'lookup') {
             return `
@@ -4389,7 +4428,85 @@ export class FormBuilder {
 
         currentPage.styleSettings[key] = value;
         debugInfo("FormBuilder", `🎨 Updated page style setting: ${key} =`, value);
+        this.applyPageStyles(currentPage); // Apply styles immediately
         this.markFormDirty();
+    }
+    
+    // Apply page styles to the form canvas
+    applyPageStyles(page) {
+        if (!page || !page.styleSettings) return;
+        
+        const canvas = document.getElementById('formCanvas');
+        const mainContent = document.querySelector('.main-content');
+        const formContainer = canvas?.closest('.form-container') || canvas;
+        
+        if (!canvas) return;
+        
+        const styles = page.styleSettings;
+        let cssText = '';
+        
+        // Apply width settings
+        if (styles.width) {
+            switch(styles.width) {
+                case 'narrow':
+                    cssText += 'max-width: 600px; margin: 0 auto;';
+                    break;
+                case 'normal':
+                    cssText += 'max-width: 800px; margin: 0 auto;';
+                    break;
+                case 'wide':
+                    cssText += 'max-width: 1200px; margin: 0 auto;';
+                    break;
+                case 'full':
+                    cssText += 'max-width: 100%; margin: 0;';
+                    break;
+            }
+        }
+        
+        // Apply column layout
+        if (styles.columns && styles.columns !== '1') {
+            cssText += `display: grid; grid-template-columns: repeat(${styles.columns}, 1fr); gap: var(--space-4);`;
+        }
+        
+        // Apply colors
+        if (styles.backgroundColor) {
+            cssText += `background-color: ${styles.backgroundColor};`;
+        }
+        
+        if (styles.borderColor) {
+            cssText += `border: 1px solid ${styles.borderColor};`;
+        }
+        
+        // Apply the inline styles
+        canvas.style.cssText = cssText;
+        
+        // Apply header color if present
+        if (styles.headerColor && mainContent) {
+            const pageHeader = mainContent.querySelector('.page-header');
+            if (pageHeader) {
+                pageHeader.style.backgroundColor = styles.headerColor;
+            }
+        }
+        
+        // Apply custom CSS
+        this.applyPageCustomCSS(styles.customCSS);
+    }
+    
+    // Apply custom CSS for the page
+    applyPageCustomCSS(customCSS) {
+        // Remove existing custom style tag if present
+        const existingStyle = document.getElementById('page-custom-styles');
+        if (existingStyle) {
+            existingStyle.remove();
+        }
+        
+        // Add new custom CSS if provided
+        if (customCSS && customCSS.trim()) {
+            const styleTag = document.createElement('style');
+            styleTag.id = 'page-custom-styles';
+            styleTag.textContent = customCSS;
+            document.head.appendChild(styleTag);
+        }
     }
 
     applyPageThemePreset(theme) {
@@ -5030,8 +5147,8 @@ export class FormBuilder {
 
                 <!-- Advanced Tab -->
                 <div class="property-sub-content" id="page-advanced-tab" style="display: none;">
-                    ${this.renderRepeatConfigurationSection(page)}
                     ${this.renderHiddenFieldsSection(page)}
+                    ${this.renderAdvancedSettingsSection(page)}
                 </div>
             </div>
         `;
@@ -5164,8 +5281,8 @@ export class FormBuilder {
         `;
     }
 
-    // Helper method for Repeat Configuration Section
-    renderRepeatConfigurationSection(page) {
+    // REMOVED - Duplicate repeat configuration section (consolidated to Salesforce tab)
+    /* renderRepeatConfigurationSection(page) {
         return `
             <div class="property-section">
                 <div class="section-header">
@@ -5227,7 +5344,7 @@ export class FormBuilder {
                 </div>
             </div>
         `;
-    }
+    } */
 
     // Helper method for Hidden Fields Section
     renderHiddenFieldsSection(page) {
@@ -5720,7 +5837,8 @@ export class FormBuilder {
             value: ''
         });
         
-        this.showPageProperties(); // Refresh to show new field
+        // Refresh only the hidden fields list, don't switch tabs
+        this.refreshHiddenFieldsList();
         this.markFormDirty();
     }
 
@@ -5740,8 +5858,51 @@ export class FormBuilder {
         
         if (confirm('Remove this hidden field?')) {
             currentPage.hiddenFields.splice(index, 1);
-            this.showPageProperties(); // Refresh to remove field from UI
+            // Refresh only the hidden fields list, don't switch tabs
+            this.refreshHiddenFieldsList();
             this.markFormDirty();
+        }
+    }
+
+    // Refresh only the hidden fields list without changing tabs
+    refreshHiddenFieldsList() {
+        const hiddenFieldsList = document.getElementById('hidden-fields-list');
+        if (hiddenFieldsList) {
+            const currentPage = this.getCurrentPage();
+            const hiddenFields = currentPage.hiddenFields || [];
+            hiddenFieldsList.innerHTML = hiddenFields.map((field, index) => `
+                <div class="hidden-field-item" data-field-index="${index}">
+                    <div class="property-row">
+                        <div class="property-group">
+                            <label>Salesforce Field</label>
+                            <input type="text" value="${field.salesforceField || ''}"
+                                   placeholder="e.g., RecordTypeId, OwnerId"
+                                   onchange="window.AppModules.formBuilder.updateHiddenField(${index}, 'salesforceField', this.value)">
+                        </div>
+                        
+                        <div class="property-group">
+                            <label>Value Type</label>
+                            <select onchange="window.AppModules.formBuilder.updateHiddenField(${index}, 'valueType', this.value)">
+                                <option value="static" ${field.valueType === 'static' ? 'selected' : ''}>Static Value</option>
+                                <option value="variable" ${field.valueType === 'variable' ? 'selected' : ''}>Variable</option>
+                                <option value="userInfo" ${field.valueType === 'userInfo' ? 'selected' : ''}>Current User</option>
+                            </select>
+                        </div>
+                        
+                        <div class="property-group">
+                            <label>Value</label>
+                            <input type="text" value="${field.value || ''}"
+                                   placeholder="${field.valueType === 'variable' ? 'Variable name' : field.valueType === 'userInfo' ? 'Id' : 'Static value'}"
+                                   onchange="window.AppModules.formBuilder.updateHiddenField(${index}, 'value', this.value)">
+                        </div>
+                        
+                        <button type="button" class="button button-danger remove-hidden-field-btn"
+                                onclick="window.AppModules.formBuilder.removeHiddenField(${index})">
+                            <span class="button-icon">×</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
     }
 

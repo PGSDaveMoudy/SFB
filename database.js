@@ -380,6 +380,144 @@ const FormSubmission = sequelize.define('FormSubmission', {
     ]
 });
 
+// Bug Reports table
+const BugReport = sequelize.define('BugReport', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+            len: [1, 255]
+        }
+    },
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        validate: {
+            len: [10, 10000]
+        }
+    },
+    category: {
+        type: DataTypes.ENUM('bug', 'feature_request', 'improvement', 'question'),
+        allowNull: false,
+        defaultValue: 'bug'
+    },
+    priority: {
+        type: DataTypes.ENUM('low', 'medium', 'high', 'critical'),
+        allowNull: false,
+        defaultValue: 'medium'
+    },
+    status: {
+        type: DataTypes.ENUM('open', 'in_progress', 'resolved', 'closed'),
+        allowNull: false,
+        defaultValue: 'open'
+    },
+    reporterEmail: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+            isEmail: true
+        }
+    },
+    reporterName: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    userAgent: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    browserInfo: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    url: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    reproductionSteps: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    expectedBehavior: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    actualBehavior: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    attachmentPath: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    attachmentFileName: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    orgId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'salesforce_orgs',
+            key: 'id'
+        }
+    },
+    userId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'users',
+            key: 'id'
+        }
+    },
+    adminNotes: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    resolvedBy: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'users',
+            key: 'id'
+        }
+    },
+    resolvedAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+    }
+}, {
+    tableName: 'bug_reports',
+    indexes: [
+        {
+            fields: ['status']
+        },
+        {
+            fields: ['category']
+        },
+        {
+            fields: ['priority']
+        },
+        {
+            fields: ['reporterEmail']
+        },
+        {
+            fields: ['orgId']
+        },
+        {
+            fields: ['userId']
+        },
+        {
+            fields: ['createdAt']
+        }
+    ]
+});
+
 // Define associations
 User.hasMany(UserOrgAccess, { foreignKey: 'userId', as: 'orgAccess' });
 UserOrgAccess.belongsTo(User, { foreignKey: 'userId', as: 'user' });
@@ -392,6 +530,16 @@ UserOrgAccess.belongsTo(SalesforceOrg, { foreignKey: 'orgId', as: 'org' });
 
 SalesforceOrg.hasMany(FormSubmission, { foreignKey: 'orgId', as: 'submissions' });
 FormSubmission.belongsTo(SalesforceOrg, { foreignKey: 'orgId', as: 'org' });
+
+// Bug Report associations
+User.hasMany(BugReport, { foreignKey: 'userId', as: 'bugReports' });
+BugReport.belongsTo(User, { foreignKey: 'userId', as: 'reporter' });
+
+User.hasMany(BugReport, { foreignKey: 'resolvedBy', as: 'resolvedBugReports' });
+BugReport.belongsTo(User, { foreignKey: 'resolvedBy', as: 'resolver' });
+
+SalesforceOrg.hasMany(BugReport, { foreignKey: 'orgId', as: 'bugReports' });
+BugReport.belongsTo(SalesforceOrg, { foreignKey: 'orgId', as: 'org' });
 
 // Database utilities
 class DatabaseManager {
@@ -789,6 +937,7 @@ module.exports = {
     SalesforceOrg,
     UserOrgAccess,
     FormSubmission,
+    BugReport,
     DatabaseManager,
     encrypt,
     decrypt

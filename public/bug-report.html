@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PilotForms - Report a Bug</title>
+    <link rel="stylesheet" href="styles-notion.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--purple-50) 100%);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            color: var(--gray-900);
+            min-height: 100vh;
+            height: auto !important;
+            overflow: visible !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+        }
+        
+        .bug-report-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-8);
+            height: auto !important;
+            overflow: visible !important;
+        }
+        
+        .bug-report-header {
+            text-align: center;
+            margin-bottom: var(--space-8);
+            padding: var(--space-8);
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .bug-report-form {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .form-group {
+            margin-bottom: var(--space-6);
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: var(--space-2);
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: var(--space-3);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--purple-500);
+            box-shadow: 0 0 0 3px var(--purple-100);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+        }
+        
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .file-upload input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-upload-label {
+            display: block;
+            padding: var(--space-3);
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .file-upload-label:hover {
+            border-color: var(--purple-400);
+            background-color: var(--purple-50);
+        }
+        
+        .file-upload-label.has-file {
+            border-color: var(--green-400);
+            background-color: var(--green-50);
+            color: var(--green-700);
+        }
+        
+        .submit-button {
+            display: block !important; /* Ensure button is visible */
+            background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); /* Use hex colors as fallback */
+            color: white;
+            border: none;
+            padding: 16px 32px; /* Use px values as fallback */
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 16px;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .success-message {
+            background: var(--green-50);
+            border: 1px solid var(--green-200);
+            color: var(--green-800);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-6);
+            display: none;
+        }
+        
+        .error-message {
+            background: var(--red-50);
+            border: 1px solid var(--red-200);
+            color: var(--red-800);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-6);
+            display: none;
+        }
+        
+        .required {
+            color: var(--red-500);
+        }
+        
+        .help-text {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: var(--space-1);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: var(--space-6);
+            color: var(--purple-600);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .back-link:hover {
+            color: var(--purple-700);
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .bug-report-container {
+                padding: var(--space-4);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bug-report-container">
+        <a href="/" class="back-link">← Back to PilotForms</a>
+        
+        <div class="bug-report-header">
+            <h1>🐛 Report a Bug</h1>
+            <p>Help us improve PilotForms by reporting issues you encounter. Your feedback is valuable!</p>
+        </div>
+        
+        <div class="bug-report-form">
+            <div id="successMessage" class="success-message"></div>
+            <div id="errorMessage" class="error-message"></div>
+            
+            <form id="bugReportForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Bug Title <span class="required">*</span></label>
+                    <input type="text" id="title" name="title" required maxlength="255" placeholder="Brief description of the bug">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" name="category">
+                            <option value="bug">Bug</option>
+                            <option value="feature_request">Feature Request</option>
+                            <option value="improvement">Improvement</option>
+                            <option value="question">Question</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="priority">Priority</label>
+                        <select id="priority" name="priority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description <span class="required">*</span></label>
+                    <textarea id="description" name="description" required maxlength="10000" placeholder="Detailed description of the issue..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reproductionSteps">Steps to Reproduce</label>
+                    <textarea id="reproductionSteps" name="reproductionSteps" maxlength="5000" placeholder="1. Go to...&#10;2. Click on...&#10;3. See error..."></textarea>
+                    <div class="help-text">Please provide step-by-step instructions to reproduce the bug</div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expectedBehavior">Expected Behavior</label>
+                        <textarea id="expectedBehavior" name="expectedBehavior" maxlength="2000" placeholder="What should happen?"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="actualBehavior">Actual Behavior</label>
+                        <textarea id="actualBehavior" name="actualBehavior" maxlength="2000" placeholder="What actually happened?"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reporterName">Your Name</label>
+                        <input type="text" id="reporterName" name="reporterName" maxlength="100" placeholder="Optional">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reporterEmail">Your Email</label>
+                        <input type="email" id="reporterEmail" name="reporterEmail" maxlength="255" placeholder="Optional - for follow-up">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="attachment">Screenshot or File</label>
+                    <div class="file-upload">
+                        <input type="file" id="attachment" name="attachment" accept="image/*,.pdf,.txt,.log">
+                        <label for="attachment" class="file-upload-label" id="fileUploadLabel">
+                            📎 Click to attach a file (images, PDFs, logs)
+                        </label>
+                    </div>
+                    <div class="help-text">Max file size: 10MB. Screenshots are very helpful!</div>
+                </div>
+                
+                <input type="hidden" id="url" name="url">
+                <input type="hidden" id="browserInfo" name="browserInfo">
+                
+                <button type="submit" class="submit-button" id="submitButton">
+                    Submit Bug Report
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-populate browser and page info
+        document.getElementById('url').value = window.location.href;
+        document.getElementById('browserInfo').value = navigator.userAgent;
+        
+        // Handle file upload display
+        document.getElementById('attachment').addEventListener('change', function(e) {
+            const label = document.getElementById('fileUploadLabel');
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                label.textContent = `📎 ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                label.classList.add('has-file');
+            } else {
+                label.textContent = '📎 Click to attach a file (images, PDFs, logs)';
+                label.classList.remove('has-file');
+            }
+        });
+        
+        // Handle form submission
+        document.getElementById('bugReportForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitButton = document.getElementById('submitButton');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Hide previous messages
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            // Disable submit button
+            submitButton.disabled = true;
+            submitButton.textContent = 'Submitting...';
+            
+            try {
+                // Create FormData object
+                const formData = new FormData(this);
+                
+                // Submit the form
+                const response = await fetch('/api/bug-report', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    successMessage.textContent = `Bug report submitted successfully! Reference ID: ${result.bugReportId}`;
+                    successMessage.style.display = 'block';
+                    
+                    // Reset form
+                    this.reset();
+                    document.getElementById('fileUploadLabel').textContent = '📎 Click to attach a file (images, PDFs, logs)';
+                    document.getElementById('fileUploadLabel').classList.remove('has-file');
+                    
+                    // Scroll to top to show success message
+                    window.scrollTo(0, 0);
+                } else {
+                    throw new Error(result.error || 'Failed to submit bug report');
+                }
+            } catch (error) {
+                console.error('Error submitting bug report:', error);
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.style.display = 'block';
+                
+                // Scroll to top to show error message
+                window.scrollTo(0, 0);
+            } finally {
+                // Re-enable submit button
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit Bug Report';
+            }
+        });
+    </script>
+</body>
+</html>

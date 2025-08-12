@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles-notion-enhanced.css">
     <link rel="stylesheet" href="styles-unified-experience.css">
     <link rel="stylesheet" href="desktop-optimized.css">
+    <link rel="stylesheet" href="styles-layout-fix.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -90,6 +91,9 @@
                 </button>
                 <button class="actions-item" onclick="showOrgManager()" title="Manage Salesforce connections">
                     🏢 Connect Org
+                </button>
+                <button class="actions-item" onclick="window.open('/bug-report.html', '_blank')" title="Report a bug or issue">
+                    🐛 Report Bug
                 </button>
                 <div class="actions-divider"></div>
                 <button class="actions-item" onclick="logoutUser()" title="Sign out of PilotForms" style="color: #ef4444;">
@@ -277,10 +281,6 @@
                         <div class="field-block" draggable="true" data-field-type="email-verify">
                             <span class="field-icon">📧</span>
                             <span>Verify Email</span>
-                        </div>
-                        <div class="field-block" draggable="true" data-field-type="datatable">
-                            <span class="field-icon">📊</span>
-                            <span>Data Table</span>
                         </div>
                         <div class="field-block" draggable="true" data-field-type="section">
                             <span class="field-icon">📦</span>

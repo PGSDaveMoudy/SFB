@@ -129,6 +129,9 @@ export class MultiPage {
             return false;
         }
 
+        // Store current page field values before navigating
+        this.storeCurrentPageFieldValues();
+
         const formViewer = window.AppModules.formViewer;
         if (!formViewer) return false;
 
@@ -152,6 +155,9 @@ export class MultiPage {
     }
 
     previousPage() {
+        // Store current page field values before navigating
+        this.storeCurrentPageFieldValues();
+        
         if (this.navigationHistory.length > 0) {
             const previousIndex = this.navigationHistory.pop();
             this.switchToPage(previousIndex);
@@ -163,6 +169,31 @@ export class MultiPage {
             return true;
         }
         return false;
+    }
+    
+    storeCurrentPageFieldValues() {
+        // Store all field values from the current page
+        const currentPageElement = document.querySelector('.form-page.active');
+        if (currentPageElement) {
+            const fields = currentPageElement.querySelectorAll('input, select, textarea');
+            fields.forEach(field => {
+                const fieldId = field.name || field.id;
+                if (fieldId) {
+                    const value = this.getFieldValue(field);
+                    
+                    // Store in variables for cross-page access
+                    this.variables.set(fieldId, value);
+                    
+                    // Also update conditionalLogic's field values
+                    const conditionalLogic = window.AppModules?.conditionalLogic;
+                    if (conditionalLogic) {
+                        conditionalLogic.fieldValues.set(fieldId, value);
+                    }
+                    
+                    debugInfo('MultiPage', `Stored field value: ${fieldId} = ${value}`);
+                }
+            });
+        }
     }
     
     goToPage(pageIndex) {
@@ -283,9 +314,14 @@ export class MultiPage {
     }
     
     updateNavigationButtons() {
+        debugInfo('MultiPage', '🔄 NAVIGATION: Updating navigation buttons...');
+        
         const prevBtn = document.getElementById('prevPageBtn');
         const nextBtn = document.getElementById('nextPageBtn');
         const submitBtn = document.getElementById('submitBtn');
+        
+        debugInfo('MultiPage', `🔄 NAVIGATION: Found buttons - Prev: ${!!prevBtn}, Next: ${!!nextBtn}, Submit: ${!!submitBtn}`);
+        debugInfo('MultiPage', `🔄 NAVIGATION: Current page index: ${this.currentPageIndex}`);
         
         if (prevBtn) {
             prevBtn.style.display = this.currentPageIndex > 0 ? 'inline-block' : 'none';
@@ -298,23 +334,36 @@ export class MultiPage {
         
         if (formBuilder && formBuilder.currentForm) {
             totalPages = formBuilder.currentForm.pages.length;
+            debugInfo('MultiPage', `🔄 NAVIGATION: Using formBuilder, total pages: ${totalPages}`);
         } else if (formViewer && formViewer.formData) {
             totalPages = formViewer.formData.pages.length;
+            debugInfo('MultiPage', `🔄 NAVIGATION: Using formViewer, total pages: ${totalPages}`);
         }
         
         if (nextBtn && submitBtn) {
-            if (this.currentPageIndex < totalPages - 1) {
-                // Check if next button should be conditionally visible
-                const shouldShowNext = this.shouldShowNavigationButton('next');
-                nextBtn.style.display = shouldShowNext ? 'inline-block' : 'none';
+            // Always use shouldShowNavigationButton logic which considers conditional visibility
+            const shouldShowNext = this.shouldShowNavigationButton('next');
+            const shouldShowSubmit = this.shouldShowNavigationButton('submit');
+            
+            debugInfo('MultiPage', `🔄 NAVIGATION: Button evaluation - Next: ${shouldShowNext}, Submit: ${shouldShowSubmit}`);
+            
+            if (shouldShowNext) {
+                nextBtn.style.display = 'inline-block';
                 submitBtn.style.display = 'none';
-            } else {
-                // Check if submit button should be conditionally visible
-                const shouldShowSubmit = this.shouldShowNavigationButton('submit');
+                debugInfo('MultiPage', '🔄 NAVIGATION: Showing Next button');
+            } else if (shouldShowSubmit) {
                 nextBtn.style.display = 'none';
-                submitBtn.style.display = shouldShowSubmit ? 'inline-block' : 'none';
+                submitBtn.style.display = 'inline-block';
+                debugInfo('MultiPage', '🔄 NAVIGATION: Showing Submit button');
+            } else {
+                // Neither button should show (this shouldn't normally happen)
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'none';
+                debugInfo('MultiPage', '🔄 NAVIGATION: Hiding both buttons');
             }
         }
+        
+        debugInfo('MultiPage', '🔄 NAVIGATION: Navigation buttons updated successfully');
     }
     
     shouldShowNavigationButton(buttonType) {
@@ -460,7 +509,53 @@ export class MultiPage {
     }
     
     isPageVisible(pageId) {
-        return this.pageVisibility.get(pageId) !== false; // Default to visible
+        // If no explicit visibility state is set, we need to evaluate the page conditions
+        if (!this.pageVisibility.has(pageId)) {
+            // Check if the page has conditional visibility rules
+            const formViewer = window.AppModules.formViewer;
+            const formBuilder = window.AppModules.formBuilder;
+            
+            let formData = null;
+            if (formViewer && formViewer.formData) {
+                formData = formViewer.formData;
+            } else if (formBuilder && formBuilder.currentForm) {
+                formData = formBuilder.currentForm;
+            }
+            
+            if (formData) {
+                const page = formData.pages.find(p => p.id === pageId);
+                if (page && page.conditionalVisibility && page.conditionalVisibility.enabled) {
+                    // Page has conditional visibility - evaluate it
+                    const conditionalLogic = window.AppModules.conditionalLogic;
+                    if (conditionalLogic) {
+                        const pageIndex = formData.pages.indexOf(page);
+                        const pageConditionConfig = {
+                            pageId: pageId,
+                            pageIndex: pageIndex,
+                            conditions: page.conditionalVisibility.conditions || [],
+                            logic: page.conditionalVisibility.logic || 'AND'
+                        };
+                        
+                        // Temporarily evaluate the condition
+                        const shouldBeVisible = conditionalLogic.evaluateConditionSet(
+                            pageConditionConfig.conditions, 
+                            pageConditionConfig.logic
+                        );
+                        
+                        debugInfo('MultiPage', `🔄 PAGE VISIBILITY: Evaluated ${pageId}: ${shouldBeVisible}`);
+                        this.pageVisibility.set(pageId, shouldBeVisible);
+                        return shouldBeVisible;
+                    }
+                    // If conditional logic module not available, default to hidden for conditional pages
+                    return false;
+                } else {
+                    // Page has no conditional visibility - default to visible
+                    return true;
+                }
+            }
+        }
+        
+        return this.pageVisibility.get(pageId) !== false; // Default to visible if not explicitly set
     }
     
     // Repeat functionality
@@ -766,20 +861,40 @@ export class MultiPage {
     // Navigation button management (removed duplicate methods - consolidated into single updateNavigationButtons)
     
     evaluateNavigationConditions(page, buttonType) {
+        debugInfo('MultiPage', `🔄 NAVIGATION: Evaluating conditions for ${buttonType} button on page ${page?.id}`);
+        
         if (!page || !page.navigationConfig || !page.navigationConfig[buttonType]) {
+            debugInfo('MultiPage', `🔄 NAVIGATION: No navigation config found for ${buttonType}, defaulting to visible`);
             return true; // Default to visible if no configuration
         }
         
         const config = page.navigationConfig[buttonType];
+        debugInfo('MultiPage', `🔄 NAVIGATION: Navigation config for ${buttonType}:`, config);
+        
         if (!config.conditionalVisibility || !config.conditionalVisibility.enabled) {
+            debugInfo('MultiPage', `🔄 NAVIGATION: Conditional visibility not enabled for ${buttonType}, defaulting to visible`);
             return true; // Show if conditional visibility is not enabled
         }
         
         const conditionalLogic = window.AppModules.conditionalLogic;
-        if (!conditionalLogic) return true;
+        if (!conditionalLogic) {
+            debugInfo('MultiPage', `🔄 NAVIGATION: ConditionalLogic module not found, defaulting to visible`);
+            return true;
+        }
+        
+        debugInfo('MultiPage', `🔄 NAVIGATION: Evaluating conditional visibility for ${buttonType}:`, config.conditionalVisibility);
+        
+        // Check if FormVariables are available for debugging
+        if (window.FormVariables) {
+            const allVars = window.FormVariables.getAll ? window.FormVariables.getAll() : {};
+            debugInfo('MultiPage', `🔄 NAVIGATION: Current FormVariables:`, allVars);
+        }
         
         // Use the existing conditional logic system to evaluate conditions
-        return conditionalLogic.evaluateConditionGroup(config.conditionalVisibility);
+        const result = conditionalLogic.evaluateConditionGroup(config.conditionalVisibility);
+        debugInfo('MultiPage', `🔄 NAVIGATION: Conditional evaluation result for ${buttonType}: ${result}`);
+        
+        return result;
     }
     
     showSubmitButton() {

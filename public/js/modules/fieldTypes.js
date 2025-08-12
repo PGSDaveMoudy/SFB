@@ -1059,6 +1059,10 @@ export class FieldTypes {
         
         // Send OTP
         sendOtpBtn.addEventListener('click', async () => {
+            if (sendOtpBtn.disabled) {
+                debugInfo("FieldTypes", '🔐 LOGIN: Send OTP button already disabled, ignoring click');
+                return;
+            }
             debugInfo("FieldTypes", '🔐 LOGIN: Send OTP button clicked');
             await this.sendLoginOTP(fieldId, email, contact, statusDiv);
         });
@@ -1071,6 +1075,10 @@ export class FieldTypes {
         
         // Resend OTP
         resendOtpBtn.addEventListener('click', async () => {
+            if (resendOtpBtn.disabled) {
+                debugInfo("FieldTypes", '🔐 LOGIN: Resend OTP button already disabled, ignoring click');
+                return;
+            }
             debugInfo("FieldTypes", '🔐 LOGIN: Resend OTP button clicked');
             await this.sendLoginOTP(fieldId, email, contact, statusDiv);
         });
@@ -1236,8 +1244,15 @@ export class FieldTypes {
         });
         
         // Handle verify button click
-        verifyBtn.addEventListener('click', (e) => {
+        verifyBtn.addEventListener('click', async (e) => {
             e.preventDefault();
+            
+            // Prevent multiple clicks by checking if already processing
+            if (verifyBtn.disabled) {
+                debugInfo("FieldTypes", '📧 EMAIL-VERIFY: Button already disabled, ignoring click');
+                return;
+            }
+            
             const email = emailInput.value.trim();
             
             if (!this.isValidEmail(email)) {
@@ -1245,7 +1260,20 @@ export class FieldTypes {
                 return;
             }
             
-            this.handleEmailVerification(fieldId, email);
+            // Disable button and show processing state
+            verifyBtn.disabled = true;
+            const originalText = verifyBtn.textContent;
+            verifyBtn.textContent = 'Sending...';
+            
+            try {
+                await this.handleEmailVerification(fieldId, email);
+            } catch (error) {
+                debugError("FieldTypes", '📧 EMAIL-VERIFY: Error in handleEmailVerification:', error);
+            } finally {
+                // Re-enable button
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = originalText;
+            }
         });
         
         // Handle Enter key
@@ -1415,7 +1443,12 @@ export class FieldTypes {
         });
         
         if (!response.ok) {
-            throw new Error('Failed to send verification code');
+            const errorData = await response.json().catch(() => ({}));
+            if (response.status === 429) {
+                // Rate limited - show specific message
+                throw new Error(errorData.message || 'Please wait before requesting another verification code');
+            }
+            throw new Error(errorData.message || 'Failed to send verification code');
         }
         
         return await response.json();
@@ -2014,7 +2047,12 @@ export class FieldTypes {
             });
             
             if (!response.ok) {
-                throw new Error('Failed to send OTP');
+                const errorData = await response.json().catch(() => ({}));
+                if (response.status === 429) {
+                    // Rate limited - show specific message
+                    throw new Error(errorData.message || 'Please wait before requesting another OTP');
+                }
+                throw new Error(errorData.message || 'Failed to send OTP');
             }
             
             const result = await response.json();

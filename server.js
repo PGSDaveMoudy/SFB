@@ -17,7 +17,7 @@ const crypto = require('crypto');
 const jsforce = require('jsforce');
 const jwt = require('jsonwebtoken');
 const emailService = require('./emailService');
-const { DatabaseManager, User, SalesforceOrg, UserOrgAccess, FormSubmission, sequelize } = require('./database');
+const { DatabaseManager, User, SalesforceOrg, UserOrgAccess, FormSubmission, BugReport, sequelize } = require('./database');
 
 // JWT secret key (should be in environment variable)
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
@@ -33,6 +33,18 @@ const authenticateJWT = async (req, res, next) => {
             const decoded = jwt.verify(token, JWT_SECRET);
             req.user = await DatabaseManager.getUserById(decoded.userId);
             if (req.user) {
+                // Clear Salesforce connection if it belongs to a different user
+                if (req.session.salesforceConnection && req.session.pilotFormsUserId && 
+                    req.session.pilotFormsUserId !== decoded.userId) {
+                    console.log('Clearing Salesforce connection - user changed from', req.session.pilotFormsUserId, 'to', decoded.userId);
+                    req.session.salesforceConnection = null;
+                    req.session.currentOrgId = null;
+                    req.session.userInfo = null;
+                }
+                
+                // Track the current PilotForms user
+                req.session.pilotFormsUserId = decoded.userId;
+                
                 next();
             } else {
                 res.status(401).json({ message: 'User not found' });
@@ -166,13 +178,38 @@ app.use((req, res, next) => {
     next();
 });
 
-// Rate limiting with proper trust proxy configuration
+// Rate limiting with proper trust proxy configuration - Enterprise settings
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    trustProxy: true // Use X-Forwarded-For header from nginx
+    max: 5000, // Enterprise limit: 5000 requests per 15 minutes per IP (20,000/hour)
+    trustProxy: true, // Use X-Forwarded-For header from nginx
+    message: {
+        error: 'Rate limit exceeded',
+        message: 'Too many requests from this IP. Please try again later.',
+        retryAfter: 900 // 15 minutes in seconds
+    },
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false // Disable the `X-RateLimit-*` headers
 });
+
+// Apply different rate limits for different endpoints
+const strictLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes  
+    max: 1000, // More restrictive for auth endpoints but still enterprise-friendly
+    trustProxy: true,
+    message: {
+        error: 'Authentication rate limit exceeded',
+        message: 'Too many authentication attempts. Please try again later.',
+        retryAfter: 900
+    }
+});
+
+// Apply general rate limiting to all API routes
 app.use('/api/', limiter);
+
+// Apply stricter rate limiting to authentication endpoints (but still enterprise-friendly)
+app.use('/api/send-otp', strictLimiter);
+app.use('/api/verify-otp', strictLimiter);
 
 // File upload configuration
 const storage = multer.diskStorage({
@@ -516,7 +553,7 @@ app.get('/api/auth/me', authenticateJWT, async (req, res) => {
 });
 
 // Salesforce OAuth routes - Updated for multi-org support
-app.get('/api/salesforce/auth-url', (req, res) => {
+app.get('/api/salesforce/auth-url', authenticateJWT, (req, res) => {
     const loginUrl = req.query.loginUrl || 'https://login.salesforce.com'; // Allow custom login URLs
     const authUrl = `${loginUrl}/services/oauth2/authorize`;
     const redirectUri = `https://${process.env.DOMAIN}/oauth/callback`;
@@ -528,6 +565,7 @@ app.get('/api/salesforce/auth-url', (req, res) => {
     req.session.codeVerifier = codeVerifier;
     req.session.state = state;
     req.session.loginUrl = loginUrl;
+    req.session.pilotFormsUserId = req.user.id; // Store PilotForms user ID for OAuth flow
     
     const params = new URLSearchParams({
         response_type: 'code',
@@ -627,6 +665,7 @@ app.get('/oauth/callback', async (req, res) => {
                 refreshToken: tokens.refresh_token,
                 loginUrl: loginUrl
             };
+            // The pilotFormsUserId should already be set from OAuth initiation
             
             req.session.userInfo = {
                 userId: userInfo.user_id,
@@ -644,20 +683,26 @@ app.get('/oauth/callback', async (req, res) => {
             if (targetOrgId) {
                 req.session.currentOrgId = targetOrgId;
                 
-                // Store user-org access in database
-                await DatabaseManager.storeUserOrgAccess(
-                    userInfo.user_id,
-                    targetOrgId,
-                    {
-                        accessToken: tokens.access_token,
-                        refreshToken: tokens.refresh_token,
-                        instanceUrl: tokens.instance_url,
-                        expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 hours
-                    }
-                );
-                
-                // Update org last connected timestamp
-                await DatabaseManager.updateOrgLastConnected(targetOrgId, userInfo.organization_id);
+                try {
+                    // Store user-org access in database
+                    await DatabaseManager.storeUserOrgAccess(
+                        userInfo.user_id,
+                        targetOrgId,
+                        {
+                            accessToken: tokens.access_token,
+                            refreshToken: tokens.refresh_token,
+                            instanceUrl: tokens.instance_url,
+                            expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 hours
+                        }
+                    );
+                    
+                    // Update org last connected timestamp
+                    await DatabaseManager.updateOrgLastConnected(targetOrgId, userInfo.organization_id);
+                } catch (dbError) {
+                    // Log the database error but don't fail the OAuth flow
+                    console.error('Database update error during OAuth (non-critical):', dbError);
+                    // Continue with the OAuth flow - the connection is still successful
+                }
             } else {
                 // For legacy single-org flow, set currentOrgId based on organization
                 const legacyOrgId = 'legacy-org-' + userInfo.organization_id;
@@ -672,8 +717,14 @@ app.get('/oauth/callback', async (req, res) => {
             delete req.session.targetOrgId;
             
             // Redirect to main app
-            req.session.save(() => {
-                res.redirect('/?connected=true');
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Session save error during OAuth:', err);
+                    // Try to redirect anyway
+                    res.redirect('/?connected=true');
+                } else {
+                    res.redirect('/?connected=true');
+                }
             });
         } else {
             console.error('Token exchange failed:', tokens);
@@ -681,12 +732,22 @@ app.get('/oauth/callback', async (req, res) => {
         }
     } catch (error) {
         console.error('OAuth callback error:', error);
-        res.redirect('/?error=oauth_failed');
+        console.error('Error stack:', error.stack);
+        
+        // Check if we already have a successful connection despite the error
+        if (req.session.salesforceConnection && req.session.userInfo) {
+            console.log('OAuth flow completed successfully despite error, redirecting with success');
+            req.session.save(() => {
+                res.redirect('/?connected=true');
+            });
+        } else {
+            res.redirect('/?error=oauth_failed');
+        }
     }
 });
 
 // Username/password authentication fallback
-app.post('/api/salesforce/connect', async (req, res) => {
+app.post('/api/salesforce/connect', authenticateJWT, async (req, res) => {
     const { username, password, securityToken, loginUrl } = req.body;
     
     try {
@@ -703,6 +764,7 @@ app.post('/api/salesforce/connect', async (req, res) => {
             refreshToken: conn.refreshToken,
             loginUrl: loginUrl || 'https://login.salesforce.com'
         };
+        req.session.pilotFormsUserId = req.user.id; // Track PilotForms user
         
         // Get user info
         try {
@@ -876,7 +938,7 @@ app.get('/api/orgs', authenticateJWT, async (req, res) => {
 });
 
 // Get OAuth URL for a specific org
-app.get('/api/orgs/:orgId/auth-url', async (req, res) => {
+app.get('/api/orgs/:orgId/auth-url', authenticateJWT, async (req, res) => {
     try {
         const { orgId } = req.params;
         
@@ -913,6 +975,7 @@ app.get('/api/orgs/:orgId/auth-url', async (req, res) => {
         req.session.state = state;
         req.session.targetOrgId = orgId;
         req.session.loginUrl = org.loginUrl;
+        req.session.pilotFormsUserId = req.user.id; // Store PilotForms user ID for OAuth flow
 
         res.json({ authUrl });
 
@@ -925,7 +988,7 @@ app.get('/api/orgs/:orgId/auth-url', async (req, res) => {
 });
 
 // Connect to a specific org (similar to existing connect but org-aware)
-app.post('/api/orgs/:orgId/connect', async (req, res) => {
+app.post('/api/orgs/:orgId/connect', authenticateJWT, async (req, res) => {
     try {
         const { orgId } = req.params;
         const { username, password, securityToken } = req.body;
@@ -955,6 +1018,7 @@ app.post('/api/orgs/:orgId/connect', async (req, res) => {
             organizationId: loginResult.organizationId,
             userId: loginResult.id
         };
+        req.session.pilotFormsUserId = req.user.id; // Track PilotForms user
 
         req.session.currentOrgId = orgId;
         req.session.userInfo = {
@@ -1798,30 +1862,72 @@ async function handleAttachments(conn, form, formData, results, uploadedFiles, r
     try {
         // Process file uploads
         if (uploadedFiles && uploadedFiles.length > 0) {
+            console.log(`Processing ${uploadedFiles.length} file uploads...`);
+            
             for (const file of uploadedFiles) {
+                console.log(`Processing file: ${file.originalname} (field: ${file.fieldname})`);
+                
                 // Find which page this file belongs to based on field mapping
                 const targetRecord = findRecordForFile(form, file.fieldname, results);
                 
                 if (targetRecord) {
-                    const contentVersion = {
-                        Title: file.originalname,
-                        PathOnClient: file.originalname,
-                        VersionData: fs.readFileSync(file.path).toString('base64')
-                    };
+                    console.log(`Attaching file to record: ${targetRecord.id} (${targetRecord.objectName})`);
                     
-                    const cvResult = await conn.sobject('ContentVersion').create(contentVersion);
-                    
-                    // Create ContentDocumentLink to attach to the record
-                    if (cvResult.success) {
-                        // Get the ContentDocumentId from ContentVersion
-                        const cv = await conn.sobject('ContentVersion').findOne({ Id: cvResult.id });
+                    try {
+                        // Create ContentVersion first
+                        const contentVersion = {
+                            Title: file.originalname,
+                            PathOnClient: file.originalname,
+                            VersionData: fs.readFileSync(file.path).toString('base64'),
+                            FirstPublishLocationId: targetRecord.id // This automatically creates the link
+                        };
                         
-                        await conn.sobject('ContentDocumentLink').create({
-                            ContentDocumentId: cv.ContentDocumentId,
-                            LinkedEntityId: targetRecord.id,
-                            ShareType: 'V'
-                        });
+                        const cvResult = await conn.sobject('ContentVersion').create(contentVersion);
+                        
+                        if (cvResult.success) {
+                            console.log(`✅ File attached successfully: ContentVersion ${cvResult.id}`);
+                            
+                            // The ContentDocumentLink is automatically created when FirstPublishLocationId is specified
+                            // But let's verify it was created properly
+                            const cv = await conn.sobject('ContentVersion').findOne({ 
+                                Id: cvResult.id,
+                                select: 'Id, ContentDocumentId, Title'
+                            });
+                            
+                            if (cv && cv.ContentDocumentId) {
+                                console.log(`✅ ContentDocument created: ${cv.ContentDocumentId}`);
+                                
+                                // Verify the ContentDocumentLink exists
+                                const cdl = await conn.sobject('ContentDocumentLink').findOne({
+                                    ContentDocumentId: cv.ContentDocumentId,
+                                    LinkedEntityId: targetRecord.id
+                                });
+                                
+                                if (cdl) {
+                                    console.log(`✅ ContentDocumentLink verified: ${cdl.Id}`);
+                                } else {
+                                    console.warn('⚠️ ContentDocumentLink not found, creating manually...');
+                                    
+                                    // Create ContentDocumentLink manually as fallback
+                                    await conn.sobject('ContentDocumentLink').create({
+                                        ContentDocumentId: cv.ContentDocumentId,
+                                        LinkedEntityId: targetRecord.id,
+                                        ShareType: 'V',
+                                        Visibility: 'AllUsers'
+                                    });
+                                    
+                                    console.log('✅ ContentDocumentLink created manually');
+                                }
+                            }
+                        } else {
+                            console.error('❌ Failed to create ContentVersion:', cvResult);
+                        }
+                    } catch (attachmentError) {
+                        console.error(`❌ Error attaching file ${file.originalname}:`, attachmentError);
+                        // Continue processing other files even if one fails
                     }
+                } else {
+                    console.warn(`⚠️ No target record found for file field: ${file.fieldname}`);
                 }
                 
                 // Clean up uploaded file
@@ -1933,41 +2039,36 @@ async function handleAttachments(conn, form, formData, results, uploadedFiles, r
                             generatedBy: 'Salesforce Form Builder'
                         };
                         
-                        // Save signature image
+                        // Save signature image with automatic linking
                         const signatureCV = {
                             Title: `Signature_${field.label || 'Signature'}_${Date.now()}.png`,
                             PathOnClient: `Signature_${field.label || 'Signature'}.png`,
-                            VersionData: base64Data
+                            VersionData: base64Data,
+                            FirstPublishLocationId: recordId // This automatically creates the link
                         };
                         
                         const signatureCVResult = await conn.sobject('ContentVersion').create(signatureCV);
                         
-                        // Save legal compliance metadata as JSON
+                        if (signatureCVResult.success) {
+                            console.log(`✅ Signature image attached: ContentVersion ${signatureCVResult.id}`);
+                        } else {
+                            console.error('❌ Failed to create signature ContentVersion:', signatureCVResult);
+                        }
+                        
+                        // Save legal compliance metadata as JSON with automatic linking
                         const complianceCV = {
                             Title: `Signature_Legal_Compliance_${field.label || 'Signature'}_${Date.now()}.json`,
                             PathOnClient: `Signature_Legal_Compliance_${field.label || 'Signature'}.json`,
-                            VersionData: Buffer.from(JSON.stringify(legalComplianceData, null, 2)).toString('base64')
+                            VersionData: Buffer.from(JSON.stringify(legalComplianceData, null, 2)).toString('base64'),
+                            FirstPublishLocationId: recordId // This automatically creates the link
                         };
                         
                         const complianceCVResult = await conn.sobject('ContentVersion').create(complianceCV);
                         
-                        // Create ContentDocumentLinks for both files
-                        if (signatureCVResult.success) {
-                            const signatureCV = await conn.sobject('ContentVersion').findOne({ Id: signatureCVResult.id });
-                            await conn.sobject('ContentDocumentLink').create({
-                                ContentDocumentId: signatureCV.ContentDocumentId,
-                                LinkedEntityId: recordId,
-                                ShareType: 'V'
-                            });
-                        }
-                        
                         if (complianceCVResult.success) {
-                            const complianceCV = await conn.sobject('ContentVersion').findOne({ Id: complianceCVResult.id });
-                            await conn.sobject('ContentDocumentLink').create({
-                                ContentDocumentId: complianceCV.ContentDocumentId,
-                                LinkedEntityId: recordId,
-                                ShareType: 'V'
-                            });
+                            console.log(`✅ Signature compliance metadata attached: ContentVersion ${complianceCVResult.id}`);
+                        } else {
+                            console.error('❌ Failed to create compliance metadata ContentVersion:', complianceCVResult);
                         }
                         
                         console.log(`Processed signature with legal compliance for field ${field.id}`);
@@ -2053,14 +2154,33 @@ app.post('/api/send-otp', async (req, res) => {
             return res.status(400).json({ error: 'Email is required' });
         }
         
-        // Generate 6-digit OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const sessionId = generateSessionId();
-        
-        // Store OTP in memory with expiration (in production, use Redis or database)
+        // Initialize storage for OTP sessions and rate limiting
         if (!global.otpSessions) {
             global.otpSessions = new Map();
         }
+        if (!global.otpRateLimit) {
+            global.otpRateLimit = new Map();
+        }
+        
+        // Check rate limiting to prevent multiple OTP emails - Enterprise-friendly settings
+        const rateLimitKey = `${email}-${contactId || 'no-contact'}`;
+        const lastOtpTime = global.otpRateLimit.get(rateLimitKey);
+        const now = Date.now();
+        const rateLimitWindow = 10000; // Reduced to 10 seconds for enterprise use
+        
+        if (lastOtpTime && (now - lastOtpTime) < rateLimitWindow && !isResend) {
+            const remainingTime = Math.ceil((rateLimitWindow - (now - lastOtpTime)) / 1000);
+            return res.status(429).json({ 
+                error: 'OTP already sent recently', 
+                message: `Please wait ${remainingTime} seconds before requesting a new OTP`,
+                remainingTime,
+                rateLimitType: 'OTP_RATE_LIMIT' // Help identify the specific rate limit
+            });
+        }
+        
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const sessionId = generateSessionId();
         
         global.otpSessions.set(sessionId, {
             email,
@@ -2119,6 +2239,19 @@ app.post('/api/send-otp', async (req, res) => {
             return { success: false, message: error.message };
         });
         
+        // Update rate limiting timestamp only after successful email attempt
+        if (emailResult.success) {
+            global.otpRateLimit.set(rateLimitKey, now);
+        }
+        
+        // Clean up expired rate limit entries (older than 2 minutes)
+        const cleanupThreshold = now - (2 * 60000);
+        for (const [key, timestamp] of global.otpRateLimit.entries()) {
+            if (timestamp < cleanupThreshold) {
+                global.otpRateLimit.delete(key);
+            }
+        }
+        
         const response = {
             success: true,
             sessionId,
@@ -2138,6 +2271,65 @@ app.post('/api/send-otp', async (req, res) => {
         console.error('Error sending OTP:', error);
         res.status(500).json({ error: error.message });
     }
+});
+
+// Clear OTP rate limits (for testing/debugging)
+app.post('/api/clear-otp-limits', (req, res) => {
+    if (!global.otpRateLimit) {
+        global.otpRateLimit = new Map();
+    }
+    
+    const clearedCount = global.otpRateLimit.size;
+    global.otpRateLimit.clear();
+    
+    res.json({
+        success: true,
+        message: `Cleared ${clearedCount} rate limit entries`,
+        clearedCount
+    });
+});
+
+// Get rate limit status (for monitoring/debugging)
+app.get('/api/rate-limit-status', (req, res) => {
+    const now = Date.now();
+    const activeOtpLimits = [];
+    
+    if (global.otpRateLimit) {
+        for (const [key, timestamp] of global.otpRateLimit.entries()) {
+            const timeSinceLastRequest = now - timestamp;
+            const remainingTime = Math.max(0, 10000 - timeSinceLastRequest); // 10 second window
+            
+            if (remainingTime > 0) {
+                activeOtpLimits.push({
+                    key: key.replace(/@.*/, '@***'), // Hide email domain for privacy
+                    remainingTime: Math.ceil(remainingTime / 1000)
+                });
+            }
+        }
+    }
+    
+    res.json({
+        timestamp: new Date().toISOString(),
+        rateLimits: {
+            general: {
+                windowMs: 15 * 60 * 1000,
+                maxRequests: 5000,
+                description: "5000 requests per 15 minutes per IP"
+            },
+            authentication: {
+                windowMs: 15 * 60 * 1000,
+                maxRequests: 1000,
+                description: "1000 auth requests per 15 minutes per IP"
+            },
+            otp: {
+                windowMs: 10000,
+                maxRequests: 1,
+                description: "1 OTP request per 10 seconds per email",
+                activeBlocks: activeOtpLimits.length
+            }
+        },
+        activeOtpBlocks: activeOtpLimits
+    });
 });
 
 // Verify OTP
@@ -2175,7 +2367,11 @@ app.post('/api/verify-otp', async (req, res) => {
             return res.status(400).json({ error: 'Too many attempts' });
         }
         
-        if (session.otp !== otp) {
+        // Normalize OTPs for comparison (trim whitespace, ensure strings)
+        const normalizedStoredOtp = String(session.otp).trim();
+        const normalizedProvidedOtp = String(otp).trim();
+        
+        if (normalizedStoredOtp !== normalizedProvidedOtp) {
             return res.json({
                 verified: false,
                 message: 'Invalid OTP',
@@ -3179,6 +3375,173 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
             path: `/uploads/${req.file.filename}`
         }
     });
+});
+
+// Bug Report API endpoint
+app.post('/api/bug-report', upload.single('attachment'), async (req, res) => {
+    try {
+        const {
+            title,
+            description,
+            category,
+            priority,
+            reporterEmail,
+            reporterName,
+            reproductionSteps,
+            expectedBehavior,
+            actualBehavior,
+            url,
+            browserInfo
+        } = req.body;
+
+        // Validate required fields
+        if (!title || !description) {
+            return res.status(400).json({ 
+                error: 'Title and description are required' 
+            });
+        }
+
+        // Get user context if authenticated
+        let userId = null;
+        let orgId = null;
+        
+        if (req.session && req.session.pilotFormsUserId) {
+            userId = req.session.pilotFormsUserId;
+        }
+        
+        if (req.session && req.session.currentOrgId) {
+            orgId = req.session.currentOrgId;
+        }
+
+        // Prepare bug report data
+        const bugReportData = {
+            title: title.trim(),
+            description: description.trim(),
+            category: category || 'bug',
+            priority: priority || 'medium',
+            reporterEmail: reporterEmail || null,
+            reporterName: reporterName || null,
+            reproductionSteps: reproductionSteps || null,
+            expectedBehavior: expectedBehavior || null,
+            actualBehavior: actualBehavior || null,
+            url: url || req.get('referer') || null,
+            browserInfo: browserInfo || req.get('User-Agent') || null,
+            userAgent: req.get('User-Agent'),
+            userId: userId,
+            orgId: orgId
+        };
+
+        // Handle file attachment
+        if (req.file) {
+            bugReportData.attachmentPath = req.file.path;
+            bugReportData.attachmentFileName = req.file.originalname;
+        }
+
+        // Create bug report in database
+        const bugReport = await BugReport.create(bugReportData);
+
+        // Send notification email to admin (if configured)
+        try {
+            if (process.env.ADMIN_EMAIL && emailService) {
+                const emailData = {
+                    to: process.env.ADMIN_EMAIL,
+                    subject: `New Bug Report: ${title}`,
+                    html: `
+                        <h2>New Bug Report Submitted</h2>
+                        <p><strong>ID:</strong> ${bugReport.id}</p>
+                        <p><strong>Title:</strong> ${title}</p>
+                        <p><strong>Category:</strong> ${category || 'bug'}</p>
+                        <p><strong>Priority:</strong> ${priority || 'medium'}</p>
+                        <p><strong>Reporter:</strong> ${reporterName || 'Anonymous'} ${reporterEmail ? `(${reporterEmail})` : ''}</p>
+                        <p><strong>URL:</strong> ${url || 'Not provided'}</p>
+                        <hr>
+                        <p><strong>Description:</strong></p>
+                        <p>${description.replace(/\n/g, '<br>')}</p>
+                        ${reproductionSteps ? `
+                        <p><strong>Steps to Reproduce:</strong></p>
+                        <p>${reproductionSteps.replace(/\n/g, '<br>')}</p>
+                        ` : ''}
+                        ${expectedBehavior ? `
+                        <p><strong>Expected Behavior:</strong></p>
+                        <p>${expectedBehavior.replace(/\n/g, '<br>')}</p>
+                        ` : ''}
+                        ${actualBehavior ? `
+                        <p><strong>Actual Behavior:</strong></p>
+                        <p>${actualBehavior.replace(/\n/g, '<br>')}</p>
+                        ` : ''}
+                        ${req.file ? `<p><strong>Attachment:</strong> ${req.file.originalname}</p>` : ''}
+                        <hr>
+                        <p><strong>Browser Info:</strong> ${browserInfo || req.get('User-Agent') || 'Not available'}</p>
+                        <p><strong>Submitted:</strong> ${new Date().toISOString()}</p>
+                    `
+                };
+                
+                await emailService.sendEmail(emailData);
+            }
+        } catch (emailError) {
+            console.error('Failed to send bug report notification email:', emailError);
+            // Don't fail the bug report submission if email fails
+        }
+
+        res.json({
+            success: true,
+            message: 'Bug report submitted successfully',
+            bugReportId: bugReport.id
+        });
+
+    } catch (error) {
+        console.error('Error submitting bug report:', error);
+        res.status(500).json({
+            error: 'Failed to submit bug report',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
+
+// Get bug reports (admin only - could be enhanced with proper admin auth)
+app.get('/api/bug-reports', async (req, res) => {
+    try {
+        const { status, category, priority, limit = 50, offset = 0 } = req.query;
+        
+        const whereClause = {};
+        if (status) whereClause.status = status;
+        if (category) whereClause.category = category;
+        if (priority) whereClause.priority = priority;
+
+        const bugReports = await BugReport.findAndCountAll({
+            where: whereClause,
+            limit: parseInt(limit),
+            offset: parseInt(offset),
+            order: [['createdAt', 'DESC']],
+            include: [
+                {
+                    model: User,
+                    as: 'reporter',
+                    attributes: ['id', 'email', 'firstName', 'lastName']
+                },
+                {
+                    model: SalesforceOrg,
+                    as: 'org',
+                    attributes: ['id', 'name']
+                }
+            ]
+        });
+
+        res.json({
+            success: true,
+            data: bugReports.rows,
+            total: bugReports.count,
+            limit: parseInt(limit),
+            offset: parseInt(offset)
+        });
+
+    } catch (error) {
+        console.error('Error fetching bug reports:', error);
+        res.status(500).json({
+            error: 'Failed to fetch bug reports',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
 });
 
 // Form viewer route

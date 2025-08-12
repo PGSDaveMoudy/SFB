@@ -1057,13 +1057,22 @@ export class FormViewer {
             // Add regular form data as JSON string
             formData.append('formData', JSON.stringify(data));
 
-            // Add metadata
-            formData.append('submissionMetadata', JSON.stringify({
+            // Add metadata including variables for hidden field processing
+            const metadata = {
                 timestamp: new Date().toISOString(),
                 userAgent: navigator.userAgent,
                 referrer: document.referrer,
-                formVersion: this.formData.version || '1.0'
-            }));
+                formVersion: this.formData.version || '1.0',
+                variables: {}
+            };
+
+            // Add all global variables to metadata for hidden field variable references
+            if (window.FormVariables) {
+                metadata.variables = window.FormVariables.getAll();
+                debugInfo('FormViewer', 'Adding variables to submission metadata:', metadata.variables);
+            }
+
+            formData.append('submissionMetadata', JSON.stringify(metadata));
 
             // Add files with proper field names
             files.forEach(({ key, file }) => {
